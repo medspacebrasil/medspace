@@ -154,7 +154,10 @@ export async function deleteListing(formData: FormData): Promise<void> {
   revalidatePath("/painel")
 }
 
-export async function publishListing(formData: FormData): Promise<ActionState> {
+export async function publishListing(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   const session = await auth()
   if (!session?.user?.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
