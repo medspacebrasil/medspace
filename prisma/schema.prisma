@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// AUTENTICACAO
+// ============================================
+
+enum Role {
+  CLINIC
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         Role     @default(CLINIC)
+  clinic       Clinic?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+// ============================================
+// CLINICA
+// ============================================
+
+model Clinic {
+  id           String    @id @default(cuid())
+  userId       String    @unique @map("user_id")
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  phone        String?
+  whatsapp     String
+  city         String
+  neighborhood String
+  description  String?
+  listings     Listing[]
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("clinics")
+}
+
+// ============================================
+// ANUNCIO
+// ============================================
+
+enum ListingStatus {
+  DRAFT
+  PENDING
+  PUBLISHED
+  REJECTED
+  ARCHIVED
+}
+
+model Listing {
+  id              String             @id @default(cuid())
+  clinicId        String             @map("clinic_id")
+  clinic          Clinic             @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  title           String
+  slug            String             @unique
+  description     String             @db.VarChar(300)
+  fullDescription String?            @map("full_description") @db.Text
+  roomTypeId      String?            @map("room_type_id")
+  roomType        RoomType?          @relation(fields: [roomTypeId], references: [id])
+  city            String
+  neighborhood    String
+  whatsapp        String
+  status          ListingStatus      @default(DRAFT)
+  images          ListingImage[]
+  specialties     ListingSpecialty[]
+  equipment       ListingEquipment[]
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  @@index([city])
+  @@index([neighborhood])
+  @@index([status])
+  @@index([clinicId])
+  @@map("listings")
+}
+
+model ListingImage {
+  id        String   @id @default(cuid())
+  listingId String   @map("listing_id")
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("listing_images")
+}
+
+// ============================================
+// TAXONOMIAS (Lookup Tables)
+// ============================================
+
+model Specialty {
+  id       String             @id @default(cuid())
+  name     String             @unique
+  slug     String             @unique
+  listings ListingSpecialty[]
+
+  @@map("specialties")
+}
+
+model Equipment {
+  id       String             @id @default(cuid())
+  name     String             @unique
+  slug     String             @unique
+  listings ListingEquipment[]
+
+  @@map("equipment")
+}
+
+model RoomType {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  listings Listing[]
+
+  @@map("room_types")
+}
+
+// ============================================
+// TABELAS DE JUNCAO (N:N)
+// ============================================
+
+model ListingSpecialty {
+  listingId   String    @map("listing_id")
+  specialtyId String    @map("specialty_id")
+  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  specialty   Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+
+  @@id([listingId, specialtyId])
+  @@map("listing_specialties")
+}
+
+model ListingEquipment {
+  listingId   String    @map("listing_id")
+  equipmentId String    @map("equipment_id")
+  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@id([listingId, equipmentId])
+  @@map("listing_equipment")
+}
