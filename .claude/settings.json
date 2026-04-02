@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const { PrismaClient } = require\\('@prisma/client'\\); console.log\\(Object.keys\\(new PrismaClient.prototype?.constructor ?? {}\\)\\)\")"
+    ]
+  }
+}

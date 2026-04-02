@@ -7,7 +7,12 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(npx vitest:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(gh repo:*)",
+      "Bash(git remote:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(npx next:*)"
     ]
   }
 }

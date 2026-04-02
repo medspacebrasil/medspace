@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import { supabaseAdmin } from "@/lib/supabase/client"
+import { getSupabaseAdmin } from "@/lib/supabase/client"
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
@@ -58,7 +58,9 @@ export async function POST(request: Request) {
     const fileName = `${session.user.clinicId}/${Date.now()}.${ext}`
     const buffer = Buffer.from(await file.arrayBuffer())
 
-    const { error: uploadError } = await supabaseAdmin.storage
+    const supabase = getSupabaseAdmin()
+
+    const { error: uploadError } = await supabase.storage
       .from("listings")
       .upload(fileName, buffer, {
         contentType: file.type,
@@ -74,7 +76,7 @@ export async function POST(request: Request) {
 
     const {
       data: { publicUrl },
-    } = supabaseAdmin.storage.from("listings").getPublicUrl(fileName)
+    } = supabase.storage.from("listings").getPublicUrl(fileName)
 
     let imageRecord = null
     if (listingId) {
