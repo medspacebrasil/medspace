@@ -3,6 +3,7 @@
 import { useActionState } from "react"
 import { updateListing, deleteListing, publishListing, type ActionState } from "../../actions"
 import { ListingForm } from "@/components/forms/ListingForm"
+import { ImageUpload } from "@/components/anuncios/ImageUpload"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Send } from "lucide-react"
@@ -88,6 +89,10 @@ export function EditListingClient({
           Anúncio atualizado com sucesso!
         </div>
       )}
+
+      <div className="mt-6">
+        <ImageUpload listingId={listing.id} initialImages={listing.images} />
+      </div>
 
       <div className="mt-6">
         <ListingForm

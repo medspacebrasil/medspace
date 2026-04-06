@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { auth } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
-import { Menu, X } from "lucide-react"
+import { MobileNav } from "./MobileNav"
 
 export async function Header() {
   const session = await auth()
@@ -40,10 +40,7 @@ export async function Header() {
           )}
         </nav>
 
-        {/* Mobile menu button - client component would handle toggle */}
-        <button className="md:hidden" aria-label="Menu">
-          <Menu className="h-6 w-6" />
-        </button>
+        <MobileNav isLoggedIn={!!session} />
       </div>
     </header>
   )

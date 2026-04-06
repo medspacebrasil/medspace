@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { createListingSchema, updateListingSchema } from "@/lib/validators"
@@ -62,8 +63,7 @@ export async function createListing(
     revalidatePath("/painel")
     redirect(`/painel/anuncios/${listing.id}/editar`)
   } catch (error) {
-    // redirect throws, re-throw
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error
+    if (isRedirectError(error)) throw error
     return { success: false, errors: { _form: ["Erro ao criar anúncio"] } }
   }
 }

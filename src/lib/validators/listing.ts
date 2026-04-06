@@ -7,6 +7,7 @@ export const createListingSchema = z.object({
     .max(120, "Título deve ter no máximo 120 caracteres"),
   description: z
     .string()
+    .min(10, "Descrição deve ter no mínimo 10 caracteres")
     .max(300, "Descrição curta deve ter no máximo 300 caracteres"),
   fullDescription: z.string().optional(),
   city: z.string().min(2, "Cidade é obrigatória"),

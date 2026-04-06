@@ -147,6 +147,14 @@ describe("createListingSchema", () => {
     expect(result.success).toBe(false)
   })
 
+  it("rejects short description (under 10 chars)", () => {
+    const result = createListingSchema.safeParse({
+      ...validListing,
+      description: "Curta",
+    })
+    expect(result.success).toBe(false)
+  })
+
   it("rejects description over 300 chars", () => {
     const result = createListingSchema.safeParse({
       ...validListing,

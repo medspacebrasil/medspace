@@ -4,7 +4,8 @@ import { testSession, adminSession } from "../../helpers/auth"
 
 // Mock modules before imports
 let mockPrisma: MockPrisma
-let mockAuthFn: ReturnType<typeof vi.fn>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let mockAuthFn: any
 
 vi.mock("@/lib/db", () => ({
   prisma: new Proxy(

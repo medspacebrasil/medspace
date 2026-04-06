@@ -15,7 +15,7 @@ export function AdminSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden w-64 border-r bg-muted/30 lg:block">
+    <aside className="relative hidden w-64 border-r bg-muted/30 lg:block">
       <div className="flex h-16 items-center border-b px-6">
         <Link href="/admin" className="text-xl font-bold text-primary">
           Med<span className="text-secondary">Space</span>
@@ -44,15 +44,13 @@ export function AdminSidebar() {
         })}
       </nav>
       <div className="absolute bottom-4 left-4 right-4">
-        <form action="/api/auth/signout" method="POST">
-          <button
-            type="submit"
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          >
-            <LogOut className="h-4 w-4" />
-            Sair
-          </button>
-        </form>
+        <Link
+          href="/api/auth/signout"
+          className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+        >
+          <LogOut className="h-4 w-4" />
+          Sair
+        </Link>
       </div>
     </aside>
   )
