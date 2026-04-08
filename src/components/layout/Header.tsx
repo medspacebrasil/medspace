@@ -8,15 +8,15 @@ export async function Header() {
   const session = await auth()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-      <div className="container mx-auto flex h-18 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full border-b border-gold/10 bg-navy">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/logo-light.png"
+            src="/logo-dark.png"
             alt="MedSpace"
-            width={140}
-            height={48}
-            className="h-10 w-auto"
+            width={180}
+            height={60}
+            className="h-12 w-auto"
             priority
           />
         </Link>
@@ -24,31 +24,31 @@ export async function Header() {
         <nav className="hidden items-center gap-8 md:flex">
           <Link
             href="/anuncios"
-            className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
           >
             Encontrar Salas
           </Link>
           <Link
             href="/#como-funciona"
-            className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
           >
             Como Funciona
           </Link>
           {session ? (
             <Link href="/painel">
-              <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
+              <Button size="sm" className="bg-gold text-navy hover:bg-gold/90 font-medium">
                 Meu Painel
               </Button>
             </Link>
           ) : (
             <div className="flex items-center gap-3">
               <Link href="/login">
-                <Button variant="ghost" size="sm" className="font-medium">
+                <Button variant="ghost" size="sm" className="font-medium text-white/80 hover:text-white hover:bg-white/10">
                   Entrar
                 </Button>
               </Link>
               <Link href="/cadastro">
-                <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-medium">
+                <Button size="sm" className="bg-gold text-navy hover:bg-gold/90 font-medium">
                   Cadastrar Clínica
                 </Button>
               </Link>

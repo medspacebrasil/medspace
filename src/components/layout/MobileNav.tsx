@@ -19,7 +19,7 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
         aria-label="Menu"
         aria-expanded={open}
         aria-controls="mobile-nav"
-        className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-muted"
+        className="flex h-10 w-10 items-center justify-center rounded-lg text-white hover:bg-white/10"
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
