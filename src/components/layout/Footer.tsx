@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Mail } from "lucide-react"
 
 export function Footer() {
@@ -7,10 +8,13 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-1">
-            <span className="text-2xl font-bold tracking-tight">
-              <span className="text-gold">Med</span>
-              <span className="text-white">Space</span>
-            </span>
+            <Image
+              src="/logo.png"
+              alt="MedSpace"
+              width={160}
+              height={56}
+              className="h-12 w-auto brightness-150"
+            />
             <p className="mt-4 text-sm text-white/60">
               Conectando médicos e clínicas. Encontre o espaço ideal para sua
               prática médica.

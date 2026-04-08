@@ -12,7 +12,7 @@ export async function Header() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/logo-dark.png"
+            src="/logo.png"
             alt="MedSpace"
             width={180}
             height={60}
