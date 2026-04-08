@@ -47,8 +47,7 @@ export default function LoginPage() {
         setError("Email ou senha incorretos")
       } else if (result?.ok) {
         setDebug("Login OK! Redirecionando...")
-        router.push("/painel")
-        router.refresh()
+        window.location.href = "/painel"
       } else {
         setError("Resposta inesperada do servidor")
       }
