@@ -55,9 +55,9 @@ export default async function HomePage() {
           <Image
             src="/logo.png"
             alt="MedSpace"
-            width={280}
-            height={100}
-            className="mx-auto mb-6 h-20 w-auto brightness-150 md:h-24"
+            width={400}
+            height={150}
+            className="mx-auto mb-8 h-32 w-auto brightness-150 md:h-44 lg:h-52"
             priority
           />
           <h1 className="text-3xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
