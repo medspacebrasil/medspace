@@ -12,6 +12,7 @@ import {
 import { prisma } from "@/lib/db"
 import { ListingCard } from "@/components/anuncios/ListingCard"
 import { HeroSearch } from "@/components/home/HeroSearch"
+import Image from "next/image"
 import {
   Search,
   Building2,
@@ -51,9 +52,14 @@ export default async function HomePage() {
       <section className="relative overflow-hidden bg-navy px-4 py-20 md:py-32">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(201,168,76,0.15),_transparent_60%)]" />
         <div className="container relative mx-auto text-center">
-          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/20">
-            <Stethoscope className="h-7 w-7 text-gold" />
-          </div>
+          <Image
+            src="/logo.png"
+            alt="MedSpace"
+            width={280}
+            height={100}
+            className="mx-auto mb-6 h-20 w-auto brightness-150 md:h-24"
+            priority
+          />
           <h1 className="text-3xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
             Encontre o espaço ideal para{" "}
             <span className="text-gold">sua prática médica.</span>
