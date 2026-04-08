@@ -10,7 +10,7 @@ export default function AuthLayout({
     <div className="flex min-h-screen flex-col items-center justify-center bg-warm-gray p-4">
       <Link href="/" className="mb-8">
         <Image
-          src="/logo-light.png"
+          src="/logo.png"
           alt="MedSpace"
           width={160}
           height={56}
