@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic"
 
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/accordion"
 import { prisma } from "@/lib/db"
 import { ListingCard } from "@/components/anuncios/ListingCard"
+import { HeroSearch } from "@/components/home/HeroSearch"
 import {
   Search,
   Building2,
@@ -21,7 +21,6 @@ import {
   Clock,
   CheckCircle2,
   ArrowRight,
-  MapPin,
 } from "lucide-react"
 
 export default async function HomePage() {
@@ -68,24 +67,10 @@ export default async function HomePage() {
           </p>
 
           {/* Search bar */}
-          <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <div className="flex flex-1 items-center gap-2 rounded-xl bg-white/10 px-4 py-3">
-                <MapPin className="h-4 w-4 text-gold" />
-                <span className="text-sm text-white/50">Cidade</span>
-              </div>
-              <div className="flex flex-1 items-center gap-2 rounded-xl bg-white/10 px-4 py-3">
-                <Stethoscope className="h-4 w-4 text-gold" />
-                <span className="text-sm text-white/50">Especialidade</span>
-              </div>
-              <Link href="/anuncios">
-                <Button className="w-full gap-2 bg-gold text-navy hover:bg-gold/90 font-semibold sm:w-auto">
-                  <Search className="h-4 w-4" />
-                  Buscar
-                </Button>
-              </Link>
-            </div>
-          </div>
+          <HeroSearch
+            cities={cities.map((c) => c.city)}
+            specialties={specialties.map((s) => ({ slug: s.slug, name: s.name }))}
+          />
         </div>
       </section>
 

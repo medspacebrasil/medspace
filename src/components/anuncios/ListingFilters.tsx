@@ -1,8 +1,7 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback } from "react"
-import { Select } from "@/components/ui/select"
+import { useCallback, type ChangeEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Search, X } from "lucide-react"
 
@@ -48,15 +47,19 @@ export function ListingFilters({
 
   const hasFilters = searchParams.toString().length > 0
 
+  const handleChange = (key: string) => (e: ChangeEvent<HTMLSelectElement>) => {
+    updateFilter(key, e.target.value)
+  }
+
   return (
-    <div className="space-y-4 rounded-lg border bg-card p-4">
+    <div className="space-y-4 rounded-xl border border-border/50 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 font-semibold">
-          <Search className="h-4 w-4" />
+          <Search className="h-4 w-4 text-gold" />
           Filtros
         </h3>
         {hasFilters && (
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="text-destructive">
             <X className="mr-1 h-3 w-3" />
             Limpar
           </Button>
@@ -64,9 +67,10 @@ export function ListingFilters({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Select
+        <select
           value={searchParams.get("city") ?? ""}
-          onChange={(e) => updateFilter("city", e.target.value)}
+          onChange={handleChange("city")}
+          className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
         >
           <option value="">Todas as cidades</option>
           {cities.map((city) => (
@@ -74,11 +78,12 @@ export function ListingFilters({
               {city}
             </option>
           ))}
-        </Select>
+        </select>
 
-        <Select
+        <select
           value={searchParams.get("specialty") ?? ""}
-          onChange={(e) => updateFilter("specialty", e.target.value)}
+          onChange={handleChange("specialty")}
+          className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
         >
           <option value="">Todas as especialidades</option>
           {specialties.map((s) => (
@@ -86,11 +91,12 @@ export function ListingFilters({
               {s.name}
             </option>
           ))}
-        </Select>
+        </select>
 
-        <Select
+        <select
           value={searchParams.get("roomType") ?? ""}
-          onChange={(e) => updateFilter("roomType", e.target.value)}
+          onChange={handleChange("roomType")}
+          className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
         >
           <option value="">Todos os tipos de sala</option>
           {roomTypes.map((rt) => (
@@ -98,11 +104,12 @@ export function ListingFilters({
               {rt.name}
             </option>
           ))}
-        </Select>
+        </select>
 
-        <Select
+        <select
           value={searchParams.get("equipment") ?? ""}
-          onChange={(e) => updateFilter("equipment", e.target.value)}
+          onChange={handleChange("equipment")}
+          className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
         >
           <option value="">Todos os equipamentos</option>
           {equipment.map((eq) => (
@@ -110,7 +117,7 @@ export function ListingFilters({
               {eq.name}
             </option>
           ))}
-        </Select>
+        </select>
       </div>
     </div>
   )
