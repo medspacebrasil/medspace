@@ -12,9 +12,9 @@ export default function AuthLayout({
         <Image
           src="/logo.png"
           alt="MedSpace"
-          width={160}
-          height={56}
-          className="h-12 w-auto"
+          width={220}
+          height={80}
+          className="h-16 w-auto"
           priority
         />
       </Link>

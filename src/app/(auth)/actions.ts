@@ -4,7 +4,7 @@ import { hash } from "bcryptjs"
 import { signIn as nextAuthSignIn } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { registerSchema, loginSchema } from "@/lib/validators"
-import { AuthError } from "next-auth"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 export type ActionState = {
   success: boolean
@@ -56,8 +56,6 @@ export async function registerClinic(
     },
   })
 
-  // signIn with redirectTo throws a NEXT_REDIRECT on success
-  // which must be re-thrown for the redirect to work
   try {
     await nextAuthSignIn("credentials", {
       email,
@@ -65,11 +63,9 @@ export async function registerClinic(
       redirectTo: "/painel",
     })
   } catch (error) {
-    if (error instanceof AuthError) {
-      return { success: false, errors: { _form: ["Conta criada! Faça login para continuar."] } }
-    }
-    // Re-throw redirect errors and any other non-auth errors
-    throw error
+    // MUST check redirect first — Auth.js throws a redirect on success
+    if (isRedirectError(error)) throw error
+    return { success: false, errors: { _form: ["Conta criada! Faça login para continuar."] } }
   }
 
   return { success: true }
@@ -96,12 +92,10 @@ export async function signInAction(
       redirectTo: "/painel",
     })
   } catch (error) {
-    if (error instanceof AuthError) {
-      return { success: false, errors: { _form: ["Email ou senha incorretos"] } }
-    }
-    // Re-throw redirect errors (NEXT_REDIRECT) — this is how
-    // Auth.js v5 signals a successful login in server actions
-    throw error
+    // MUST check redirect first — Auth.js throws a redirect on success
+    // and the redirect error may also be an instanceof AuthError
+    if (isRedirectError(error)) throw error
+    return { success: false, errors: { _form: ["Email ou senha incorretos"] } }
   }
 
   return { success: true }
