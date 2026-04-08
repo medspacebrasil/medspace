@@ -69,7 +69,7 @@ export async function unarchiveListing(formData: FormData) {
 export async function setListingStatus(formData: FormData) {
   await requireAdmin()
   const id = formData.get("id") as string
-  const status = formData.get("status") as string
+  const status = formData.get("status") as "DRAFT" | "PENDING" | "PUBLISHED" | "REJECTED" | "ARCHIVED"
   if (!id || !status) throw new Error("Dados incompletos")
 
   await prisma.listing.update({
