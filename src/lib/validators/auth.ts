@@ -14,6 +14,7 @@ export const registerSchema = z.object({
     .string()
     .regex(/^\d{10,11}$/, "WhatsApp deve ter 10 ou 11 dígitos (DDD + número)"),
   city: z.string().min(2, "Cidade é obrigatória").max(100, "Nome da cidade muito longo"),
+  state: z.string().max(2).default(""),
   neighborhood: z.string().min(2, "Bairro é obrigatório").max(100, "Nome do bairro muito longo"),
 })
 

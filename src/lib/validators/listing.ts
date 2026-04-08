@@ -11,6 +11,7 @@ export const createListingSchema = z.object({
     .max(300, "Descrição curta deve ter no máximo 300 caracteres"),
   fullDescription: z.string().max(5000, "Descrição completa muito longa").optional(),
   city: z.string().min(2, "Cidade é obrigatória").max(100, "Nome da cidade muito longo"),
+  state: z.string().max(2).default(""),
   neighborhood: z.string().min(2, "Bairro é obrigatório").max(100, "Nome do bairro muito longo"),
   whatsapp: z
     .string()

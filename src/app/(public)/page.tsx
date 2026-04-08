@@ -27,7 +27,7 @@ import {
 export default async function HomePage() {
   const [featuredListings, specialties, cities] = await Promise.all([
     prisma.listing.findMany({
-      where: { status: "PUBLISHED" },
+      where: { status: "PUBLISHED", featured: true },
       include: {
         clinic: true,
         roomType: true,
@@ -40,9 +40,8 @@ export default async function HomePage() {
     prisma.specialty.findMany({ orderBy: { name: "asc" }, take: 8 }),
     prisma.listing.findMany({
       where: { status: "PUBLISHED" },
-      select: { city: true },
-      distinct: ["city"],
-      take: 6,
+      select: { city: true, state: true },
+      distinct: ["city", "state"],
     }),
   ])
 
@@ -74,7 +73,16 @@ export default async function HomePage() {
 
           {/* Search bar */}
           <HeroSearch
-            cities={cities.map((c) => c.city)}
+            states={Object.entries(
+              cities.reduce<Record<string, string[]>>((acc, c) => {
+                const st = c.state || "Outros"
+                if (!acc[st]) acc[st] = []
+                if (!acc[st].includes(c.city)) acc[st].push(c.city)
+                return acc
+              }, {})
+            )
+              .map(([state, stateCities]) => ({ state, cities: stateCities.sort() }))
+              .sort((a, b) => a.state.localeCompare(b.state))}
             specialties={specialties.map((s) => ({ slug: s.slug, name: s.name }))}
           />
         </div>

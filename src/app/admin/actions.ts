@@ -109,6 +109,23 @@ export async function blockClinic(formData: FormData) {
   revalidatePath("/anuncios")
 }
 
+export async function toggleFeatured(formData: FormData) {
+  await requireAdmin()
+  const id = formData.get("id") as string
+  if (!id) throw new Error("ID não fornecido")
+
+  const listing = await prisma.listing.findUnique({ where: { id }, select: { featured: true } })
+  if (!listing) throw new Error("Anúncio não encontrado")
+
+  await prisma.listing.update({
+    where: { id },
+    data: { featured: !listing.featured },
+  })
+
+  revalidatePath("/admin/anuncios")
+  revalidatePath("/")
+}
+
 export async function adminUpdateListing(formData: FormData) {
   await requireAdmin()
   const id = formData.get("id") as string
@@ -118,6 +135,7 @@ export async function adminUpdateListing(formData: FormData) {
   const description = formData.get("description") as string
   const fullDescription = formData.get("fullDescription") as string | null
   const city = formData.get("city") as string
+  const state = formData.get("state") as string || ""
   const neighborhood = formData.get("neighborhood") as string
   const whatsapp = formData.get("whatsapp") as string
   const roomTypeId = formData.get("roomTypeId") as string | null
@@ -131,6 +149,7 @@ export async function adminUpdateListing(formData: FormData) {
       description,
       fullDescription: fullDescription || null,
       city,
+      state,
       neighborhood,
       whatsapp,
       roomTypeId: roomTypeId || null,

@@ -7,8 +7,8 @@ import { notFound } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { approveListing, rejectListing, archiveListing, unarchiveListing } from "../actions"
-import { CheckCircle, XCircle, Archive, RotateCcw, Pencil } from "lucide-react"
+import { approveListing, rejectListing, archiveListing, unarchiveListing, toggleFeatured } from "../actions"
+import { CheckCircle, XCircle, Archive, RotateCcw, Pencil, Star } from "lucide-react"
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "success" | "warning" | "destructive" | "outline" }> = {
   DRAFT: { label: "Rascunho", variant: "secondary" },
@@ -38,7 +38,7 @@ export default async function AdminAnunciosPage({
       images: { orderBy: { order: "asc" }, take: 1 },
       _count: { select: { specialties: true, images: true } },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
   })
 
   return (
@@ -77,6 +77,7 @@ export default async function AdminAnunciosPage({
                   <div className="flex items-center gap-2">
                     <h3 className="font-medium">{listing.title}</h3>
                     <Badge variant={cfg.variant}>{cfg.label}</Badge>
+                    {listing.featured && <Badge variant="default" className="bg-gold text-navy">Destaque</Badge>}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {listing.clinic.name} &middot; {listing.city},{" "}
@@ -85,6 +86,18 @@ export default async function AdminAnunciosPage({
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
+                  <form action={toggleFeatured}>
+                    <input type="hidden" name="id" value={listing.id} />
+                    <Button
+                      type="submit"
+                      size="sm"
+                      variant={listing.featured ? "default" : "ghost"}
+                      className="gap-1"
+                      title={listing.featured ? "Remover destaque" : "Destacar"}
+                    >
+                      <Star className={`h-3.5 w-3.5 ${listing.featured ? "fill-current" : ""}`} />
+                    </Button>
+                  </form>
                   <Link href={`/admin/anuncios/${listing.id}/editar`}>
                     <Button size="sm" variant="outline" className="gap-1">
                       <Pencil className="h-3.5 w-3.5" />

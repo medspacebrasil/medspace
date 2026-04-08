@@ -22,6 +22,7 @@ export async function registerClinic(
     clinicName: formData.get("clinicName"),
     whatsapp: formData.get("whatsapp"),
     city: formData.get("city"),
+    state: formData.get("state") || "",
     neighborhood: formData.get("neighborhood"),
   }
 
@@ -30,7 +31,7 @@ export async function registerClinic(
     return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
   }
 
-  const { email, password, name, clinicName, whatsapp, city, neighborhood } =
+  const { email, password, name, clinicName, whatsapp, city, state, neighborhood } =
     parsed.data
 
   const existing = await prisma.user.findUnique({ where: { email } })
@@ -50,6 +51,7 @@ export async function registerClinic(
           name: clinicName,
           whatsapp,
           city,
+          state: state || "",
           neighborhood,
         },
       },

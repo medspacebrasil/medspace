@@ -18,14 +18,15 @@ interface CepData {
 interface CepInputProps {
   defaultCity?: string
   defaultNeighborhood?: string
+  defaultState?: string
   defaultCep?: string
 }
 
-export function CepInput({ defaultCity, defaultNeighborhood, defaultCep }: CepInputProps) {
+export function CepInput({ defaultCity, defaultNeighborhood, defaultState, defaultCep }: CepInputProps) {
   const [cep, setCep] = useState(defaultCep ?? "")
   const [city, setCity] = useState(defaultCity ?? "")
   const [neighborhood, setNeighborhood] = useState(defaultNeighborhood ?? "")
-  const [uf, setUf] = useState("")
+  const [uf, setUf] = useState(defaultState ?? "")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -68,6 +69,7 @@ export function CepInput({ defaultCity, defaultNeighborhood, defaultCep }: CepIn
 
   return (
     <>
+      <input type="hidden" name="state" value={uf} />
       <div className="space-y-2">
         <Label htmlFor="cep">CEP</Label>
         <div className="flex gap-2">

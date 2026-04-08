@@ -40,6 +40,7 @@ model Clinic {
   phone        String?
   whatsapp     String
   city         String
+  state        String   @default("")
   neighborhood String
   description  String?
   listings     Listing[]
@@ -72,9 +73,11 @@ model Listing {
   roomTypeId      String?            @map("room_type_id")
   roomType        RoomType?          @relation(fields: [roomTypeId], references: [id])
   city            String
+  state           String             @default("")
   neighborhood    String
   whatsapp        String
   status          ListingStatus      @default(DRAFT)
+  featured        Boolean            @default(false)
   images          ListingImage[]
   specialties     ListingSpecialty[]
   equipment       ListingEquipment[]

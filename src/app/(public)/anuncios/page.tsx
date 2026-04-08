@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 
 interface PageProps {
   searchParams: Promise<{
+    state?: string
     city?: string
     specialty?: string
     roomType?: string
@@ -32,6 +33,7 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
 
   // Build where clause
   const where: Record<string, unknown> = { status: "PUBLISHED" as const }
+  if (params.state) where.state = params.state
   if (params.city) where.city = params.city
   if (params.specialty) {
     where.specialties = {
@@ -67,14 +69,12 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
       prisma.specialty.findMany({ orderBy: { name: "asc" } }),
       prisma.roomType.findMany({ orderBy: { name: "asc" } }),
       prisma.equipment.findMany({ orderBy: { name: "asc" } }),
-      prisma.listing
-        .findMany({
-          where: { status: "PUBLISHED" },
-          select: { city: true },
-          distinct: ["city"],
-          orderBy: { city: "asc" },
-        })
-        .then((rows) => rows.map((r) => r.city)),
+      prisma.listing.findMany({
+        where: { status: "PUBLISHED" },
+        select: { city: true, state: true },
+        distinct: ["city", "state"],
+        orderBy: { city: "asc" },
+      }),
     ])
 
   const totalPages = Math.ceil(total / limit)
@@ -92,7 +92,16 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
             specialties={specialties}
             roomTypes={roomTypes}
             equipment={equipmentList}
-            cities={cities}
+            states={Object.entries(
+              cities.reduce<Record<string, string[]>>((acc, c) => {
+                const st = c.state || "Outros"
+                if (!acc[st]) acc[st] = []
+                if (!acc[st].includes(c.city)) acc[st].push(c.city)
+                return acc
+              }, {})
+            )
+              .map(([state, stateCities]) => ({ state, cities: stateCities.sort() }))
+              .sort((a, b) => a.state.localeCompare(b.state))}
           />
         </Suspense>
       </div>

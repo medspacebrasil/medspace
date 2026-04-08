@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, type ChangeEvent } from "react"
+import { useCallback, useState, type ChangeEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Search, X } from "lucide-react"
 
@@ -15,17 +15,20 @@ interface ListingFiltersProps {
   specialties: FilterOption[]
   roomTypes: FilterOption[]
   equipment: FilterOption[]
-  cities: string[]
+  states: { state: string; cities: string[] }[]
 }
 
 export function ListingFilters({
   specialties,
   roomTypes,
   equipment,
-  cities,
+  states,
 }: ListingFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [selectedState, setSelectedState] = useState(searchParams.get("state") ?? "")
+
+  const citiesForState = states.find((s) => s.state === selectedState)?.cities ?? []
 
   const updateFilter = useCallback(
     (key: string, value: string) => {
@@ -42,6 +45,7 @@ export function ListingFilters({
   )
 
   const clearFilters = useCallback(() => {
+    setSelectedState("")
     router.push("/anuncios")
   }, [router])
 
@@ -66,14 +70,39 @@ export function ListingFilters({
         )}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <select
+          value={selectedState}
+          onChange={(e) => {
+            setSelectedState(e.target.value)
+            const params = new URLSearchParams(searchParams.toString())
+            if (e.target.value) {
+              params.set("state", e.target.value)
+            } else {
+              params.delete("state")
+            }
+            params.delete("city")
+            params.delete("page")
+            router.push(`/anuncios?${params.toString()}`)
+          }}
+          className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
+        >
+          <option value="">Todos os estados</option>
+          {states.map((s) => (
+            <option key={s.state} value={s.state}>
+              {s.state}
+            </option>
+          ))}
+        </select>
+
         <select
           value={searchParams.get("city") ?? ""}
           onChange={handleChange("city")}
-          className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
+          disabled={!selectedState}
+          className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 disabled:opacity-50 max-h-60"
         >
-          <option value="">Todas as cidades</option>
-          {cities.map((city) => (
+          <option value="">{selectedState ? "Todas as cidades" : "Selecione um estado"}</option>
+          {citiesForState.map((city) => (
             <option key={city} value={city}>
               {city}
             </option>
