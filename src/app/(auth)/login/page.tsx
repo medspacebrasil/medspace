@@ -34,6 +34,11 @@ export default function LoginPage() {
               {state.errors._form[0]}
             </div>
           )}
+          {state.errors?._debug && (
+            <div className="rounded-lg bg-yellow-100 p-3 text-xs text-yellow-800 break-all">
+              Debug: {state.errors._debug[0]}
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input

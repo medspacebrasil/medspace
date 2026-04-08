@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { Button } from "@/components/ui/button"
@@ -18,9 +19,20 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
 
 export default async function PainelPage() {
   const session = await auth()
+  if (!session?.user) {
+    redirect("/login")
+  }
+
+  // Admin users may not have a clinicId
+  if (!session.user.clinicId) {
+    if (session.user.role === "ADMIN") {
+      redirect("/admin")
+    }
+    redirect("/login")
+  }
 
   const listings = await prisma.listing.findMany({
-    where: { clinicId: session!.user.clinicId! },
+    where: { clinicId: session.user.clinicId },
     include: {
       images: { orderBy: { order: "asc" }, take: 1 },
       _count: { select: { images: true, specialties: true } },

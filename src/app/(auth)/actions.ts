@@ -63,7 +63,6 @@ export async function registerClinic(
       redirectTo: "/painel",
     })
   } catch (error) {
-    // MUST check redirect first — Auth.js throws a redirect on success
     if (isRedirectError(error)) throw error
     return { success: false, errors: { _form: ["Conta criada! Faça login para continuar."] } }
   }
@@ -92,10 +91,17 @@ export async function signInAction(
       redirectTo: "/painel",
     })
   } catch (error) {
-    // MUST check redirect first — Auth.js throws a redirect on success
-    // and the redirect error may also be an instanceof AuthError
     if (isRedirectError(error)) throw error
-    return { success: false, errors: { _form: ["Email ou senha incorretos"] } }
+    // Show the actual error for debugging
+    const msg = error instanceof Error ? error.message : String(error)
+    const name = error instanceof Error ? error.constructor.name : "Unknown"
+    return {
+      success: false,
+      errors: {
+        _form: ["Email ou senha incorretos"],
+        _debug: [`${name}: ${msg}`],
+      },
+    }
   }
 
   return { success: true }
