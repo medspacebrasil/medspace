@@ -1,11 +1,11 @@
 "use server"
 
 import { hash } from "bcryptjs"
-import { redirect } from "next/navigation"
 import { signIn as nextAuthSignIn } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { registerSchema, loginSchema } from "@/lib/validators"
 import { AuthError } from "next-auth"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 export type ActionState = {
   success: boolean
@@ -66,11 +66,18 @@ export async function registerClinic(
 
     return { success: true }
   } catch (error) {
+    if (isRedirectError(error)) throw error
     if (error instanceof AuthError) {
       return { success: false, errors: { _form: ["Erro ao fazer login após cadastro"] } }
     }
-    // redirect() throws internally, re-throw it
-    throw error
+    if (
+      error instanceof Object &&
+      "code" in error &&
+      (error as { code: string }).code === "P2002"
+    ) {
+      return { success: false, errors: { email: ["Este email já está cadastrado"] } }
+    }
+    return { success: false, errors: { _form: ["Erro interno. Tente novamente."] } }
   }
 }
 
@@ -97,9 +104,10 @@ export async function signInAction(
 
     return { success: true }
   } catch (error) {
+    if (isRedirectError(error)) throw error
     if (error instanceof AuthError) {
       return { success: false, errors: { _form: ["Email ou senha incorretos"] } }
     }
-    throw error
+    return { success: false, errors: { _form: ["Erro interno. Tente novamente."] } }
   }
 }

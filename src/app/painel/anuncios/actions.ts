@@ -42,9 +42,10 @@ export async function createListing(
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
 
-    let slug = generateSlug(data.title)
+    const baseSlug = generateSlug(data.title)
+    let slug = baseSlug
     const existing = await prisma.listing.findUnique({ where: { slug } })
-    if (existing) slug = `${slug}-${Date.now().toString(36)}`
+    if (existing) slug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`
 
     const listing = await prisma.listing.create({
       data: {
@@ -140,15 +141,21 @@ export async function updateListing(
 
 export async function deleteListing(formData: FormData): Promise<void> {
   const session = await auth()
-  if (!session?.user?.clinicId) return
+  if (!session?.user?.clinicId) {
+    throw new Error("Não autorizado")
+  }
 
   const id = formData.get("id") as string
+  if (!id) throw new Error("ID não fornecido")
+
   const listing = await prisma.listing.findUnique({
     where: { id },
     select: { clinicId: true },
   })
 
-  if (!listing || listing.clinicId !== session.user.clinicId) return
+  if (!listing || listing.clinicId !== session.user.clinicId) {
+    throw new Error("Anúncio não encontrado")
+  }
 
   await prisma.listing.delete({ where: { id } })
   revalidatePath("/painel")
@@ -174,6 +181,13 @@ export async function publishListing(
 
   if (!listing || listing.clinicId !== session.user.clinicId) {
     return { success: false, errors: { _form: ["Anúncio não encontrado"] } }
+  }
+
+  if (listing.status !== "DRAFT" && listing.status !== "REJECTED") {
+    return {
+      success: false,
+      errors: { _form: ["Apenas rascunhos ou anúncios rejeitados podem ser enviados para revisão"] },
+    }
   }
 
   if (listing.images.length === 0) {

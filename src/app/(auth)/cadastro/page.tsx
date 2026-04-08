@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 
 export default function CadastroPage() {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
@@ -22,24 +23,24 @@ export default function CadastroPage() {
   )
 
   return (
-    <Card>
+    <Card className="border-border/50 shadow-lg">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">
-          Med<span className="text-secondary">Space</span>
-        </CardTitle>
-        <CardDescription>Cadastre sua clínica gratuitamente</CardDescription>
+        <CardTitle className="text-2xl">Cadastrar Clínica</CardTitle>
+        <CardDescription>
+          Crie sua conta gratuitamente e comece a anunciar
+        </CardDescription>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
           {state.errors?._form && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
               {state.errors._form[0]}
             </div>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="name">Seu nome</Label>
-            <Input id="name" name="name" placeholder="João da Silva" required />
+            <Input id="name" name="name" placeholder="João da Silva" autoComplete="name" required />
             {state.errors?.name && (
               <p className="text-sm text-destructive">{state.errors.name[0]}</p>
             )}
@@ -52,6 +53,7 @@ export default function CadastroPage() {
               name="email"
               type="email"
               placeholder="seu@email.com"
+              autoComplete="email"
               required
             />
             {state.errors?.email && (
@@ -66,6 +68,7 @@ export default function CadastroPage() {
               name="password"
               type="password"
               placeholder="Mínimo 8 caracteres"
+              autoComplete="new-password"
               required
             />
             {state.errors?.password && (
@@ -75,7 +78,7 @@ export default function CadastroPage() {
             )}
           </div>
 
-          <hr />
+          <Separator className="my-2" />
 
           <div className="space-y-2">
             <Label htmlFor="clinicName">Nome da Clínica</Label>
@@ -134,12 +137,16 @@ export default function CadastroPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button
+            type="submit"
+            className="w-full bg-gold text-navy hover:bg-gold/90 font-semibold"
+            disabled={isPending}
+          >
             {isPending ? "Cadastrando..." : "Cadastrar Clínica"}
           </Button>
           <p className="text-sm text-muted-foreground">
             Já tem conta?{" "}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="font-medium text-gold-dark hover:underline">
               Entrar
             </Link>
           </p>

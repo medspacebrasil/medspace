@@ -22,17 +22,15 @@ export default function LoginPage() {
   )
 
   return (
-    <Card>
+    <Card className="border-border/50 shadow-lg">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">
-          Med<span className="text-secondary">Space</span>
-        </CardTitle>
-        <CardDescription>Entre com sua conta</CardDescription>
+        <CardTitle className="text-2xl">Entrar</CardTitle>
+        <CardDescription>Acesse sua conta para continuar</CardDescription>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
           {state.errors?._form && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
               {state.errors._form[0]}
             </div>
           )}
@@ -43,6 +41,7 @@ export default function LoginPage() {
               name="email"
               type="email"
               placeholder="seu@email.com"
+              autoComplete="email"
               required
             />
             {state.errors?.email && (
@@ -56,6 +55,7 @@ export default function LoginPage() {
               name="password"
               type="password"
               placeholder="Mínimo 8 caracteres"
+              autoComplete="current-password"
               required
             />
             {state.errors?.password && (
@@ -66,12 +66,16 @@ export default function LoginPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button
+            type="submit"
+            className="w-full bg-gold text-navy hover:bg-gold/90 font-semibold"
+            disabled={isPending}
+          >
             {isPending ? "Entrando..." : "Entrar"}
           </Button>
           <p className="text-sm text-muted-foreground">
             Não tem conta?{" "}
-            <Link href="/cadastro" className="text-primary hover:underline">
+            <Link href="/cadastro" className="font-medium text-gold-dark hover:underline">
               Cadastre sua clínica
             </Link>
           </p>

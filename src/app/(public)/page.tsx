@@ -1,14 +1,31 @@
 export const dynamic = "force-dynamic"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import { prisma } from "@/lib/db"
 import { ListingCard } from "@/components/anuncios/ListingCard"
-import { Search, Building2, Stethoscope, MessageCircle } from "lucide-react"
+import {
+  Search,
+  Building2,
+  Stethoscope,
+  MessageCircle,
+  Shield,
+  Clock,
+  CheckCircle2,
+  ArrowRight,
+  MapPin,
+} from "lucide-react"
 
 export default async function HomePage() {
-  const [featuredListings, stats] = await Promise.all([
+  const [featuredListings, specialties, cities] = await Promise.all([
     prisma.listing.findMany({
       where: { status: "PUBLISHED" },
       include: {
@@ -20,98 +37,69 @@ export default async function HomePage() {
       orderBy: { createdAt: "desc" },
       take: 6,
     }),
-    prisma.listing.count({ where: { status: "PUBLISHED" } }),
+    prisma.specialty.findMany({ orderBy: { name: "asc" }, take: 8 }),
+    prisma.listing.findMany({
+      where: { status: "PUBLISHED" },
+      select: { city: true },
+      distinct: ["city"],
+      take: 6,
+    }),
   ])
 
   return (
     <>
       {/* Hero */}
-      <section className="bg-primary px-4 py-16 text-primary-foreground md:py-24">
-        <div className="container mx-auto text-center">
-          <h1 className="text-3xl font-bold md:text-5xl">
-            Encontre o espaço ideal para sua{" "}
-            <span className="text-secondary">prática médica</span>
+      <section className="relative overflow-hidden bg-navy px-4 py-20 md:py-32">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(201,168,76,0.15),_transparent_60%)]" />
+        <div className="container relative mx-auto text-center">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/20">
+            <Stethoscope className="h-7 w-7 text-gold" />
+          </div>
+          <h1 className="text-3xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
+            Encontre o espaço ideal para{" "}
+            <span className="text-gold">sua prática médica.</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-primary-foreground/80">
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-white/70">
             Conectamos médicos a clínicas com salas e equipamentos disponíveis.
-            Sem burocracia, direto pelo WhatsApp.
+            Sem burocracia, direto pelo WhatsApp.{" "}
+            <span className="font-medium text-white/90">
+              Rápido, seguro e 100% online.
+            </span>
           </p>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link href="/anuncios">
-              <Button size="lg" variant="secondary" className="gap-2">
-                <Search className="h-5 w-5" />
-                Buscar Salas
-              </Button>
-            </Link>
-            <Link href="/cadastro">
-              <Button
-                size="lg"
-                variant="outline"
-                className="gap-2 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
-              >
-                <Building2 className="h-5 w-5" />
-                Anunciar Espaço
-              </Button>
-            </Link>
+
+          {/* Search bar */}
+          <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-1 items-center gap-2 rounded-xl bg-white/10 px-4 py-3">
+                <MapPin className="h-4 w-4 text-gold" />
+                <span className="text-sm text-white/50">Cidade</span>
+              </div>
+              <div className="flex flex-1 items-center gap-2 rounded-xl bg-white/10 px-4 py-3">
+                <Stethoscope className="h-4 w-4 text-gold" />
+                <span className="text-sm text-white/50">Especialidade</span>
+              </div>
+              <Link href="/anuncios">
+                <Button className="w-full gap-2 bg-gold text-navy hover:bg-gold/90 font-semibold sm:w-auto">
+                  <Search className="h-4 w-4" />
+                  Buscar
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="px-4 py-16">
-        <div className="container mx-auto">
-          <h2 className="text-center text-2xl font-bold md:text-3xl">
-            Como funciona
-          </h2>
-          <div className="mt-10 grid gap-8 md:grid-cols-3">
-            <Card className="text-center">
-              <CardContent className="pt-6">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Search className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mt-4 font-semibold">1. Busque</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Encontre salas por cidade, especialidade ou tipo de
-                  equipamento.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="text-center">
-              <CardContent className="pt-6">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Stethoscope className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mt-4 font-semibold">2. Escolha</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Veja fotos, equipamentos disponíveis e detalhes de cada
-                  espaço.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="text-center">
-              <CardContent className="pt-6">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <MessageCircle className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="mt-4 font-semibold">3. Contate</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Entre em contato direto com a clínica pelo WhatsApp e combine
-                  tudo.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured listings */}
+      {/* Featured listings (images) */}
       {featuredListings.length > 0 && (
-        <section className="bg-muted/50 px-4 py-16">
+        <section className="px-4 py-16">
           <div className="container mx-auto">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Destaques</h2>
+              <h2 className="text-2xl font-bold md:text-3xl">Espaços em Destaque</h2>
               <Link href="/anuncios">
-                <Button variant="ghost">Ver todos</Button>
+                <Button variant="ghost" className="gap-1 text-gold hover:text-gold-dark">
+                  Ver todos
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </Link>
             </div>
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -123,21 +111,255 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* CTA */}
-      <section className="px-4 py-16">
-        <div className="container mx-auto text-center">
-          <h2 className="text-2xl font-bold md:text-3xl">
-            Tem uma clínica com espaço disponível?
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Cadastre-se gratuitamente e comece a receber contatos de médicos
-            interessados.
-          </p>
-          <Link href="/cadastro">
-            <Button size="lg" className="mt-6">
-              Cadastrar Clínica Grátis
-            </Button>
-          </Link>
+      {/* How it works */}
+      <section id="como-funciona" className="bg-warm-gray px-4 py-16 md:py-20">
+        <div className="container mx-auto">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold md:text-3xl">Como funciona</h2>
+            <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
+              Em 3 passos simples, encontre o espaço perfeito para atender seus
+              pacientes.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
+            <Card className="border-0 bg-white shadow-sm text-center">
+              <CardContent className="pt-8 pb-6">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10">
+                  <Search className="h-7 w-7 text-gold" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold">1. Busque</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Encontre salas por cidade, especialidade ou tipo de equipamento.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-0 bg-white shadow-sm text-center">
+              <CardContent className="pt-8 pb-6">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10">
+                  <Stethoscope className="h-7 w-7 text-gold" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold">2. Escolha</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Veja fotos, equipamentos disponíveis e detalhes de cada espaço.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-0 bg-white shadow-sm text-center">
+              <CardContent className="pt-8 pb-6">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10">
+                  <MessageCircle className="h-7 w-7 text-gold" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold">3. Contate</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Entre em contato direto com a clínica pelo WhatsApp e combine tudo.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Why MedSpace */}
+      <section className="bg-navy px-4 py-16 md:py-20">
+        <div className="container mx-auto">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white md:text-3xl">
+              Por que usar o MedSpace?
+            </h2>
+            <p className="mx-auto mt-3 max-w-lg text-white/60">
+              A forma mais moderna e prática de encontrar espaços médicos no Brasil.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            <div className="rounded-2xl bg-white/5 p-6 text-center backdrop-blur-sm">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/20">
+                <Shield className="h-7 w-7 text-gold" />
+              </div>
+              <h3 className="mt-5 text-lg font-semibold text-white">
+                Profissionais verificados
+              </h3>
+              <p className="mt-2 text-sm text-white/60">
+                Todas as clínicas passam por verificação antes de publicar anúncios
+                na plataforma.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-white/5 p-6 text-center backdrop-blur-sm">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/20">
+                <Clock className="h-7 w-7 text-gold" />
+              </div>
+              <h3 className="mt-5 text-lg font-semibold text-white">
+                Contato direto e rápido
+              </h3>
+              <p className="mt-2 text-sm text-white/60">
+                Sem intermediários. Fale direto com a clínica pelo WhatsApp e
+                feche em minutos.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-white/5 p-6 text-center backdrop-blur-sm">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/20">
+                <Building2 className="h-7 w-7 text-gold" />
+              </div>
+              <h3 className="mt-5 text-lg font-semibold text-white">
+                Espaços completos
+              </h3>
+              <p className="mt-2 text-sm text-white/60">
+                Salas equipadas com tudo que você precisa para atender seus
+                pacientes com qualidade.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Specialties */}
+      {specialties.length > 0 && (
+        <section className="px-4 py-16 md:py-20">
+          <div className="container mx-auto">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold md:text-3xl">
+                Especialidades Populares
+              </h2>
+              <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
+                Encontre espaços especializados para cada área médica.
+              </p>
+            </div>
+            <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
+              {specialties.map((spec) => (
+                <Link
+                  key={spec.id}
+                  href={`/anuncios?specialty=${spec.slug}`}
+                  className="group rounded-xl border border-border bg-white p-5 text-center transition-all hover:border-gold/50 hover:shadow-md"
+                >
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10 transition-colors group-hover:bg-gold/20">
+                    <Stethoscope className="h-5 w-5 text-gold" />
+                  </div>
+                  <p className="mt-3 text-sm font-medium">{spec.name}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA - Clinic owners */}
+      <section className="bg-warm-gray px-4 py-16 md:py-20">
+        <div className="container mx-auto">
+          <div className="mx-auto max-w-2xl rounded-2xl border border-gold/20 bg-white p-8 text-center shadow-sm md:p-12">
+            <h2 className="text-2xl font-bold md:text-3xl">
+              Você tem uma clínica?
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-muted-foreground">
+              Cadastre-se gratuitamente e comece a receber contatos de médicos
+              interessados nos seus espaços.
+            </p>
+            <div className="mt-6 grid grid-cols-1 gap-3 text-left sm:grid-cols-2 sm:gap-x-8 sm:gap-y-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-gold" />
+                <span className="text-sm">Cadastro gratuito</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-gold" />
+                <span className="text-sm">Anuncie seus espaços</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-gold" />
+                <span className="text-sm">Receba contatos pelo WhatsApp</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-gold" />
+                <span className="text-sm">Gerencie tudo pelo painel</span>
+              </div>
+            </div>
+            <Link href="/cadastro">
+              <Button
+                size="lg"
+                className="mt-8 gap-2 bg-gold text-navy hover:bg-gold/90 font-semibold"
+              >
+                Cadastrar minha clínica
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Plano inicial gratuito &middot; Sem taxas de cadastro &middot;
+              Comece hoje mesmo
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="px-4 py-16 md:py-20">
+        <div className="container mx-auto">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold md:text-3xl">
+              Perguntas Frequentes
+            </h2>
+            <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
+              Tire suas dúvidas sobre a plataforma
+            </p>
+          </div>
+          <div className="mx-auto mt-10 max-w-2xl">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1" className="border-border/50">
+                <AccordionTrigger>O que é o MedSpace?</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  O MedSpace é um marketplace que conecta médicos a clínicas que
+                  oferecem salas e equipamentos para uso profissional. Nossa
+                  plataforma facilita a busca e o contato direto entre
+                  profissionais de saúde e espaços disponíveis.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2" className="border-border/50">
+                <AccordionTrigger>
+                  Como faço para encontrar uma sala?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Basta acessar a página de anúncios e usar os filtros por
+                  cidade, especialidade, tipo de sala ou equipamento. Ao
+                  encontrar um espaço que atenda suas necessidades, clique no
+                  botão de WhatsApp para falar direto com a clínica.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-3" className="border-border/50">
+                <AccordionTrigger>A plataforma é gratuita?</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Sim! Tanto para médicos que buscam salas quanto para clínicas
+                  que anunciam seus espaços, o cadastro e uso da plataforma é
+                  totalmente gratuito.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-4" className="border-border/50">
+                <AccordionTrigger>
+                  Como posso anunciar minha clínica?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Crie uma conta como clínica, preencha os dados do seu espaço,
+                  adicione fotos e publique. Após a verificação pela nossa
+                  equipe, seu anúncio ficará visível para milhares de médicos.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-5" className="border-border/50">
+                <AccordionTrigger>
+                  Os espaços são verificados?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Sim. Todos os anúncios passam por uma verificação da nossa
+                  equipe antes de serem publicados, garantindo a qualidade e
+                  veracidade das informações.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-6" className="border-border/50">
+                <AccordionTrigger>
+                  Como funciona o contato com a clínica?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  O contato é feito diretamente pelo WhatsApp. Ao clicar no
+                  botão de contato em um anúncio, você será redirecionado para
+                  uma conversa com a clínica, sem intermediários.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
         </div>
       </section>
     </>
