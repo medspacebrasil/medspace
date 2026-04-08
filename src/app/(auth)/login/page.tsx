@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from "react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,15 +16,12 @@ import {
 } from "@/components/ui/card"
 
 export default function LoginPage() {
-  const router = useRouter()
   const [error, setError] = useState("")
-  const [debug, setDebug] = useState("")
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError("")
-    setDebug("Iniciando login...")
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
@@ -33,41 +29,23 @@ export default function LoginPage() {
     const password = formData.get("password") as string
 
     try {
-      setDebug(`Chamando signIn com email: ${email}`)
-
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       })
 
-      setDebug(`Resultado: ${JSON.stringify(result)}`)
-
       if (result?.error) {
         setError("Email ou senha incorretos")
       } else if (result?.ok) {
-        setDebug("Login OK! Redirecionando...")
         window.location.href = "/painel"
       } else {
         setError("Resposta inesperada do servidor")
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
-      setError(`Erro: ${msg}`)
-      setDebug(`Exceção: ${msg}`)
+      setError(`Erro: ${err instanceof Error ? err.message : String(err)}`)
     } finally {
       setLoading(false)
-    }
-  }
-
-  async function testAuth() {
-    setDebug("Testando /api/auth/providers...")
-    try {
-      const res = await fetch("/api/auth/providers")
-      const data = await res.json()
-      setDebug(`Providers (${res.status}): ${JSON.stringify(data)}`)
-    } catch (err) {
-      setDebug(`Erro ao testar: ${err instanceof Error ? err.message : String(err)}`)
     }
   }
 
@@ -84,11 +62,6 @@ export default function LoginPage() {
               {error}
             </div>
           )}
-          {debug && (
-            <div className="rounded-lg bg-blue-50 p-3 text-xs text-blue-800 font-mono break-all">
-              DEBUG: {debug}
-            </div>
-          )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -98,7 +71,6 @@ export default function LoginPage() {
               placeholder="seu@email.com"
               autoComplete="email"
               required
-              defaultValue="admin@medspace.com.br"
             />
           </div>
           <div className="space-y-2">
@@ -110,7 +82,6 @@ export default function LoginPage() {
               placeholder="Mínimo 8 caracteres"
               autoComplete="current-password"
               required
-              defaultValue="admin123456"
             />
           </div>
         </CardContent>
@@ -121,14 +92,6 @@ export default function LoginPage() {
             disabled={loading}
           >
             {loading ? "Entrando..." : "Entrar"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full text-xs"
-            onClick={testAuth}
-          >
-            Testar API Auth
           </Button>
           <p className="text-sm text-muted-foreground">
             Não tem conta?{" "}

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
+import { CepInput } from "@/components/forms/CepInput"
 import type { ActionState } from "@/app/painel/anuncios/actions"
 
 interface FilterOption {
@@ -118,36 +119,16 @@ export function ListingForm({
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="city">Cidade</Label>
-              <Input
-                id="city"
-                name="city"
-                defaultValue={defaultValues?.city}
-                placeholder="São Paulo"
-                required
-              />
-              {state.errors?.city && (
-                <p className="text-sm text-destructive">{state.errors.city[0]}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="neighborhood">Bairro</Label>
-              <Input
-                id="neighborhood"
-                name="neighborhood"
-                defaultValue={defaultValues?.neighborhood}
-                placeholder="Centro"
-                required
-              />
-              {state.errors?.neighborhood && (
-                <p className="text-sm text-destructive">
-                  {state.errors.neighborhood[0]}
-                </p>
-              )}
-            </div>
-          </div>
+          <CepInput
+            defaultCity={defaultValues?.city}
+            defaultNeighborhood={defaultValues?.neighborhood}
+          />
+          {state.errors?.city && (
+            <p className="text-sm text-destructive">{state.errors.city[0]}</p>
+          )}
+          {state.errors?.neighborhood && (
+            <p className="text-sm text-destructive">{state.errors.neighborhood[0]}</p>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">

@@ -51,6 +51,7 @@ export async function createListing(
       data: {
         ...data,
         slug,
+        status: "PENDING",
         clinicId: session.user.clinicId,
         specialties: {
           create: specialtyIds.map((id) => ({ specialtyId: id })),

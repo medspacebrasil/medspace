@@ -6,6 +6,7 @@ import { registerClinic, type ActionState } from "../actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { CepInput } from "@/components/forms/CepInput"
 import {
   Card,
   CardContent,
@@ -110,31 +111,13 @@ export default function CadastroPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="city">Cidade</Label>
-              <Input id="city" name="city" placeholder="São Paulo" required />
-              {state.errors?.city && (
-                <p className="text-sm text-destructive">
-                  {state.errors.city[0]}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="neighborhood">Bairro</Label>
-              <Input
-                id="neighborhood"
-                name="neighborhood"
-                placeholder="Centro"
-                required
-              />
-              {state.errors?.neighborhood && (
-                <p className="text-sm text-destructive">
-                  {state.errors.neighborhood[0]}
-                </p>
-              )}
-            </div>
-          </div>
+          <CepInput />
+          {state.errors?.city && (
+            <p className="text-sm text-destructive">{state.errors.city[0]}</p>
+          )}
+          {state.errors?.neighborhood && (
+            <p className="text-sm text-destructive">{state.errors.neighborhood[0]}</p>
+          )}
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button
