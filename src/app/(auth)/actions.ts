@@ -1,7 +1,6 @@
 "use server"
 
 import { hash } from "bcryptjs"
-import { redirect } from "next/navigation"
 import { signIn as nextAuthSignIn } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { registerSchema, loginSchema } from "@/lib/validators"
@@ -57,20 +56,23 @@ export async function registerClinic(
     },
   })
 
+  // signIn with redirectTo throws a NEXT_REDIRECT on success
+  // which must be re-thrown for the redirect to work
   try {
     await nextAuthSignIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirectTo: "/painel",
     })
   } catch (error) {
     if (error instanceof AuthError) {
-      return { success: false, errors: { _form: ["Conta criada, mas erro ao entrar. Faça login manualmente."] } }
+      return { success: false, errors: { _form: ["Conta criada! Faça login para continuar."] } }
     }
+    // Re-throw redirect errors and any other non-auth errors
     throw error
   }
 
-  redirect("/painel")
+  return { success: true }
 }
 
 export async function signInAction(
@@ -91,14 +93,16 @@ export async function signInAction(
     await nextAuthSignIn("credentials", {
       email: parsed.data.email,
       password: parsed.data.password,
-      redirect: false,
+      redirectTo: "/painel",
     })
   } catch (error) {
     if (error instanceof AuthError) {
       return { success: false, errors: { _form: ["Email ou senha incorretos"] } }
     }
+    // Re-throw redirect errors (NEXT_REDIRECT) — this is how
+    // Auth.js v5 signals a successful login in server actions
     throw error
   }
 
-  redirect("/painel")
+  return { success: true }
 }
