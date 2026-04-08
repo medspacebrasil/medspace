@@ -4,6 +4,7 @@ import { redirect, notFound } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { ProfileForm } from "./ProfileForm"
+import { ChangePasswordForm } from "@/components/forms/ChangePasswordForm"
 
 export default async function PerfilPage() {
   const session = await auth()
@@ -26,8 +27,9 @@ export default async function PerfilPage() {
       <p className="text-muted-foreground">
         Atualize os dados da sua clínica
       </p>
-      <div className="mt-6">
+      <div className="mt-6 space-y-6">
         <ProfileForm clinic={clinic} />
+        <ChangePasswordForm />
       </div>
     </div>
   )

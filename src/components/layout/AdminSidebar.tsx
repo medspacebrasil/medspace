@@ -4,12 +4,13 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Building2, FileText, LogOut } from "lucide-react"
+import { LayoutDashboard, Building2, FileText, Settings, LogOut } from "lucide-react"
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/clinicas", label: "Clínicas", icon: Building2 },
   { href: "/admin/anuncios", label: "Anúncios", icon: FileText },
+  { href: "/admin/config", label: "Configurações", icon: Settings },
 ]
 
 export function AdminSidebar() {

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { compare, hash } from "bcryptjs"
 import { z } from "zod/v4"
 
 export type ActionState = {
@@ -53,4 +54,56 @@ export async function updateProfile(
   } catch {
     return { success: false, errors: { _form: ["Erro ao atualizar perfil"] } }
   }
+}
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Senha atual é obrigatória"),
+  newPassword: z.string().min(8, "Nova senha deve ter no mínimo 8 caracteres").max(128),
+  confirmPassword: z.string().min(1, "Confirmação é obrigatória"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
+})
+
+export async function changePassword(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, errors: { _form: ["Não autorizado"] } }
+  }
+
+  const raw = {
+    currentPassword: formData.get("currentPassword"),
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  }
+
+  const parsed = changePasswordSchema.safeParse(raw)
+  if (!parsed.success) {
+    return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { passwordHash: true },
+  })
+
+  if (!user) {
+    return { success: false, errors: { _form: ["Usuário não encontrado"] } }
+  }
+
+  const isValid = await compare(parsed.data.currentPassword, user.passwordHash)
+  if (!isValid) {
+    return { success: false, errors: { currentPassword: ["Senha atual incorreta"] } }
+  }
+
+  const newHash = await hash(parsed.data.newPassword, 12)
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { passwordHash: newHash },
+  })
+
+  return { success: true }
 }
