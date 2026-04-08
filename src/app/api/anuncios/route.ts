@@ -76,11 +76,12 @@ export async function POST(request: Request) {
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
 
-    // Generate unique slug
-    let slug = generateSlug(data.title)
+    // Generate unique slug with random suffix to avoid race conditions
+    const baseSlug = generateSlug(data.title)
+    let slug = baseSlug
     const existing = await prisma.listing.findUnique({ where: { slug } })
     if (existing) {
-      slug = `${slug}-${Date.now().toString(36)}`
+      slug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`
     }
 
     const listing = await prisma.listing.create({

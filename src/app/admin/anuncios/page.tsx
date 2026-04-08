@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic"
 
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { notFound } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -20,9 +22,13 @@ export default async function AdminAnunciosPage({
 }: {
   searchParams: Promise<{ status?: string }>
 }) {
+  const session = await auth()
+  if (session?.user?.role !== "ADMIN") notFound()
+
+  const VALID_STATUSES = ["DRAFT", "PENDING", "PUBLISHED", "REJECTED", "ARCHIVED"]
   const params = await searchParams
   const where: Record<string, unknown> = {}
-  if (params.status) where.status = params.status
+  if (params.status && VALID_STATUSES.includes(params.status)) where.status = params.status
 
   const listings = await prisma.listing.findMany({
     where,

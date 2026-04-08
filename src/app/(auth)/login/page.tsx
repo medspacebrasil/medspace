@@ -1,8 +1,9 @@
 "use client"
 
-import { useActionState } from "react"
+import { useState, type FormEvent } from "react"
+import { signIn } from "next-auth/react"
 import Link from "next/link"
-import { signInAction, type ActionState } from "../actions"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,10 +17,40 @@ import {
 } from "@/components/ui/card"
 
 export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    signInAction,
-    { success: false }
-  )
+  const router = useRouter()
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError("Email ou senha incorretos")
+      } else if (result?.ok) {
+        router.push("/painel")
+        router.refresh()
+      } else {
+        setError("Resposta inesperada do servidor")
+      }
+    } catch (err) {
+      setError(`Erro: ${err instanceof Error ? err.message : String(err)}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <Card className="border-border/50 shadow-lg">
@@ -27,16 +58,11 @@ export default function LoginPage() {
         <CardTitle className="text-2xl">Entrar</CardTitle>
         <CardDescription>Acesse sua conta para continuar</CardDescription>
       </CardHeader>
-      <form action={formAction}>
+      <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {state.errors?._form && (
+          {error && (
             <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-              {state.errors._form[0]}
-            </div>
-          )}
-          {state.errors?._debug && (
-            <div className="rounded-lg bg-yellow-100 p-3 text-xs text-yellow-800 break-all">
-              Debug: {state.errors._debug[0]}
+              {error}
             </div>
           )}
           <div className="space-y-2">
@@ -49,9 +75,6 @@ export default function LoginPage() {
               autoComplete="email"
               required
             />
-            {state.errors?.email && (
-              <p className="text-sm text-destructive">{state.errors.email[0]}</p>
-            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
@@ -63,20 +86,15 @@ export default function LoginPage() {
               autoComplete="current-password"
               required
             />
-            {state.errors?.password && (
-              <p className="text-sm text-destructive">
-                {state.errors.password[0]}
-              </p>
-            )}
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button
             type="submit"
             className="w-full bg-gold text-navy hover:bg-gold/90 font-semibold"
-            disabled={isPending}
+            disabled={loading}
           >
-            {isPending ? "Entrando..." : "Entrar"}
+            {loading ? "Entrando..." : "Entrar"}
           </Button>
           <p className="text-sm text-muted-foreground">
             Não tem conta?{" "}

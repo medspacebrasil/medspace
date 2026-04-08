@@ -9,9 +9,9 @@ export const createListingSchema = z.object({
     .string()
     .min(10, "Descrição deve ter no mínimo 10 caracteres")
     .max(300, "Descrição curta deve ter no máximo 300 caracteres"),
-  fullDescription: z.string().optional(),
-  city: z.string().min(2, "Cidade é obrigatória"),
-  neighborhood: z.string().min(2, "Bairro é obrigatório"),
+  fullDescription: z.string().max(5000, "Descrição completa muito longa").optional(),
+  city: z.string().min(2, "Cidade é obrigatória").max(100, "Nome da cidade muito longo"),
+  neighborhood: z.string().min(2, "Bairro é obrigatório").max(100, "Nome do bairro muito longo"),
   whatsapp: z
     .string()
     .regex(/^\d{10,11}$/, "WhatsApp deve ter 10 ou 11 dígitos"),

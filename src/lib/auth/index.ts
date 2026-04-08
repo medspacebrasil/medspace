@@ -45,7 +45,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub!
+        session.user.id = token.sub ?? ""
         session.user.role = token.role as string
         session.user.clinicId = token.clinicId as string | undefined
       }
@@ -58,4 +58,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
   },
+  trustHost: true,
 })

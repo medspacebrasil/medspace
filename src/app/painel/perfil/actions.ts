@@ -11,12 +11,12 @@ export type ActionState = {
 }
 
 const profileSchema = z.object({
-  name: z.string().min(2),
-  phone: z.string().optional(),
+  name: z.string().min(2).max(150),
+  phone: z.string().regex(/^\d{10,11}$/, "Telefone deve ter 10 ou 11 dígitos").optional().or(z.literal("")),
   whatsapp: z.string().regex(/^\d{10,11}$/),
-  city: z.string().min(2),
-  neighborhood: z.string().min(2),
-  description: z.string().optional(),
+  city: z.string().min(2).max(100),
+  neighborhood: z.string().min(2).max(100),
+  description: z.string().max(2000, "Descrição muito longa").optional(),
 })
 
 export async function updateProfile(

@@ -1,10 +1,15 @@
 export const dynamic = "force-dynamic"
 
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Building2, FileText, Clock, Users } from "lucide-react"
+import { notFound } from "next/navigation"
 
 export default async function AdminDashboard() {
+  const session = await auth()
+  if (session?.user?.role !== "ADMIN") notFound()
+
   const [clinicCount, listingCount, pendingCount, publishedCount] =
     await Promise.all([
       prisma.clinic.count(),

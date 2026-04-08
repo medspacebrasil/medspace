@@ -1,18 +1,24 @@
 export const dynamic = "force-dynamic"
 
+import { redirect, notFound } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { ProfileForm } from "./ProfileForm"
 
 export default async function PerfilPage() {
   const session = await auth()
+  if (!session?.user?.clinicId) {
+    redirect("/login")
+  }
 
   const clinic = await prisma.clinic.findUnique({
-    where: { id: session!.user.clinicId! },
+    where: { id: session.user.clinicId },
     include: { user: { select: { email: true, name: true } } },
   })
 
-  if (!clinic) return null
+  if (!clinic) {
+    notFound()
+  }
 
   return (
     <div>

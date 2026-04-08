@@ -16,7 +16,7 @@ export async function GET(_request: Request, context: RouteContext) {
       status: "PUBLISHED",
     },
     include: {
-      clinic: { select: { name: true, phone: true } },
+      clinic: { select: { name: true } },
       roomType: true,
       specialties: { include: { specialty: true } },
       equipment: { include: { equipment: true } },

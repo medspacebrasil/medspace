@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic"
 
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { notFound } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +10,9 @@ import { blockClinic } from "../actions"
 import { Ban } from "lucide-react"
 
 export default async function AdminClinicasPage() {
+  const session = await auth()
+  if (session?.user?.role !== "ADMIN") notFound()
+
   const clinics = await prisma.clinic.findMany({
     include: {
       user: { select: { email: true } },

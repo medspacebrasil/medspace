@@ -44,13 +44,15 @@ export function AdminSidebar() {
         })}
       </nav>
       <div className="absolute bottom-4 left-4 right-4">
-        <Link
-          href="/api/auth/signout"
-          className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-        >
-          <LogOut className="h-4 w-4" />
-          Sair
-        </Link>
+        <form action="/api/auth/signout" method="POST">
+          <button
+            type="submit"
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+            Sair
+          </button>
+        </form>
       </div>
     </aside>
   )
