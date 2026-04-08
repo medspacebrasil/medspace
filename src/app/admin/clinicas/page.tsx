@@ -15,8 +15,11 @@ export default async function AdminClinicasPage() {
 
   const clinics = await prisma.clinic.findMany({
     include: {
-      user: { select: { email: true } },
+      user: { select: { email: true, name: true } },
       _count: { select: { listings: true } },
+      listings: {
+        select: { status: true },
+      },
     },
     orderBy: { createdAt: "desc" },
   })
@@ -27,36 +30,51 @@ export default async function AdminClinicasPage() {
       <p className="text-muted-foreground">{clinics.length} clínica(s)</p>
 
       <div className="mt-6 space-y-3">
-        {clinics.map((clinic) => (
-          <Card key={clinic.id}>
-            <CardContent className="flex items-center justify-between gap-4 p-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-medium">{clinic.name}</h3>
-                  <Badge variant="outline">
+        {clinics.map((clinic) => {
+          const published = clinic.listings.filter((l) => l.status === "PUBLISHED").length
+          const pending = clinic.listings.filter((l) => l.status === "PENDING").length
+          const allArchived = clinic.listings.length > 0 && clinic.listings.every((l) => l.status === "ARCHIVED")
+
+          return (
+            <Card key={clinic.id}>
+              <CardContent className="flex items-center justify-between gap-4 p-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium">{clinic.name}</h3>
+                    {allArchived && (
+                      <Badge variant="destructive">Bloqueada</Badge>
+                    )}
+                    {published > 0 && (
+                      <Badge variant="success">{published} publicado(s)</Badge>
+                    )}
+                    {pending > 0 && (
+                      <Badge variant="warning">{pending} pendente(s)</Badge>
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {clinic.user.name} ({clinic.user.email}) &middot; {clinic.city},{" "}
+                    {clinic.neighborhood} &middot; WhatsApp: {clinic.whatsapp} &middot;{" "}
                     {clinic._count.listings} anúncio(s)
-                  </Badge>
+                  </p>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {clinic.user.email} &middot; {clinic.city},{" "}
-                  {clinic.neighborhood} &middot; WhatsApp: {clinic.whatsapp}
-                </p>
-              </div>
-              <form action={blockClinic}>
-                <input type="hidden" name="clinicId" value={clinic.id} />
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="destructive"
-                  className="gap-1"
-                >
-                  <Ban className="h-3.5 w-3.5" />
-                  Bloquear
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        ))}
+                {!allArchived && clinic._count.listings > 0 && (
+                  <form action={blockClinic}>
+                    <input type="hidden" name="clinicId" value={clinic.id} />
+                    <Button
+                      type="submit"
+                      size="sm"
+                      variant="destructive"
+                      className="gap-1"
+                    >
+                      <Ban className="h-3.5 w-3.5" />
+                      Bloquear
+                    </Button>
+                  </form>
+                )}
+              </CardContent>
+            </Card>
+          )
+        })}
         {clinics.length === 0 && (
           <p className="py-8 text-center text-muted-foreground">
             Nenhuma clínica cadastrada.

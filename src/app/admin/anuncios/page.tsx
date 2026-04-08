@@ -1,13 +1,14 @@
 export const dynamic = "force-dynamic"
 
+import Link from "next/link"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { notFound } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { approveListing, rejectListing, archiveListing } from "../actions"
-import { CheckCircle, XCircle, Archive } from "lucide-react"
+import { approveListing, rejectListing, archiveListing, unarchiveListing } from "../actions"
+import { CheckCircle, XCircle, Archive, RotateCcw, Pencil } from "lucide-react"
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "success" | "warning" | "destructive" | "outline" }> = {
   DRAFT: { label: "Rascunho", variant: "secondary" },
@@ -60,7 +61,7 @@ export default async function AdminAnunciosPage({
                   : "bg-muted text-muted-foreground hover:bg-accent"
               }`}
             >
-              {s || "Todos"}
+              {s ? statusConfig[s]?.label || s : "Todos"}
             </a>
           )
         )}
@@ -83,7 +84,13 @@ export default async function AdminAnunciosPage({
                     fotos
                   </p>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex items-center gap-1">
+                  <Link href={`/admin/anuncios/${listing.id}/editar`}>
+                    <Button size="sm" variant="outline" className="gap-1">
+                      <Pencil className="h-3.5 w-3.5" />
+                      Editar
+                    </Button>
+                  </Link>
                   {listing.status === "PENDING" && (
                     <>
                       <form action={approveListing}>
@@ -123,6 +130,20 @@ export default async function AdminAnunciosPage({
                       >
                         <Archive className="h-3.5 w-3.5" />
                         Arquivar
+                      </Button>
+                    </form>
+                  )}
+                  {(listing.status === "ARCHIVED" || listing.status === "REJECTED" || listing.status === "DRAFT") && (
+                    <form action={approveListing}>
+                      <input type="hidden" name="id" value={listing.id} />
+                      <Button
+                        type="submit"
+                        size="sm"
+                        variant="default"
+                        className="gap-1"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Publicar
                       </Button>
                     </form>
                   )}
