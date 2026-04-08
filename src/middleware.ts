@@ -2,67 +2,34 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 /**
- * Lightweight middleware that reads the Auth.js JWT session cookie
- * without importing the full auth config (which pulls in Prisma + bcrypt
- * and exceeds the 1MB Edge Function limit on Vercel Hobby).
+ * Lightweight middleware that checks for the Auth.js session cookie.
  *
- * We decode the JWT payload (base64url) to check login status and role.
- * The actual signature verification happens in auth() on server-side routes.
+ * Auth.js v5 uses encrypted JWTs (JWE) which cannot be decoded without
+ * the full auth library (too large for Edge). So we only check cookie
+ * presence here. Actual role/session verification happens server-side
+ * in auth() calls within page components.
  */
 
-function getSessionFromCookie(req: NextRequest) {
-  // Auth.js uses different cookie names based on environment
+function isLoggedIn(req: NextRequest): boolean {
   const secureCookie = req.cookies.get("__Secure-authjs.session-token")
   const devCookie = req.cookies.get("authjs.session-token")
-  const token = secureCookie?.value || devCookie?.value
-
-  if (!token) return null
-
-  try {
-    // JWT format: header.payload.signature — we only need the payload
-    const parts = token.split(".")
-    if (parts.length !== 3) return null
-
-    const payload = JSON.parse(
-      Buffer.from(parts[1], "base64url").toString("utf-8")
-    )
-
-    return {
-      user: {
-        role: payload.role as string | undefined,
-      },
-    }
-  } catch {
-    return null
-  }
+  return !!(secureCookie?.value || devCookie?.value)
 }
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
-  const session = getSessionFromCookie(req)
-  const isLoggedIn = !!session
-  const role = session?.user?.role
+  const loggedIn = isLoggedIn(req)
 
-  // Protected: /painel/* requires login
-  if (pathname.startsWith("/painel")) {
-    if (!isLoggedIn) {
+  // Protected: /painel/* and /admin/* require login
+  if (pathname.startsWith("/painel") || pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+    if (!loggedIn) {
       return NextResponse.redirect(new URL("/login", req.url))
-    }
-  }
-
-  // Protected: /admin/* requires ADMIN
-  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
-    if (!isLoggedIn) {
-      return NextResponse.redirect(new URL("/login", req.url))
-    }
-    if (role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
   }
 
   // Redirect logged-in users away from auth pages
   if (pathname.startsWith("/login") || pathname.startsWith("/cadastro")) {
-    if (isLoggedIn) {
+    if (loggedIn) {
       return NextResponse.redirect(new URL("/painel", req.url))
     }
   }
