@@ -60,15 +60,12 @@ export default async function HomePage() {
             priority
           />
           <h1 className="text-3xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
-            Encontre o espaço ideal para{" "}
-            <span className="text-gold">sua prática médica.</span>
+            Conectamos clínicas e médicos para{" "}
+            <span className="text-gold">sublocação de espaços e equipamentos médicos</span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-white/70">
-            Conectamos médicos a clínicas com salas e equipamentos disponíveis.
-            Sem burocracia, direto pelo WhatsApp.{" "}
-            <span className="font-medium text-white/90">
-              Rápido, seguro e 100% online.
-            </span>
+            Encontre salas, aparelhos e estruturas prontas para atender — direto
+            com a clínica, sem burocracia.
           </p>
 
           {/* Search bar */}

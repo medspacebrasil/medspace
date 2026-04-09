@@ -35,11 +35,11 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
               Encontrar Salas
             </Link>
             <Link
-              href="/#como-funciona"
+              href="/para-clinicas"
               onClick={() => setOpen(false)}
               className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/70 hover:bg-muted hover:text-foreground"
             >
-              Como Funciona
+              Para Clínicas
             </Link>
             {isLoggedIn ? (
               <Link href="/painel" onClick={() => setOpen(false)}>

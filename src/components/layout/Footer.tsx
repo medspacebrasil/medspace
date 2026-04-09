@@ -30,8 +30,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/cadastro" className="transition-colors hover:text-white">
-                  Anunciar Espaço
+                <Link href="/para-clinicas" className="transition-colors hover:text-white">
+                  Para Clínicas
                 </Link>
               </li>
             </ul>

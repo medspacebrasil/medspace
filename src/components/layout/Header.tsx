@@ -29,10 +29,10 @@ export async function Header() {
             Encontrar Salas
           </Link>
           <Link
-            href="/#como-funciona"
+            href="/para-clinicas"
             className="text-sm font-medium text-white/70 transition-colors hover:text-white"
           >
-            Como Funciona
+            Para Clínicas
           </Link>
           {session ? (
             <Link href="/painel">

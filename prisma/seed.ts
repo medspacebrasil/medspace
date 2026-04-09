@@ -30,6 +30,7 @@ async function main() {
     "Fisioterapia",
     "Nutrição",
     "Psicologia",
+    "Outros",
   ]
 
   for (const name of specialties) {
