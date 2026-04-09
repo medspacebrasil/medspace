@@ -218,7 +218,7 @@ export default function ParaClinicasPage() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10">
                 <ImagePlus className="h-6 w-6 text-gold" />
               </div>
-              <h3 className="mt-4 font-semibold">Fotos ilimitadas</h3>
+              <h3 className="mt-4 font-semibold">Galeria de fotos</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 Adicione até 10 fotos por anúncio para mostrar seus espaços.
               </p>

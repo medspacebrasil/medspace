@@ -213,7 +213,7 @@ export default async function HomePage() {
           <div className="container mx-auto">
             <div className="text-center">
               <h2 className="text-2xl font-bold md:text-3xl">
-                Especialidades Populares
+                Especialidades Médicas
               </h2>
               <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
                 Encontre espaços especializados para cada área médica.

@@ -27,8 +27,7 @@ async function main() {
     "Psiquiatria",
     "Urologia",
     "Odontologia",
-    "Fisioterapia",
-    "Nutrição",
+    "Nutrologia",
     "Psicologia",
     "Outros",
   ]
