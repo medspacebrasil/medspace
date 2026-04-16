@@ -18,7 +18,7 @@ export default async function EditarAnuncioPage({ params }: PageProps) {
     include: {
       specialties: true,
       equipment: true,
-      images: { orderBy: { order: "asc" } },
+      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }] },
     },
   })
 

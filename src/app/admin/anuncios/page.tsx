@@ -35,7 +35,7 @@ export default async function AdminAnunciosPage({
     where,
     include: {
       clinic: { select: { name: true } },
-      images: { orderBy: { order: "asc" }, take: 1 },
+      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
       _count: { select: { specialties: true, images: true } },
     },
     orderBy: [{ featured: "desc" }, { createdAt: "desc" }],

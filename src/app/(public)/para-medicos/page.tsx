@@ -35,7 +35,7 @@ export default async function ParaMedicosPage() {
         clinic: true,
         roomType: true,
         specialties: { include: { specialty: true } },
-        images: { orderBy: { order: "asc" }, take: 1 },
+        images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
       },
       orderBy: { createdAt: "desc" },
       take: 6,

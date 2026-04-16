@@ -37,7 +37,7 @@ export async function GET(request: Request) {
         specialties: {
           include: { specialty: { select: { name: true, slug: true } } },
         },
-        images: { orderBy: { order: "asc" }, take: 1 },
+        images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
       },
       orderBy: { createdAt: sort === "oldest" ? "asc" : "desc" },
       skip: (page - 1) * limit,

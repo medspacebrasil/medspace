@@ -3,16 +3,24 @@
 import { useState, useRef } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Upload, X, Loader2 } from "lucide-react"
+import { Upload, X, Loader2, Star } from "lucide-react"
+
+interface ListingImage {
+  id: string
+  url: string
+  order: number
+  isCover: boolean
+}
 
 interface ImageUploadProps {
   listingId: string
-  initialImages: { id: string; url: string; order: number }[]
+  initialImages: ListingImage[]
 }
 
 export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
-  const [images, setImages] = useState(initialImages)
+  const [images, setImages] = useState<ListingImage[]>(initialImages)
   const [uploading, setUploading] = useState(false)
+  const [settingCover, setSettingCover] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -42,7 +50,7 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
       const data = await res.json()
       setImages((prev) => [
         ...prev,
-        { id: data.id, url: data.url, order: prev.length },
+        { id: data.id, url: data.url, order: prev.length, isCover: false },
       ])
     } catch {
       setError("Erro de conexão ao fazer upload")
@@ -53,16 +61,44 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
   }
 
   async function handleRemove(imageId: string) {
-    // For now, just remove from UI. A proper DELETE endpoint could be added later.
     setImages((prev) => prev.filter((img) => img.id !== imageId))
+  }
+
+  async function handleSetCover(imageId: string) {
+    setSettingCover(imageId)
+    setError(null)
+    try {
+      const res = await fetch("/api/images/cover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageId }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error ?? "Erro ao definir capa")
+        return
+      }
+      setImages((prev) =>
+        prev.map((img) => ({ ...img, isCover: img.id === imageId }))
+      )
+    } catch {
+      setError("Erro de conexão ao definir capa")
+    } finally {
+      setSettingCover(null)
+    }
   }
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium">
-          Fotos ({images.length}/10)
-        </h3>
+        <div>
+          <h3 className="text-sm font-medium">Fotos ({images.length}/10)</h3>
+          {images.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Clique na estrela para definir a foto de capa
+            </p>
+          )}
+        </div>
         <Button
           type="button"
           variant="outline"
@@ -87,14 +123,17 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
         />
       </div>
 
-      {error && (
-        <p className="text-sm text-destructive">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       {images.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {images.map((img) => (
-            <div key={img.id} className="group relative aspect-square overflow-hidden rounded-md border">
+            <div
+              key={img.id}
+              className={`group relative aspect-square overflow-hidden rounded-md border-2 ${
+                img.isCover ? "border-gold" : "border-border"
+              }`}
+            >
               <Image
                 src={img.url}
                 alt="Foto do anúncio"
@@ -102,13 +141,39 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
                 className="object-cover"
                 sizes="(max-width: 768px) 50vw, 25vw"
               />
-              <button
-                type="button"
-                onClick={() => handleRemove(img.id)}
-                className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+              {img.isCover && (
+                <div className="absolute left-1 top-1 flex items-center gap-1 rounded-full bg-gold px-2 py-0.5 text-[10px] font-semibold text-navy shadow">
+                  <Star className="h-3 w-3 fill-current" />
+                  Capa
+                </div>
+              )}
+              <div className="absolute inset-0 flex items-end justify-center gap-1 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                  type="button"
+                  onClick={() => handleSetCover(img.id)}
+                  disabled={img.isCover || settingCover === img.id}
+                  title="Definir como capa"
+                  className="rounded-full bg-white/90 p-1.5 text-navy shadow hover:bg-white disabled:opacity-50"
+                >
+                  {settingCover === img.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Star
+                      className={`h-3.5 w-3.5 ${
+                        img.isCover ? "fill-gold text-gold" : ""
+                      }`}
+                    />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRemove(img.id)}
+                  title="Remover"
+                  className="rounded-full bg-white/90 p-1.5 text-destructive shadow hover:bg-white"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

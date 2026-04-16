@@ -60,7 +60,7 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
           clinic: true,
           roomType: true,
           specialties: { include: { specialty: true } },
-          images: { orderBy: { order: "asc" }, take: 1 },
+          images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
         },
         orderBy: {
           createdAt: params.sort === "oldest" ? "asc" : "desc",

@@ -20,7 +20,7 @@ export default async function AdminEditarAnuncioPage({ params }: PageProps) {
       clinic: { select: { name: true } },
       specialties: true,
       equipment: true,
-      images: { orderBy: { order: "asc" } },
+      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }] },
     },
   })
 

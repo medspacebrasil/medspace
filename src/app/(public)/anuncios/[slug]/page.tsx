@@ -19,7 +19,7 @@ export async function generateMetadata({
   const { slug } = await params
   const listing = await prisma.listing.findUnique({
     where: { slug, status: "PUBLISHED" },
-    include: { images: { orderBy: { order: "asc" }, take: 1 } },
+    include: { images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 } },
   })
 
   if (!listing) return { title: "Anúncio não encontrado" }
@@ -45,7 +45,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
       roomType: true,
       specialties: { include: { specialty: true } },
       equipment: { include: { equipment: true } },
-      images: { orderBy: { order: "asc" } },
+      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }] },
     },
   })
 

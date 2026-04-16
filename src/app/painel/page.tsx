@@ -34,7 +34,7 @@ export default async function PainelPage() {
   const listings = await prisma.listing.findMany({
     where: { clinicId: session.user.clinicId },
     include: {
-      images: { orderBy: { order: "asc" }, take: 1 },
+      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
       _count: { select: { images: true, specialties: true } },
     },
     orderBy: { updatedAt: "desc" },

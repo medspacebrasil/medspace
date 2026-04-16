@@ -97,6 +97,7 @@ model ListingImage {
   listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
   url       String
   order     Int      @default(0)
+  isCover   Boolean  @default(false) @map("is_cover")
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("listing_images")

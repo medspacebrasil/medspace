@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     include: {
       clinic: { select: { name: true } },
       roomType: { select: { name: true } },
-      images: { orderBy: { order: "asc" }, take: 1 },
+      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
     },
     orderBy: { createdAt: "desc" },
   })

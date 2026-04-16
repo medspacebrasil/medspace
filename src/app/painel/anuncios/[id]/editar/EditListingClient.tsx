@@ -21,7 +21,7 @@ interface Props {
     status: string
     specialties: { specialtyId: string }[]
     equipment: { equipmentId: string }[]
-    images: { id: string; url: string; order: number }[]
+    images: { id: string; url: string; order: number; isCover: boolean }[]
   }
   specialties: { id: string; name: string; slug: string }[]
   roomTypes: { id: string; name: string; slug: string }[]

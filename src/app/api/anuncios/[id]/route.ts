@@ -20,7 +20,7 @@ export async function GET(_request: Request, context: RouteContext) {
       roomType: true,
       specialties: { include: { specialty: true } },
       equipment: { include: { equipment: true } },
-      images: { orderBy: { order: "asc" } },
+      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }] },
     },
   })
 
