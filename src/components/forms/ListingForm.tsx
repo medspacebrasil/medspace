@@ -164,7 +164,7 @@ export function ListingForm({
           </div>
 
           <div className="space-y-2">
-            <Label>Especialidades atendidas</Label>
+            <Label>Especialidades disponíveis</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {specialties.map((s) => (
                 <label key={s.id} className="flex items-center gap-2 text-sm">
@@ -187,7 +187,7 @@ export function ListingForm({
           </div>
 
           <div className="space-y-2">
-            <Label>Equipamentos disponíveis</Label>
+            <Label>Recursos disponíveis</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {equipment.map((eq) => (
                 <label key={eq.id} className="flex items-center gap-2 text-sm">

@@ -1,9 +1,9 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useState, type ChangeEvent } from "react"
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react"
 import { Button } from "@/components/ui/button"
-import { Search, X } from "lucide-react"
+import { Search, X, ChevronDown, Check } from "lucide-react"
 
 interface FilterOption {
   id: string
@@ -27,6 +27,12 @@ export function ListingFilters({
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedState, setSelectedState] = useState(searchParams.get("state") ?? "")
+  const [equipmentOpen, setEquipmentOpen] = useState(false)
+  const equipmentRef = useRef<HTMLDivElement>(null)
+
+  const selectedEquipment = (searchParams.get("equipment") ?? "")
+    .split(",")
+    .filter(Boolean)
 
   const citiesForState = states.find((s) => s.state === selectedState)?.cities ?? []
 
@@ -44,6 +50,16 @@ export function ListingFilters({
     [router, searchParams]
   )
 
+  const toggleEquipment = useCallback(
+    (slug: string) => {
+      const next = selectedEquipment.includes(slug)
+        ? selectedEquipment.filter((s) => s !== slug)
+        : [...selectedEquipment, slug]
+      updateFilter("equipment", next.join(","))
+    },
+    [selectedEquipment, updateFilter]
+  )
+
   const clearFilters = useCallback(() => {
     setSelectedState("")
     router.push("/anuncios")
@@ -54,6 +70,24 @@ export function ListingFilters({
   const handleChange = (key: string) => (e: ChangeEvent<HTMLSelectElement>) => {
     updateFilter(key, e.target.value)
   }
+
+  useEffect(() => {
+    if (!equipmentOpen) return
+    const onClick = (e: MouseEvent) => {
+      if (equipmentRef.current && !equipmentRef.current.contains(e.target as Node)) {
+        setEquipmentOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [equipmentOpen])
+
+  const equipmentLabel =
+    selectedEquipment.length === 0
+      ? "Recursos disponíveis"
+      : selectedEquipment.length === 1
+        ? equipment.find((eq) => eq.slug === selectedEquipment[0])?.name ?? "1 selecionado"
+        : `${selectedEquipment.length} selecionados`
 
   return (
     <div className="space-y-4 rounded-xl border border-border/50 bg-white p-4 shadow-sm">
@@ -135,18 +169,52 @@ export function ListingFilters({
           ))}
         </select>
 
-        <select
-          value={searchParams.get("equipment") ?? ""}
-          onChange={handleChange("equipment")}
-          className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
-        >
-          <option value="">Todos os equipamentos</option>
-          {equipment.map((eq) => (
-            <option key={eq.id} value={eq.slug}>
-              {eq.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative" ref={equipmentRef}>
+          <button
+            type="button"
+            onClick={() => setEquipmentOpen((o) => !o)}
+            className="flex h-10 w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
+          >
+            <span className={selectedEquipment.length === 0 ? "text-muted-foreground" : ""}>
+              {equipmentLabel}
+            </span>
+            <ChevronDown className="h-4 w-4 opacity-60" />
+          </button>
+          {equipmentOpen && (
+            <div className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-border bg-white shadow-lg">
+              {selectedEquipment.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => updateFilter("equipment", "")}
+                  className="flex w-full items-center gap-2 border-b border-border/50 px-3 py-2 text-left text-sm text-destructive hover:bg-muted"
+                >
+                  <X className="h-3 w-3" />
+                  Limpar seleção
+                </button>
+              )}
+              {equipment.map((eq) => {
+                const checked = selectedEquipment.includes(eq.slug)
+                return (
+                  <button
+                    key={eq.id}
+                    type="button"
+                    onClick={() => toggleEquipment(eq.slug)}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+                  >
+                    <span
+                      className={`flex h-4 w-4 items-center justify-center rounded border ${
+                        checked ? "border-gold bg-gold text-navy" : "border-input bg-background"
+                      }`}
+                    >
+                      {checked && <Check className="h-3 w-3" />}
+                    </span>
+                    {eq.name}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

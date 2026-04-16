@@ -169,14 +169,14 @@ export default async function HomePage() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             <div className="rounded-2xl bg-white/5 p-6 text-center backdrop-blur-sm">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/20">
-                <Shield className="h-7 w-7 text-gold" />
+                <MessageCircle className="h-7 w-7 text-gold" />
               </div>
               <h3 className="mt-5 text-lg font-semibold text-white">
-                Profissionais verificados
+                Sem intermediários
               </h3>
               <p className="mt-2 text-sm text-white/60">
-                Todas as clínicas passam por verificação antes de publicar anúncios
-                na plataforma.
+                Conecte-se diretamente com a clínica e negocie com total
+                autonomia.
               </p>
             </div>
             <div className="rounded-2xl bg-white/5 p-6 text-center backdrop-blur-sm">
@@ -184,11 +184,10 @@ export default async function HomePage() {
                 <Clock className="h-7 w-7 text-gold" />
               </div>
               <h3 className="mt-5 text-lg font-semibold text-white">
-                Contato direto e rápido
+                Contato rápido
               </h3>
               <p className="mt-2 text-sm text-white/60">
-                Sem intermediários. Fale direto com a clínica pelo WhatsApp e
-                feche em minutos.
+                Agilidade no contato para você começar a atender sem demora.
               </p>
             </div>
             <div className="rounded-2xl bg-white/5 p-6 text-center backdrop-blur-sm">
@@ -332,16 +331,6 @@ export default async function HomePage() {
                   Crie uma conta como clínica, preencha os dados do seu espaço,
                   adicione fotos e publique. Após a verificação pela nossa
                   equipe, seu anúncio ficará visível para milhares de médicos.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-5" className="border-border/50">
-                <AccordionTrigger>
-                  Os espaços são verificados?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  Sim. Todos os anúncios passam por uma verificação da nossa
-                  equipe antes de serem publicados, garantindo a qualidade e
-                  veracidade das informações.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-6" className="border-border/50">

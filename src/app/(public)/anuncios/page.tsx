@@ -44,8 +44,11 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
     where.roomType = { slug: params.roomType }
   }
   if (params.equipment) {
-    where.equipment = {
-      some: { equipment: { slug: params.equipment } },
+    const equipmentSlugs = params.equipment.split(",").filter(Boolean)
+    if (equipmentSlugs.length > 0) {
+      where.AND = equipmentSlugs.map((slug) => ({
+        equipment: { some: { equipment: { slug } } },
+      }))
     }
   }
 

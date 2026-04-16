@@ -82,7 +82,9 @@ export default function ParaClinicasPage() {
         <div className="container mx-auto">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-2xl font-bold md:text-3xl">
-              Você tem estrutura sobrando. Médicos precisam dela.
+              Você tem estrutura sobrando?
+              <br />
+              Médicos precisam dela.
             </h2>
             <p className="mt-4 text-muted-foreground">
               Muitas clínicas possuem salas e equipamentos que ficam ociosos em

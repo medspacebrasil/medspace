@@ -26,11 +26,33 @@ async function main() {
     "Pediatria",
     "Psiquiatria",
     "Urologia",
-    "Odontologia",
     "Nutrologia",
-    "Psicologia",
-    "Outros",
+    "Pneumologia",
+    "Reumatologia",
+    "Radiologia e Diagnóstico por Imagem",
+    "Genética Médica",
+    "Ginecologia e Obstetrícia",
+    "Clínica Médica",
+    "Mastologia",
+    "Nefrologia",
+    "Hematologia",
+    "Infectologia",
+    "Geriatria",
+    "Alergia e Imunologia",
+    "Oncologia",
+    "Cirurgia Geral",
+    "Cirurgia Plástica",
+    "Cirurgia Vascular",
+    "Medicina do Trabalho",
+    "Medicina Esportiva",
+    "Medicina de Família e Comunidade",
+    "Anestesiologia",
   ]
+
+  // Remove deprecated specialties
+  await prisma.specialty.deleteMany({
+    where: { slug: { in: ["odontologia", "psicologia", "outros"] } },
+  })
 
   for (const name of specialties) {
     const slug = name
@@ -69,23 +91,41 @@ async function main() {
   }
   console.log(`  ✓ ${roomTypes.length} room types`)
 
-  // Equipment
+  // Equipment (recursos disponíveis nas clínicas - amenities)
   const equipmentItems = [
-    "Maca",
-    "Cadeira odontológica",
-    "Autoclave",
-    "Negatoscópio",
-    "Ultrassom",
-    "Eletrocardiógrafo",
-    "Dermatoscópio",
-    "Oftalmoscópio",
-    "Otoscópio",
-    "Balança digital",
-    "Ar condicionado",
-    "Wi-Fi",
+    "Estacionamento no local (gratuito)",
+    "Estacionamento no local (pago)",
     "Recepcionista",
-    "Estacionamento",
+    "Manobrista",
+    "Prontuário eletrônico",
+    "Computador",
+    "Wi-Fi",
+    "Impressora",
+    "Maca",
+    "Poltrona de estética",
   ]
+
+  // Remove deprecated equipment items (replaced or moved to separate "Aparelhos" catalog)
+  await prisma.equipment.deleteMany({
+    where: {
+      slug: {
+        in: [
+          "cadeira-odontologica",
+          "autoclave",
+          "negatoscopio",
+          "ultrassom",
+          "eletrocardiografo",
+          "dermatoscopio",
+          "oftalmoscopio",
+          "otoscopio",
+          "balanca-digital",
+          "ar-condicionado",
+          "bioimpedancia",
+          "estacionamento",
+        ],
+      },
+    },
+  })
 
   for (const name of equipmentItems) {
     const slug = name
