@@ -32,7 +32,10 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
   const limit = 20
 
   // Build where clause
-  const where: Record<string, unknown> = { status: "PUBLISHED" as const }
+  const where: Record<string, unknown> = {
+    status: "PUBLISHED" as const,
+    type: "CLINIC" as const,
+  }
   if (params.state) where.state = params.state
   if (params.city) where.city = params.city
   if (params.specialty) {
@@ -73,7 +76,7 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
       prisma.roomType.findMany({ orderBy: { name: "asc" } }),
       prisma.equipment.findMany({ orderBy: { name: "asc" } }),
       prisma.listing.findMany({
-        where: { status: "PUBLISHED" },
+        where: { status: "PUBLISHED", type: "CLINIC" },
         select: { city: true, state: true },
         distinct: ["city", "state"],
         orderBy: { city: "asc" },

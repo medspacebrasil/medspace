@@ -19,6 +19,8 @@ import {
   Stethoscope,
   MessageCircle,
   ArrowRight,
+  Wrench,
+  Building2,
 } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -30,7 +32,7 @@ export const metadata: Metadata = {
 export default async function ParaMedicosPage() {
   const [featuredListings, specialties, cities] = await Promise.all([
     prisma.listing.findMany({
-      where: { status: "PUBLISHED", featured: true },
+      where: { status: "PUBLISHED", type: "CLINIC", featured: true },
       include: {
         clinic: true,
         roomType: true,
@@ -42,7 +44,7 @@ export default async function ParaMedicosPage() {
     }),
     prisma.specialty.findMany({ orderBy: { name: "asc" }, take: 8 }),
     prisma.listing.findMany({
-      where: { status: "PUBLISHED" },
+      where: { status: "PUBLISHED", type: "CLINIC" },
       select: { city: true, state: true },
       distinct: ["city", "state"],
     }),
@@ -85,6 +87,44 @@ export default async function ParaMedicosPage() {
               .sort((a, b) => a.state.localeCompare(b.state))}
             specialties={specialties.map((s) => ({ slug: s.slug, name: s.name }))}
           />
+        </div>
+      </section>
+
+      {/* Quick access: Salas / Aparelhos */}
+      <section className="px-4 py-12">
+        <div className="container mx-auto">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Link
+              href="/anuncios"
+              className="group flex items-center gap-4 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-md"
+            >
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gold/10 transition-colors group-hover:bg-gold/20">
+                <Building2 className="h-7 w-7 text-gold" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold">Salas e consultórios</h3>
+                <p className="text-sm text-muted-foreground">
+                  Espaços equipados para atender seus pacientes.
+                </p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-gold transition-transform group-hover:translate-x-1" />
+            </Link>
+            <Link
+              href="/aparelhos"
+              className="group flex items-center gap-4 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-md"
+            >
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gold/10 transition-colors group-hover:bg-gold/20">
+                <Wrench className="h-7 w-7 text-gold" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold">Aparelhos médicos</h3>
+                <p className="text-sm text-muted-foreground">
+                  Aparelhos disponíveis para locação direto com a clínica.
+                </p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-gold transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
         </div>
       </section>
 

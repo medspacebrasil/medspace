@@ -105,6 +105,35 @@ async function main() {
     "Poltrona de estética",
   ]
 
+  // Equipment Categories (aparelhos médicos - Listing.type = EQUIPMENT)
+  const equipmentCategories = [
+    "Autoclave",
+    "Ultrassom",
+    "Eletrocardiógrafo",
+    "Dermatoscópio",
+    "Oftalmoscópio",
+    "Otoscópio",
+    "Negatoscópio",
+    "Balança digital",
+    "Bioimpedância",
+    "Cadeira odontológica",
+    "Outros",
+  ]
+
+  for (const name of equipmentCategories) {
+    const slug = name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-")
+    await prisma.equipmentCategory.upsert({
+      where: { slug },
+      update: {},
+      create: { name, slug },
+    })
+  }
+  console.log(`  ✓ ${equipmentCategories.length} equipment categories`)
+
   // Remove deprecated equipment items (replaced or moved to separate "Aparelhos" catalog)
   await prisma.equipment.deleteMany({
     where: {

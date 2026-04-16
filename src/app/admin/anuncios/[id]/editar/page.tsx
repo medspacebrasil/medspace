@@ -26,6 +26,11 @@ export default async function AdminEditarAnuncioPage({ params }: PageProps) {
 
   if (!listing) notFound()
 
+  if (listing.type === "EQUIPMENT") {
+    // Admin edit for equipment isn't implemented yet — moderate from list view.
+    notFound()
+  }
+
   const [specialties, roomTypes, equipmentList] = await Promise.all([
     prisma.specialty.findMany({ orderBy: { name: "asc" } }),
     prisma.roomType.findMany({ orderBy: { name: "asc" } }),

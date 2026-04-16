@@ -62,10 +62,22 @@ enum ListingStatus {
   ARCHIVED
 }
 
+enum ListingType {
+  CLINIC
+  EQUIPMENT
+}
+
+enum EquipmentCondition {
+  NOVO
+  SEMINOVO
+  USADO
+}
+
 model Listing {
   id              String             @id @default(cuid())
   clinicId        String             @map("clinic_id")
   clinic          Clinic             @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  type            ListingType        @default(CLINIC)
   title           String
   slug            String             @unique
   description     String             @db.VarChar(300)
@@ -78,6 +90,14 @@ model Listing {
   whatsapp        String
   status          ListingStatus      @default(DRAFT)
   featured        Boolean            @default(false)
+
+  // Equipment-only fields (type = EQUIPMENT)
+  equipmentCategoryId String?            @map("equipment_category_id")
+  equipmentCategory   EquipmentCategory? @relation(fields: [equipmentCategoryId], references: [id])
+  brand               String?
+  model               String?
+  condition           EquipmentCondition?
+
   images          ListingImage[]
   specialties     ListingSpecialty[]
   equipment       ListingEquipment[]
@@ -88,7 +108,18 @@ model Listing {
   @@index([neighborhood])
   @@index([status])
   @@index([clinicId])
+  @@index([type])
   @@map("listings")
+}
+
+// Categorias de aparelhos médicos (usado quando Listing.type = EQUIPMENT)
+model EquipmentCategory {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  listings Listing[]
+
+  @@map("equipment_categories")
 }
 
 model ListingImage {

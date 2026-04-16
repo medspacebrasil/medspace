@@ -46,7 +46,14 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
               onClick={() => setOpen(false)}
               className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/70 hover:bg-muted hover:text-foreground"
             >
-              Encontrar Salas
+              Salas
+            </Link>
+            <Link
+              href="/aparelhos"
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/70 hover:bg-muted hover:text-foreground"
+            >
+              Aparelhos
             </Link>
             {isLoggedIn ? (
               <Link href="/painel" onClick={() => setOpen(false)}>

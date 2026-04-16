@@ -6,7 +6,7 @@ import type { Metadata } from "next"
 import { prisma } from "@/lib/db"
 import { Badge } from "@/components/ui/badge"
 import { WhatsAppButton } from "@/components/anuncios/WhatsAppButton"
-import { MapPin, Building2, Phone } from "lucide-react"
+import { MapPin, Wrench, Phone } from "lucide-react"
 import { formatPhone } from "@/lib/utils"
 
 interface PageProps {
@@ -18,11 +18,13 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const listing = await prisma.listing.findFirst({
-    where: { slug, status: "PUBLISHED", type: "CLINIC" },
-    include: { images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 } },
+    where: { slug, status: "PUBLISHED", type: "EQUIPMENT" },
+    include: {
+      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
+    },
   })
 
-  if (!listing) return { title: "Anúncio não encontrado" }
+  if (!listing) return { title: "Aparelho não encontrado" }
 
   return {
     title: listing.title,
@@ -35,28 +37,39 @@ export async function generateMetadata({
   }
 }
 
-export default async function ListingDetailPage({ params }: PageProps) {
+function conditionLabel(c: string | null) {
+  switch (c) {
+    case "NOVO":
+      return "Novo"
+    case "SEMINOVO":
+      return "Seminovo"
+    case "USADO":
+      return "Usado"
+    default:
+      return null
+  }
+}
+
+export default async function AparelhoDetailPage({ params }: PageProps) {
   const { slug } = await params
 
   const listing = await prisma.listing.findFirst({
-    where: { slug, status: "PUBLISHED", type: "CLINIC" },
+    where: { slug, status: "PUBLISHED", type: "EQUIPMENT" },
     include: {
       clinic: true,
-      roomType: true,
-      specialties: { include: { specialty: true } },
-      equipment: { include: { equipment: true } },
+      equipmentCategory: true,
       images: { orderBy: [{ isCover: "desc" }, { order: "asc" }] },
     },
   })
 
   if (!listing) notFound()
 
+  const condLabel = conditionLabel(listing.condition)
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Main content */}
         <div className="lg:col-span-2">
-          {/* Image gallery */}
           {listing.images.length > 0 ? (
             <div className="grid gap-2">
               <div className="relative aspect-video overflow-hidden rounded-lg">
@@ -89,32 +102,26 @@ export default async function ListingDetailPage({ params }: PageProps) {
             </div>
           ) : (
             <div className="flex aspect-video items-center justify-center rounded-lg bg-muted">
-              <Building2 className="h-16 w-16 text-muted-foreground/50" />
+              <Wrench className="h-16 w-16 text-muted-foreground/50" />
             </div>
           )}
 
-          <h1 className="mt-6 text-2xl font-bold md:text-3xl">
-            {listing.title}
-          </h1>
+          <h1 className="mt-6 text-2xl font-bold md:text-3xl">{listing.title}</h1>
 
           <div className="mt-2 flex items-center gap-2 text-muted-foreground">
             <MapPin className="h-4 w-4" />
             {listing.neighborhood}, {listing.city}
           </div>
 
-          {/* Tags */}
           <div className="mt-4 flex flex-wrap gap-2">
-            {listing.roomType && (
-              <Badge variant="secondary">{listing.roomType.name}</Badge>
+            {listing.equipmentCategory && (
+              <Badge variant="secondary">{listing.equipmentCategory.name}</Badge>
             )}
-            {listing.specialties.map((ls) => (
-              <Badge key={ls.specialtyId} variant="outline">
-                {ls.specialty.name}
-              </Badge>
-            ))}
+            {condLabel && <Badge variant="outline">{condLabel}</Badge>}
+            {listing.brand && <Badge variant="outline">{listing.brand}</Badge>}
+            {listing.model && <Badge variant="outline">{listing.model}</Badge>}
           </div>
 
-          {/* Description */}
           <div className="mt-6">
             <h2 className="text-lg font-semibold">Descrição</h2>
             <p className="mt-2 text-muted-foreground">{listing.description}</p>
@@ -124,23 +131,8 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
             )}
           </div>
-
-          {/* Equipment */}
-          {listing.equipment.length > 0 && (
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold">Equipamentos Disponíveis</h2>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {listing.equipment.map((le) => (
-                  <Badge key={le.equipmentId} variant="outline">
-                    {le.equipment.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Sidebar - contact */}
         <div className="lg:col-span-1">
           <div className="sticky top-20 space-y-4 rounded-lg border bg-card p-6">
             <h3 className="font-semibold">{listing.clinic.name}</h3>
@@ -152,7 +144,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
             )}
             <WhatsAppButton phone={listing.whatsapp} />
             <p className="text-center text-xs text-muted-foreground">
-              Contato direto com a clínica via WhatsApp
+              Contato direto via WhatsApp
             </p>
           </div>
         </div>

@@ -38,7 +38,13 @@ export async function Header() {
             href="/anuncios"
             className="text-sm font-medium text-white/70 transition-colors hover:text-white"
           >
-            Encontrar Salas
+            Salas
+          </Link>
+          <Link
+            href="/aparelhos"
+            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+          >
+            Aparelhos
           </Link>
           {session ? (
             <Link href="/painel">

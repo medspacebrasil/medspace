@@ -5,11 +5,24 @@ import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { PlusCircle, FileText, Eye, Clock } from "lucide-react"
+import {
+  PlusCircle,
+  FileText,
+  Eye,
+  Clock,
+  Building2,
+  Wrench,
+} from "lucide-react"
 
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "success" | "warning" | "destructive" | "outline" }> = {
+const statusLabels: Record<
+  string,
+  {
+    label: string
+    variant: "default" | "secondary" | "success" | "warning" | "destructive" | "outline"
+  }
+> = {
   DRAFT: { label: "Rascunho", variant: "secondary" },
   PENDING: { label: "Pendente", variant: "warning" },
   PUBLISHED: { label: "Publicado", variant: "success" },
@@ -23,7 +36,6 @@ export default async function PainelPage() {
     redirect("/login")
   }
 
-  // Admin users may not have a clinicId
   if (!session.user.clinicId) {
     if (session.user.role === "ADMIN") {
       redirect("/admin")
@@ -40,6 +52,9 @@ export default async function PainelPage() {
     orderBy: { updatedAt: "desc" },
   })
 
+  const clinicListings = listings.filter((l) => l.type === "CLINIC")
+  const equipmentListings = listings.filter((l) => l.type === "EQUIPMENT")
+
   const counts = {
     total: listings.length,
     published: listings.filter((l) => l.status === "PUBLISHED").length,
@@ -49,19 +64,11 @@ export default async function PainelPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Meus Anúncios</h1>
-          <p className="text-muted-foreground">
-            Gerencie os anúncios da sua clínica
-          </p>
-        </div>
-        <Link href="/painel/anuncios/novo">
-          <Button className="gap-2">
-            <PlusCircle className="h-4 w-4" />
-            Novo Anúncio
-          </Button>
-        </Link>
+      <div>
+        <h1 className="text-2xl font-bold">Meus Anúncios</h1>
+        <p className="text-muted-foreground">
+          Gerencie anúncios de clínicas e de aparelhos
+        </p>
       </div>
 
       {/* Stats */}
@@ -104,52 +111,116 @@ export default async function PainelPage() {
         </Card>
       </div>
 
-      {/* Listings table */}
-      <div className="mt-8">
-        {listings.length === 0 ? (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <p className="text-muted-foreground">
-                Você ainda não criou nenhum anúncio.
-              </p>
-              <Link href="/painel/anuncios/novo">
-                <Button className="mt-4 gap-2">
-                  <PlusCircle className="h-4 w-4" />
-                  Criar Primeiro Anúncio
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {listings.map((listing) => {
-              const status = statusLabels[listing.status]
-              return (
-                <Card key={listing.id}>
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{listing.title}</h3>
-                        <Badge variant={status.variant}>{status.label}</Badge>
-                      </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {listing.city}, {listing.neighborhood} &middot;{" "}
-                        {listing._count.images} fotos &middot;{" "}
-                        {listing._count.specialties} especialidades
-                      </p>
-                    </div>
-                    <Link href={`/painel/anuncios/${listing.id}/editar`}>
-                      <Button variant="outline" size="sm">
-                        Editar
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              )
-            })}
+      {/* Clínicas */}
+      <section className="mt-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-gold" />
+            <h2 className="text-lg font-bold">Clínicas</h2>
+            <Badge variant="secondary">{clinicListings.length}</Badge>
           </div>
-        )}
-      </div>
+          <Link href="/painel/anuncios/novo">
+            <Button size="sm" className="gap-2">
+              <PlusCircle className="h-4 w-4" />
+              Novo Anúncio de Clínica
+            </Button>
+          </Link>
+        </div>
+        <div className="mt-4">
+          {clinicListings.length === 0 ? (
+            <Card>
+              <CardContent className="py-10 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Nenhum anúncio de clínica ainda.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {clinicListings.map((listing) => {
+                const status = statusLabels[listing.status]
+                return (
+                  <Card key={listing.id}>
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium">{listing.title}</h3>
+                          <Badge variant={status.variant}>{status.label}</Badge>
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {listing.city}, {listing.neighborhood} &middot;{" "}
+                          {listing._count.images} fotos &middot;{" "}
+                          {listing._count.specialties} especialidades
+                        </p>
+                      </div>
+                      <Link href={`/painel/anuncios/${listing.id}/editar`}>
+                        <Button variant="outline" size="sm">
+                          Editar
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Aparelhos */}
+      <section className="mt-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Wrench className="h-5 w-5 text-gold" />
+            <h2 className="text-lg font-bold">Aparelhos</h2>
+            <Badge variant="secondary">{equipmentListings.length}</Badge>
+          </div>
+          <Link href="/painel/aparelhos/novo">
+            <Button size="sm" className="gap-2">
+              <PlusCircle className="h-4 w-4" />
+              Novo Aparelho
+            </Button>
+          </Link>
+        </div>
+        <div className="mt-4">
+          {equipmentListings.length === 0 ? (
+            <Card>
+              <CardContent className="py-10 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Nenhum aparelho anunciado ainda.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {equipmentListings.map((listing) => {
+                const status = statusLabels[listing.status]
+                return (
+                  <Card key={listing.id}>
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium">{listing.title}</h3>
+                          <Badge variant={status.variant}>{status.label}</Badge>
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {listing.city}, {listing.neighborhood} &middot;{" "}
+                          {listing._count.images} fotos
+                        </p>
+                      </div>
+                      <Link href={`/painel/aparelhos/${listing.id}/editar`}>
+                        <Button variant="outline" size="sm">
+                          Editar
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   )
 }
