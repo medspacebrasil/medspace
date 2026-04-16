@@ -139,6 +139,7 @@ export async function adminUpdateListing(formData: FormData) {
   const neighborhood = formData.get("neighborhood") as string
   const whatsapp = formData.get("whatsapp") as string
   const roomTypeId = formData.get("roomTypeId") as string | null
+  const customSpecialties = formData.get("customSpecialties") as string | null
   const specialtyIds = formData.getAll("specialtyIds") as string[]
   const equipmentIds = formData.getAll("equipmentIds") as string[]
 
@@ -153,6 +154,7 @@ export async function adminUpdateListing(formData: FormData) {
       neighborhood,
       whatsapp,
       roomTypeId: roomTypeId || null,
+      customSpecialties: customSpecialties || null,
       specialties: {
         deleteMany: {},
         create: specialtyIds.map((sid) => ({ specialtyId: sid })),

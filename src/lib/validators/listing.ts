@@ -19,6 +19,10 @@ export const createListingSchema = z.object({
   roomTypeId: z.string().optional(),
   specialtyIds: z.array(z.string()).min(1, "Selecione ao menos 1 especialidade"),
   equipmentIds: z.array(z.string()).default([]),
+  customSpecialties: z
+    .string()
+    .max(500, "Especialidades adicionais muito longas")
+    .optional(),
 })
 
 export const updateListingSchema = createListingSchema.partial()

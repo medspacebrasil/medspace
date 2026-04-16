@@ -112,6 +112,15 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 {ls.specialty.name}
               </Badge>
             ))}
+            {listing.customSpecialties
+              ?.split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+              .map((s) => (
+                <Badge key={s} variant="outline">
+                  {s}
+                </Badge>
+              ))}
           </div>
 
           {/* Description */}

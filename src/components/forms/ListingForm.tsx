@@ -31,6 +31,7 @@ interface ListingFormProps {
     roomTypeId: string
     specialtyIds: string[]
     equipmentIds: string[]
+    customSpecialties?: string
   }
   specialties?: FilterOption[]
   roomTypes?: FilterOption[]
@@ -182,6 +183,27 @@ export function ListingForm({
             {state.errors?.specialtyIds && (
               <p className="text-sm text-destructive">
                 {state.errors.specialtyIds[0]}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="customSpecialties">
+              Outras especialidades (opcional)
+            </Label>
+            <Input
+              id="customSpecialties"
+              name="customSpecialties"
+              defaultValue={defaultValues?.customSpecialties}
+              placeholder="Separe por vírgula: Mastologia, Medicina Preventiva..."
+              maxLength={500}
+            />
+            <p className="text-xs text-muted-foreground">
+              Use para adicionar especialidades que não estão na lista acima.
+            </p>
+            {state.errors?.customSpecialties && (
+              <p className="text-sm text-destructive">
+                {state.errors.customSpecialties[0]}
               </p>
             )}
           </div>

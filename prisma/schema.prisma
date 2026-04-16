@@ -91,6 +91,9 @@ model Listing {
   status          ListingStatus      @default(DRAFT)
   featured        Boolean            @default(false)
 
+  // Free-text extra specialties that aren't in the taxonomy (clinic listings)
+  customSpecialties String? @map("custom_specialties")
+
   // Equipment-only fields (type = EQUIPMENT)
   equipmentCategoryId String?            @map("equipment_category_id")
   equipmentCategory   EquipmentCategory? @relation(fields: [equipmentCategoryId], references: [id])

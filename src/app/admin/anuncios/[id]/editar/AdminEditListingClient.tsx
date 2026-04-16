@@ -30,9 +30,10 @@ interface Props {
     whatsapp: string
     roomTypeId: string | null
     status: string
+    customSpecialties: string | null
     specialties: { specialtyId: string }[]
     equipment: { equipmentId: string }[]
-    images: { id: string; url: string; order: number }[]
+    images: { id: string; url: string; order: number; isCover: boolean }[]
   }
   clinicName: string
   specialties: FilterOption[]
@@ -166,6 +167,19 @@ export function AdminEditListingClient({
                   ))}
                 </Select>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="customSpecialties">
+                Outras especialidades (opcional)
+              </Label>
+              <Input
+                id="customSpecialties"
+                name="customSpecialties"
+                defaultValue={listing.customSpecialties ?? ""}
+                placeholder="Separe por vírgula"
+                maxLength={500}
+              />
             </div>
 
             <div className="space-y-2">

@@ -19,6 +19,7 @@ interface Props {
     whatsapp: string
     roomTypeId: string | null
     status: string
+    customSpecialties: string | null
     specialties: { specialtyId: string }[]
     equipment: { equipmentId: string }[]
     images: { id: string; url: string; order: number; isCover: boolean }[]
@@ -110,6 +111,7 @@ export function EditListingClient({
             roomTypeId: listing.roomTypeId ?? "",
             specialtyIds: listing.specialties.map((s) => s.specialtyId),
             equipmentIds: listing.equipment.map((e) => e.equipmentId),
+            customSpecialties: listing.customSpecialties ?? "",
           }}
           specialties={specialties}
           roomTypes={roomTypes}
