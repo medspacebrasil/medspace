@@ -23,16 +23,22 @@ export async function Header() {
 
         <nav className="hidden items-center gap-8 md:flex">
           <Link
-            href="/anuncios"
+            href="/para-medicos"
             className="text-sm font-medium text-white/70 transition-colors hover:text-white"
           >
-            Encontrar Salas
+            Para Médicos
           </Link>
           <Link
             href="/para-clinicas"
             className="text-sm font-medium text-white/70 transition-colors hover:text-white"
           >
             Para Clínicas
+          </Link>
+          <Link
+            href="/anuncios"
+            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+          >
+            Encontrar Salas
           </Link>
           {session ? (
             <Link href="/painel">

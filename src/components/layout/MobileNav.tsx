@@ -28,11 +28,11 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
         <div id="mobile-nav" className="absolute left-0 right-0 top-[4.5rem] z-50 border-b bg-white p-4 shadow-lg">
           <nav className="flex flex-col gap-3">
             <Link
-              href="/anuncios"
+              href="/para-medicos"
               onClick={() => setOpen(false)}
               className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/70 hover:bg-muted hover:text-foreground"
             >
-              Encontrar Salas
+              Para Médicos
             </Link>
             <Link
               href="/para-clinicas"
@@ -40,6 +40,13 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
               className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/70 hover:bg-muted hover:text-foreground"
             >
               Para Clínicas
+            </Link>
+            <Link
+              href="/anuncios"
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/70 hover:bg-muted hover:text-foreground"
+            >
+              Encontrar Salas
             </Link>
             {isLoggedIn ? (
               <Link href="/painel" onClick={() => setOpen(false)}>
