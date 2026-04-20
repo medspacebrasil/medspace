@@ -432,8 +432,7 @@ export default function ParaClinicasPage() {
               </Button>
             </Link>
             <p className="mt-3 text-xs text-muted-foreground">
-              Gratuito para sempre &middot; Sem cartão de crédito &middot; Comece
-              agora
+              Gratuito &middot; Sem cartão de crédito &middot; Comece agora
             </p>
           </div>
         </div>
