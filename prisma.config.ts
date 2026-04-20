@@ -12,9 +12,4 @@ export default defineConfig({
   migrations: {
     seed: "tsx prisma/seed.ts",
   },
-  migrate: {
-    async url() {
-      return process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? ""
-    },
-  },
 })
