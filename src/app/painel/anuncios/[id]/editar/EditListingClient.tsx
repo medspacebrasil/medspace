@@ -15,6 +15,7 @@ interface Props {
     description: string
     fullDescription: string | null
     city: string
+    state: string
     neighborhood: string
     whatsapp: string
     roomTypeId: string | null
@@ -107,6 +108,7 @@ export function EditListingClient({
             description: listing.description,
             fullDescription: listing.fullDescription ?? "",
             city: listing.city,
+            state: listing.state,
             neighborhood: listing.neighborhood,
             whatsapp: listing.whatsapp,
             roomTypeId: listing.roomTypeId ?? "",

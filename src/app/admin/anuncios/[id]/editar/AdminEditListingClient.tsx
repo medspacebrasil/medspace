@@ -26,6 +26,7 @@ interface Props {
     description: string
     fullDescription: string | null
     city: string
+    state: string
     neighborhood: string
     whatsapp: string
     roomTypeId: string | null
@@ -141,6 +142,7 @@ export function AdminEditListingClient({
             <CepInput
               defaultCity={listing.city}
               defaultNeighborhood={listing.neighborhood}
+              defaultState={listing.state}
             />
 
             <div className="grid gap-4 sm:grid-cols-2">

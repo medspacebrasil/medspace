@@ -26,6 +26,7 @@ interface ListingFormProps {
     description: string
     fullDescription: string
     city: string
+    state?: string
     neighborhood: string
     whatsapp: string
     roomTypeId: string
@@ -124,6 +125,7 @@ export function ListingForm({
           <CepInput
             defaultCity={defaultValues?.city}
             defaultNeighborhood={defaultValues?.neighborhood}
+            defaultState={defaultValues?.state}
           />
           {state.errors?.city && (
             <p className="text-sm text-destructive">{state.errors.city[0]}</p>
