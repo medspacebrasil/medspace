@@ -35,6 +35,7 @@ export async function createListing(
       specialtyIds: formData.getAll("specialtyIds"),
       equipmentIds: formData.getAll("equipmentIds"),
       customSpecialties: formData.get("customSpecialties") || undefined,
+      customEquipment: formData.get("customEquipment") || undefined,
     }
 
     const parsed = createListingSchema.safeParse(raw)
@@ -109,6 +110,7 @@ export async function updateListing(
         ? formData.getAll("equipmentIds")
         : undefined,
       customSpecialties: formData.get("customSpecialties") ?? undefined,
+      customEquipment: formData.get("customEquipment") ?? undefined,
     }
 
     const parsed = updateListingSchema.safeParse(raw)

@@ -23,6 +23,10 @@ export const createListingSchema = z.object({
     .string()
     .max(500, "Especialidades adicionais muito longas")
     .optional(),
+  customEquipment: z
+    .string()
+    .max(500, "Recursos adicionais muito longos")
+    .optional(),
 })
 
 export const updateListingSchema = createListingSchema.partial()

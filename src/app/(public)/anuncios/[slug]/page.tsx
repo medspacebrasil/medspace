@@ -134,16 +134,25 @@ export default async function ListingDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Equipment */}
-          {listing.equipment.length > 0 && (
+          {/* Equipment + custom resources */}
+          {(listing.equipment.length > 0 || listing.customEquipment) && (
             <div className="mt-6">
-              <h2 className="text-lg font-semibold">Equipamentos Disponíveis</h2>
+              <h2 className="text-lg font-semibold">Recursos Disponíveis</h2>
               <div className="mt-2 flex flex-wrap gap-2">
                 {listing.equipment.map((le) => (
                   <Badge key={le.equipmentId} variant="outline">
                     {le.equipment.name}
                   </Badge>
                 ))}
+                {listing.customEquipment
+                  ?.split(",")
+                  .map((e) => e.trim())
+                  .filter(Boolean)
+                  .map((e) => (
+                    <Badge key={e} variant="outline">
+                      {e}
+                    </Badge>
+                  ))}
               </div>
             </div>
           )}

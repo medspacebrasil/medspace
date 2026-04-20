@@ -20,6 +20,7 @@ interface Props {
     roomTypeId: string | null
     status: string
     customSpecialties: string | null
+    customEquipment: string | null
     specialties: { specialtyId: string }[]
     equipment: { equipmentId: string }[]
     images: { id: string; url: string; order: number; isCover: boolean }[]
@@ -112,6 +113,7 @@ export function EditListingClient({
             specialtyIds: listing.specialties.map((s) => s.specialtyId),
             equipmentIds: listing.equipment.map((e) => e.equipmentId),
             customSpecialties: listing.customSpecialties ?? "",
+            customEquipment: listing.customEquipment ?? "",
           }}
           specialties={specialties}
           roomTypes={roomTypes}

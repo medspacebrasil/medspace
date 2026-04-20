@@ -32,6 +32,7 @@ interface ListingFormProps {
     specialtyIds: string[]
     equipmentIds: string[]
     customSpecialties?: string
+    customEquipment?: string
   }
   specialties?: FilterOption[]
   roomTypes?: FilterOption[]
@@ -224,6 +225,27 @@ export function ListingForm({
                 </label>
               ))}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="customEquipment">
+              Outros recursos (opcional)
+            </Label>
+            <Input
+              id="customEquipment"
+              name="customEquipment"
+              defaultValue={defaultValues?.customEquipment}
+              placeholder="Separe por vírgula: Ar condicionado, Cafeteria, Sala de espera..."
+              maxLength={500}
+            />
+            <p className="text-xs text-muted-foreground">
+              Use para adicionar recursos que não estão na lista acima.
+            </p>
+            {state.errors?.customEquipment && (
+              <p className="text-sm text-destructive">
+                {state.errors.customEquipment[0]}
+              </p>
+            )}
           </div>
 
           <Button type="submit" className="w-full" disabled={isPending}>

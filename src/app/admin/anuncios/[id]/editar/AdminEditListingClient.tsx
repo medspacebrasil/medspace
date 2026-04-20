@@ -31,6 +31,7 @@ interface Props {
     roomTypeId: string | null
     status: string
     customSpecialties: string | null
+    customEquipment: string | null
     specialties: { specialtyId: string }[]
     equipment: { equipmentId: string }[]
     images: { id: string; url: string; order: number; isCover: boolean }[]
@@ -203,7 +204,7 @@ export function AdminEditListingClient({
             </div>
 
             <div className="space-y-2">
-              <Label>Equipamentos</Label>
+              <Label>Recursos</Label>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {equipment.map((eq) => (
                   <label key={eq.id} className="flex items-center gap-2 text-sm">
@@ -220,6 +221,19 @@ export function AdminEditListingClient({
                   </label>
                 ))}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="customEquipment">
+                Outros recursos (opcional)
+              </Label>
+              <Input
+                id="customEquipment"
+                name="customEquipment"
+                defaultValue={listing.customEquipment ?? ""}
+                placeholder="Separe por vírgula"
+                maxLength={500}
+              />
             </div>
 
             <Button type="submit" className="w-full gap-2" disabled={saving}>
