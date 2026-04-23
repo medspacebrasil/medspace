@@ -9,7 +9,9 @@ const MAX_IMAGES_PER_LISTING = 10
 
 export async function POST(request: Request) {
   const session = await auth()
-  if (!session?.user?.clinicId) {
+  const isAdmin = session?.user?.role === "ADMIN"
+
+  if (!session?.user || (!isAdmin && !session.user.clinicId)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -36,13 +38,20 @@ export async function POST(request: Request) {
       )
     }
 
+    // Resolve the clinic id used for the storage path
+    let storageClinicId = session.user.clinicId ?? null
+
     if (listingId) {
       const listing = await prisma.listing.findUnique({
         where: { id: listingId },
         select: { clinicId: true, _count: { select: { images: true } } },
       })
 
-      if (!listing || listing.clinicId !== session.user.clinicId) {
+      if (!listing) {
+        return NextResponse.json({ error: "Listing not found" }, { status: 404 })
+      }
+
+      if (!isAdmin && listing.clinicId !== session.user.clinicId) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 })
       }
 
@@ -52,6 +61,16 @@ export async function POST(request: Request) {
           { status: 400 }
         )
       }
+
+      // Admin uploading on behalf of a clinic: use that clinic's id for storage path
+      storageClinicId = listing.clinicId
+    }
+
+    if (!storageClinicId) {
+      return NextResponse.json(
+        { error: "Listing is required for admin uploads" },
+        { status: 400 }
+      )
     }
 
     const MIME_TO_EXT: Record<string, string> = {
@@ -60,7 +79,7 @@ export async function POST(request: Request) {
       "image/webp": "webp",
     }
     const ext = MIME_TO_EXT[file.type] ?? "jpg"
-    const fileName = `${session.user.clinicId}/${crypto.randomUUID()}.${ext}`
+    const fileName = `${storageClinicId}/${crypto.randomUUID()}.${ext}`
     const buffer = Buffer.from(await file.arrayBuffer())
 
     const supabase = getSupabaseAdmin()

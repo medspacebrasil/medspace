@@ -4,7 +4,9 @@ import { prisma } from "@/lib/db"
 
 export async function POST(request: Request) {
   const session = await auth()
-  if (!session?.user?.clinicId) {
+  const isAdmin = session?.user?.role === "ADMIN"
+
+  if (!session?.user || (!isAdmin && !session.user.clinicId)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -18,7 +20,7 @@ export async function POST(request: Request) {
     include: { listing: { select: { clinicId: true } } },
   })
 
-  if (!image || image.listing.clinicId !== session.user.clinicId) {
+  if (!image || (!isAdmin && image.listing.clinicId !== session.user.clinicId)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
