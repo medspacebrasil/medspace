@@ -25,6 +25,7 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
   const [images, setImages] = useState<ListingImage[]>(initialImages)
   const [uploading, setUploading] = useState(false)
   const [settingCover, setSettingCover] = useState<string | null>(null)
+  const [removing, setRemoving] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -82,7 +83,32 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
   }
 
   async function handleRemove(imageId: string) {
-    setImages((prev) => prev.filter((img) => img.id !== imageId))
+    if (!confirm("Remover esta foto?")) return
+
+    setRemoving(imageId)
+    setError(null)
+    try {
+      const res = await fetch(`/api/images/${imageId}`, { method: "DELETE" })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error ?? "Erro ao remover foto")
+        return
+      }
+      setImages((prev) => {
+        const removed = prev.find((i) => i.id === imageId)
+        const next = prev.filter((img) => img.id !== imageId)
+        // Mirror the server-side cover promotion
+        if (removed?.isCover && next.length > 0) {
+          const first = [...next].sort((a, b) => a.order - b.order)[0]
+          return next.map((i) => ({ ...i, isCover: i.id === first.id }))
+        }
+        return next
+      })
+    } catch {
+      setError("Erro de conexão ao remover foto")
+    } finally {
+      setRemoving(null)
+    }
   }
 
   async function handleSetCover(imageId: string) {
@@ -194,10 +220,15 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
                 <button
                   type="button"
                   onClick={() => handleRemove(img.id)}
+                  disabled={removing === img.id}
                   title="Remover"
-                  className="rounded-full bg-white/90 p-1.5 text-destructive shadow hover:bg-white"
+                  className="rounded-full bg-white/90 p-1.5 text-destructive shadow hover:bg-white disabled:opacity-50"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  {removing === img.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <X className="h-3.5 w-3.5" />
+                  )}
                 </button>
               </div>
             </div>
