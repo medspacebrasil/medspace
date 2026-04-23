@@ -5,6 +5,10 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Upload, X, Loader2, Star } from "lucide-react"
 
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"]
+const MAX_SIZE_BYTES = 5 * 1024 * 1024
+const MAX_IMAGES = 10
+
 interface ListingImage {
   id: string
   url: string
@@ -28,6 +32,23 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
     const file = e.target.files?.[0]
     if (!file) return
 
+    // Client-side validation for faster feedback
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setError(
+        "Formato não aceito. Envie um arquivo JPEG, PNG ou WebP."
+      )
+      if (inputRef.current) inputRef.current.value = ""
+      return
+    }
+    if (file.size > MAX_SIZE_BYTES) {
+      const sizeMb = (file.size / 1024 / 1024).toFixed(1)
+      setError(
+        `Arquivo muito grande (${sizeMb}MB). O tamanho máximo é 5MB.`
+      )
+      if (inputRef.current) inputRef.current.value = ""
+      return
+    }
+
     setUploading(true)
     setError(null)
 
@@ -42,7 +63,7 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
       })
 
       if (!res.ok) {
-        const data = await res.json()
+        const data = await res.json().catch(() => ({}))
         setError(data.error ?? "Erro ao fazer upload")
         return
       }
@@ -90,9 +111,14 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-medium">Fotos ({images.length}/10)</h3>
+          <h3 className="text-sm font-medium">
+            Fotos ({images.length}/{MAX_IMAGES})
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Formatos: JPEG, PNG ou WebP · Máximo 5MB por foto
+          </p>
           {images.length > 0 && (
             <p className="text-xs text-muted-foreground">
               Clique na estrela para definir a foto de capa
@@ -104,7 +130,7 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
           variant="outline"
           size="sm"
           onClick={() => inputRef.current?.click()}
-          disabled={uploading || images.length >= 10}
+          disabled={uploading || images.length >= MAX_IMAGES}
           className="gap-2"
         >
           {uploading ? (

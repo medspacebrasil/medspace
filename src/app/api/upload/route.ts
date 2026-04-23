@@ -21,19 +21,23 @@ export async function POST(request: Request) {
     const listingId = formData.get("listingId") as string | null
 
     if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Nenhum arquivo enviado" },
+        { status: 400 }
+      )
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: "Invalid file type. Allowed: JPEG, PNG, WebP" },
+        { error: "Formato não aceito. Envie um arquivo JPEG, PNG ou WebP." },
         { status: 400 }
       )
     }
 
     if (file.size > MAX_SIZE) {
+      const sizeMb = (file.size / 1024 / 1024).toFixed(1)
       return NextResponse.json(
-        { error: "File too large. Maximum: 5MB" },
+        { error: `Arquivo muito grande (${sizeMb}MB). O tamanho máximo é 5MB.` },
         { status: 413 }
       )
     }
@@ -57,7 +61,9 @@ export async function POST(request: Request) {
 
       if (listing._count.images >= MAX_IMAGES_PER_LISTING) {
         return NextResponse.json(
-          { error: `Maximum ${MAX_IMAGES_PER_LISTING} images per listing` },
+          {
+            error: `Limite de ${MAX_IMAGES_PER_LISTING} fotos por anúncio atingido.`,
+          },
           { status: 400 }
         )
       }
