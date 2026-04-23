@@ -173,19 +173,6 @@ export function AdminEditListingClient({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="customSpecialties">
-                Outras especialidades (opcional)
-              </Label>
-              <Input
-                id="customSpecialties"
-                name="customSpecialties"
-                defaultValue={listing.customSpecialties ?? ""}
-                placeholder="Separe por vírgula"
-                maxLength={500}
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label>Especialidades</Label>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {specialties.map((s) => (
@@ -203,6 +190,22 @@ export function AdminEditListingClient({
                   </label>
                 ))}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="customSpecialties">
+                Outras especialidades (opcional)
+              </Label>
+              <Input
+                id="customSpecialties"
+                name="customSpecialties"
+                defaultValue={listing.customSpecialties ?? ""}
+                placeholder="Separe por vírgula"
+                maxLength={500}
+              />
+              <p className="text-xs text-muted-foreground">
+                Use para adicionar especialidades que não estão na lista acima.
+              </p>
             </div>
 
             <div className="space-y-2">
