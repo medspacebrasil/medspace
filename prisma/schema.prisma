@@ -90,6 +90,8 @@ model Listing {
   whatsapp        String
   status          ListingStatus      @default(DRAFT)
   featured        Boolean            @default(false)
+  reviewedAt      DateTime?          @map("reviewed_at")
+  requiresRqe     Boolean            @default(false) @map("requires_rqe")
 
   // Free-text extra specialties that aren't in the taxonomy (clinic listings)
   customSpecialties String? @map("custom_specialties")

@@ -36,6 +36,7 @@ export async function createListing(
       equipmentIds: formData.getAll("equipmentIds"),
       customSpecialties: formData.get("customSpecialties") || undefined,
       customEquipment: formData.get("customEquipment") || undefined,
+      requiresRqe: formData.get("requiresRqe") === "true",
     }
 
     const parsed = createListingSchema.safeParse(raw)
@@ -55,7 +56,7 @@ export async function createListing(
         ...data,
         slug,
         type: "CLINIC",
-        status: "PENDING",
+        status: "PUBLISHED",
         clinicId: session.user.clinicId,
         specialties: {
           create: specialtyIds.map((id) => ({ specialtyId: id })),
@@ -67,7 +68,8 @@ export async function createListing(
     })
 
     revalidatePath("/painel")
-    redirect(`/painel/anuncios/${listing.id}/editar`)
+    revalidatePath("/anuncios")
+    redirect(`/painel/anuncios/${listing.id}/editar?created=1`)
   } catch (error) {
     if (isRedirectError(error)) throw error
     return { success: false, errors: { _form: ["Erro ao criar anúncio"] } }
@@ -111,6 +113,7 @@ export async function updateListing(
         : undefined,
       customSpecialties: formData.get("customSpecialties") ?? undefined,
       customEquipment: formData.get("customEquipment") ?? undefined,
+      requiresRqe: formData.get("requiresRqe") === "true",
     }
 
     const parsed = updateListingSchema.safeParse(raw)
@@ -191,10 +194,10 @@ export async function publishListing(
     return { success: false, errors: { _form: ["Anúncio não encontrado"] } }
   }
 
-  if (listing.status !== "DRAFT" && listing.status !== "REJECTED") {
+  if (listing.status === "PUBLISHED") {
     return {
       success: false,
-      errors: { _form: ["Apenas rascunhos ou anúncios rejeitados podem ser enviados para revisão"] },
+      errors: { _form: ["Este anúncio já está publicado"] },
     }
   }
 
@@ -214,9 +217,10 @@ export async function publishListing(
 
   await prisma.listing.update({
     where: { id },
-    data: { status: "PENDING" },
+    data: { status: "PUBLISHED" },
   })
 
   revalidatePath("/painel")
+  revalidatePath("/anuncios")
   return { success: true }
 }

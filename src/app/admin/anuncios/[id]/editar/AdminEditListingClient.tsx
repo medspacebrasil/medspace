@@ -33,6 +33,7 @@ interface Props {
     status: string
     customSpecialties: string | null
     customEquipment: string | null
+    requiresRqe: boolean
     specialties: { specialtyId: string }[]
     equipment: { equipmentId: string }[]
     images: { id: string; url: string; order: number; isCover: boolean }[]
@@ -239,6 +240,19 @@ export function AdminEditListingClient({
                 placeholder="Separe por vírgula"
                 maxLength={500}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm font-normal">
+                <input
+                  type="checkbox"
+                  name="requiresRqe"
+                  value="true"
+                  defaultChecked={listing.requiresRqe}
+                  className="rounded"
+                />
+                Exige RQE (Registro de Qualificação de Especialista)
+              </Label>
             </div>
 
             <Button type="submit" className="w-full gap-2" disabled={saving}>

@@ -107,6 +107,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
             {listing.roomType && (
               <Badge variant="secondary">{listing.roomType.name}</Badge>
             )}
+            {listing.requiresRqe && (
+              <Badge className="border-amber-300 bg-amber-100 text-amber-900">
+                Exige RQE
+              </Badge>
+            )}
             {listing.specialties.map((ls) => (
               <Badge key={ls.specialtyId} variant="outline">
                 {ls.specialty.name}

@@ -27,6 +27,7 @@ export const createListingSchema = z.object({
     .string()
     .max(500, "Recursos adicionais muito longos")
     .optional(),
+  requiresRqe: z.coerce.boolean().optional().default(false),
 })
 
 export const updateListingSchema = createListingSchema.partial()

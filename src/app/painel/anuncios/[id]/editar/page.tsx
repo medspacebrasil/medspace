@@ -7,10 +7,15 @@ import { EditListingClient } from "./EditListingClient"
 
 interface PageProps {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ created?: string }>
 }
 
-export default async function EditarAnuncioPage({ params }: PageProps) {
+export default async function EditarAnuncioPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { id } = await params
+  const sp = await searchParams
   const session = await auth()
 
   const listing = await prisma.listing.findUnique({
@@ -35,6 +40,8 @@ export default async function EditarAnuncioPage({ params }: PageProps) {
   return (
     <EditListingClient
       listing={listing}
+      slug={listing.slug}
+      justCreated={sp.created === "1"}
       specialties={specialties}
       roomTypes={roomTypes}
       equipment={equipmentList}

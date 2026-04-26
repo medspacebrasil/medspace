@@ -7,8 +7,9 @@ import { notFound } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { approveListing, rejectListing, archiveListing, unarchiveListing, toggleFeatured } from "../actions"
-import { CheckCircle, XCircle, Archive, RotateCcw, Pencil, Star } from "lucide-react"
+import { approveListing, rejectListing, archiveListing, toggleFeatured, markReviewed } from "../actions"
+import { DeleteListingButton } from "@/components/anuncios/DeleteListingButton"
+import { CheckCircle, XCircle, Archive, RotateCcw, Pencil, Star, Eye } from "lucide-react"
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "success" | "warning" | "destructive" | "outline" }> = {
   DRAFT: { label: "Rascunho", variant: "secondary" },
@@ -21,7 +22,7 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
 export default async function AdminAnunciosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>
+  searchParams: Promise<{ status?: string; review?: string }>
 }) {
   const session = await auth()
   if (session?.user?.role !== "ADMIN") notFound()
@@ -30,6 +31,7 @@ export default async function AdminAnunciosPage({
   const params = await searchParams
   const where: Record<string, unknown> = {}
   if (params.status && VALID_STATUSES.includes(params.status)) where.status = params.status
+  if (params.review === "pending") where.reviewedAt = null
 
   const listings = await prisma.listing.findMany({
     where,
@@ -56,7 +58,7 @@ export default async function AdminAnunciosPage({
               key={s}
               href={s ? `/admin/anuncios?status=${s}` : "/admin/anuncios"}
               className={`rounded-md px-3 py-1 text-sm ${
-                (params.status ?? "") === s
+                (params.status ?? "") === s && !params.review
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-accent"
               }`}
@@ -65,6 +67,16 @@ export default async function AdminAnunciosPage({
             </a>
           )
         )}
+        <a
+          href="/admin/anuncios?review=pending"
+          className={`rounded-md px-3 py-1 text-sm ${
+            params.review === "pending"
+              ? "bg-amber-500 text-white"
+              : "bg-amber-100 text-amber-800 hover:bg-amber-200"
+          }`}
+        >
+          Não revisados
+        </a>
       </div>
 
       <div className="mt-6 space-y-3">
@@ -74,9 +86,14 @@ export default async function AdminAnunciosPage({
             <Card key={listing.id}>
               <CardContent className="flex items-center justify-between gap-4 p-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-medium">{listing.title}</h3>
                     <Badge variant={cfg.variant}>{cfg.label}</Badge>
+                    {!listing.reviewedAt && (
+                      <Badge variant="warning" className="border-amber-300 bg-amber-100 text-amber-800">
+                        Não revisado
+                      </Badge>
+                    )}
                     {listing.featured && <Badge variant="default" className="bg-gold text-navy">Destaque</Badge>}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -85,7 +102,7 @@ export default async function AdminAnunciosPage({
                     fotos
                   </p>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex flex-wrap items-center justify-end gap-1">
                   <form action={toggleFeatured}>
                     <input type="hidden" name="id" value={listing.id} />
                     <Button
@@ -98,6 +115,21 @@ export default async function AdminAnunciosPage({
                       <Star className={`h-3.5 w-3.5 ${listing.featured ? "fill-current" : ""}`} />
                     </Button>
                   </form>
+                  {!listing.reviewedAt && (
+                    <form action={markReviewed}>
+                      <input type="hidden" name="id" value={listing.id} />
+                      <Button
+                        type="submit"
+                        size="sm"
+                        variant="outline"
+                        className="gap-1"
+                        title="Marcar como revisado"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        Revisado
+                      </Button>
+                    </form>
+                  )}
                   <Link href={`/admin/anuncios/${listing.id}/editar`}>
                     <Button size="sm" variant="outline" className="gap-1">
                       <Pencil className="h-3.5 w-3.5" />
@@ -160,6 +192,7 @@ export default async function AdminAnunciosPage({
                       </Button>
                     </form>
                   )}
+                  <DeleteListingButton id={listing.id} title={listing.title} />
                 </div>
               </CardContent>
             </Card>

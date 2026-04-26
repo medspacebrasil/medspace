@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 
@@ -109,6 +110,32 @@ export async function blockClinic(formData: FormData) {
   revalidatePath("/anuncios")
 }
 
+export async function markReviewed(formData: FormData) {
+  await requireAdmin()
+  const id = formData.get("id") as string
+  if (!id) throw new Error("ID não fornecido")
+
+  await prisma.listing.update({
+    where: { id },
+    data: { reviewedAt: new Date() },
+  })
+
+  revalidatePath("/admin/anuncios")
+}
+
+export async function deleteListingPermanent(formData: FormData) {
+  await requireAdmin()
+  const id = formData.get("id") as string
+  if (!id) throw new Error("ID não fornecido")
+
+  // Cascading delete handles images, listing_specialties, listing_equipment
+  await prisma.listing.delete({ where: { id } })
+
+  revalidatePath("/admin/anuncios")
+  revalidatePath("/anuncios")
+  redirect("/admin/anuncios")
+}
+
 export async function toggleFeatured(formData: FormData) {
   await requireAdmin()
   const id = formData.get("id") as string
@@ -141,6 +168,7 @@ export async function adminUpdateListing(formData: FormData) {
   const roomTypeId = formData.get("roomTypeId") as string | null
   const customSpecialties = formData.get("customSpecialties") as string | null
   const customEquipment = formData.get("customEquipment") as string | null
+  const requiresRqe = formData.get("requiresRqe") === "true"
   const specialtyIds = formData.getAll("specialtyIds") as string[]
   const equipmentIds = formData.getAll("equipmentIds") as string[]
 
@@ -157,6 +185,8 @@ export async function adminUpdateListing(formData: FormData) {
       roomTypeId: roomTypeId || null,
       customSpecialties: customSpecialties || null,
       customEquipment: customEquipment || null,
+      requiresRqe,
+      reviewedAt: new Date(),
       specialties: {
         deleteMany: {},
         create: specialtyIds.map((sid) => ({ specialtyId: sid })),

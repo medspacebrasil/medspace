@@ -34,6 +34,7 @@ interface ListingFormProps {
     equipmentIds: string[]
     customSpecialties?: string
     customEquipment?: string
+    requiresRqe?: boolean
   }
   specialties?: FilterOption[]
   roomTypes?: FilterOption[]
@@ -248,6 +249,23 @@ export function ListingForm({
                 {state.errors.customEquipment[0]}
               </p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-sm font-normal">
+              <input
+                type="checkbox"
+                name="requiresRqe"
+                value="true"
+                defaultChecked={defaultValues?.requiresRqe ?? false}
+                className="rounded"
+              />
+              Exige RQE (Registro de Qualificação de Especialista)
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Marque se a clínica exige que o médico tenha RQE na especialidade
+              atendida.
+            </p>
           </div>
 
           <Button type="submit" className="w-full" disabled={isPending}>
