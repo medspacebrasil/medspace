@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidateTag } from "next/cache"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { getSupabaseAdmin } from "@/lib/supabase/client"
@@ -123,6 +124,8 @@ export async function POST(request: Request) {
         },
       })
     }
+
+    if (listingId) revalidateTag("listings")
 
     return NextResponse.json(
       { url: publicUrl, id: imageRecord?.id },

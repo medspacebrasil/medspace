@@ -1,7 +1,12 @@
-export const dynamic = "force-dynamic"
-
 import { Suspense } from "react"
-import { prisma } from "@/lib/db"
+import {
+  getCachedClinicListingsCount,
+  getCachedClinicListingsPage,
+  getCachedEquipment,
+  getCachedPublishedClinicCities,
+  getCachedRoomTypes,
+  getCachedSpecialties,
+} from "@/lib/cache"
 import { ListingCard } from "@/components/anuncios/ListingCard"
 import { ListingFilters } from "@/components/anuncios/ListingFilters"
 import { Button } from "@/components/ui/button"
@@ -55,32 +60,16 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
     }
   }
 
+  const sort: "recent" | "oldest" = params.sort === "oldest" ? "oldest" : "recent"
+
   const [listings, total, specialties, roomTypes, equipmentList, cities] =
     await Promise.all([
-      prisma.listing.findMany({
-        where,
-        include: {
-          clinic: true,
-          roomType: true,
-          specialties: { include: { specialty: true } },
-          images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
-        },
-        orderBy: {
-          createdAt: params.sort === "oldest" ? "asc" : "desc",
-        },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      prisma.listing.count({ where }),
-      prisma.specialty.findMany({ orderBy: { name: "asc" } }),
-      prisma.roomType.findMany({ orderBy: { name: "asc" } }),
-      prisma.equipment.findMany({ orderBy: { name: "asc" } }),
-      prisma.listing.findMany({
-        where: { status: "PUBLISHED", type: "CLINIC" },
-        select: { city: true, state: true },
-        distinct: ["city", "state"],
-        orderBy: { city: "asc" },
-      }),
+      getCachedClinicListingsPage(where, sort, (page - 1) * limit, limit),
+      getCachedClinicListingsCount(where),
+      getCachedSpecialties(),
+      getCachedRoomTypes(),
+      getCachedEquipment(),
+      getCachedPublishedClinicCities(),
     ])
 
   const totalPages = Math.ceil(total / limit)

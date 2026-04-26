@@ -9,7 +9,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { prisma } from "@/lib/db"
+import {
+  getCachedFeaturedClinicListings,
+  getCachedTopSpecialties,
+  getCachedPublishedClinicCities,
+} from "@/lib/cache"
 import { ListingCard } from "@/components/anuncios/ListingCard"
 import { HeroSearch } from "@/components/home/HeroSearch"
 import Image from "next/image"
@@ -31,23 +35,9 @@ export const metadata: Metadata = {
 
 export default async function ParaMedicosPage() {
   const [featuredListings, specialties, cities] = await Promise.all([
-    prisma.listing.findMany({
-      where: { status: "PUBLISHED", type: "CLINIC", featured: true },
-      include: {
-        clinic: true,
-        roomType: true,
-        specialties: { include: { specialty: true } },
-        images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-    }),
-    prisma.specialty.findMany({ orderBy: { name: "asc" }, take: 8 }),
-    prisma.listing.findMany({
-      where: { status: "PUBLISHED", type: "CLINIC" },
-      select: { city: true, state: true },
-      distinct: ["city", "state"],
-    }),
+    getCachedFeaturedClinicListings(6),
+    getCachedTopSpecialties(8),
+    getCachedPublishedClinicCities(),
   ])
 
   return (

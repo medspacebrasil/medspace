@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/db"
+import { getCachedClinicListingBySlug } from "@/lib/cache"
 import { Badge } from "@/components/ui/badge"
 import { WhatsAppButton } from "@/components/anuncios/WhatsAppButton"
 import { MapPin, Building2, Phone } from "lucide-react"
@@ -38,16 +39,7 @@ export async function generateMetadata({
 export default async function ListingDetailPage({ params }: PageProps) {
   const { slug } = await params
 
-  const listing = await prisma.listing.findFirst({
-    where: { slug, status: "PUBLISHED", type: "CLINIC" },
-    include: {
-      clinic: true,
-      roomType: true,
-      specialties: { include: { specialty: true } },
-      equipment: { include: { equipment: true } },
-      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }] },
-    },
-  })
+  const listing = await getCachedClinicListingBySlug(slug)
 
   if (!listing) notFound()
 

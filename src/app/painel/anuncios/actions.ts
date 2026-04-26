@@ -1,6 +1,6 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { auth } from "@/lib/auth"
@@ -69,6 +69,7 @@ export async function createListing(
 
     revalidatePath("/painel")
     revalidatePath("/anuncios")
+    revalidateTag("listings")
     redirect(`/painel/anuncios/${listing.id}/editar?created=1`)
   } catch (error) {
     if (isRedirectError(error)) throw error
@@ -144,6 +145,7 @@ export async function updateListing(
 
     revalidatePath("/painel")
     revalidatePath(`/anuncios`)
+    revalidateTag("listings")
     return { success: true }
   } catch {
     return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] } }
@@ -170,6 +172,8 @@ export async function deleteListing(formData: FormData): Promise<void> {
 
   await prisma.listing.delete({ where: { id } })
   revalidatePath("/painel")
+  revalidatePath("/anuncios")
+  revalidateTag("listings")
 }
 
 export async function publishListing(
@@ -222,5 +226,6 @@ export async function publishListing(
 
   revalidatePath("/painel")
   revalidatePath("/anuncios")
+  revalidateTag("listings")
   return { success: true }
 }
