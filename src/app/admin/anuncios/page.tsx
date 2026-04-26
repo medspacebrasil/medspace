@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { approveListing, rejectListing, archiveListing, toggleFeatured, markReviewed } from "../actions"
 import { DeleteListingButton } from "@/components/anuncios/DeleteListingButton"
+import { AdminListingsSearch } from "@/components/anuncios/AdminListingsSearch"
 import { CheckCircle, XCircle, Archive, RotateCcw, Pencil, Star, Eye } from "lucide-react"
+
+const PAGE_SIZE = 20
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "success" | "warning" | "destructive" | "outline" }> = {
   DRAFT: { label: "Rascunho", variant: "secondary" },
@@ -22,33 +25,71 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
 export default async function AdminAnunciosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; review?: string }>
+  searchParams: Promise<{
+    status?: string
+    review?: string
+    q?: string
+    page?: string
+  }>
 }) {
   const session = await auth()
   if (session?.user?.role !== "ADMIN") notFound()
 
   const VALID_STATUSES = ["DRAFT", "PENDING", "PUBLISHED", "REJECTED", "ARCHIVED"]
   const params = await searchParams
+  const page = Math.max(1, Number(params.page) || 1)
   const where: Record<string, unknown> = {}
   if (params.status && VALID_STATUSES.includes(params.status)) where.status = params.status
   if (params.review === "pending") where.reviewedAt = null
 
-  const listings = await prisma.listing.findMany({
-    where,
-    include: {
-      clinic: { select: { name: true } },
-      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
-      _count: { select: { specialties: true, images: true } },
-    },
-    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-  })
+  const q = (params.q ?? "").trim()
+  if (q) {
+    where.OR = [
+      { title: { contains: q, mode: "insensitive" } },
+      { city: { contains: q, mode: "insensitive" } },
+      { neighborhood: { contains: q, mode: "insensitive" } },
+      { clinic: { name: { contains: q, mode: "insensitive" } } },
+    ]
+  }
+
+  const [listings, total] = await Promise.all([
+    prisma.listing.findMany({
+      where,
+      include: {
+        clinic: { select: { name: true } },
+        images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
+        _count: { select: { specialties: true, images: true } },
+      },
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.listing.count({ where }),
+  ])
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  // Helper to build pagination links preserving current filters
+  function pageHref(p: number): string {
+    const sp = new URLSearchParams()
+    if (params.status) sp.set("status", params.status)
+    if (params.review) sp.set("review", params.review)
+    if (q) sp.set("q", q)
+    sp.set("page", String(p))
+    return `/admin/anuncios?${sp.toString()}`
+  }
 
   return (
     <div>
       <h1 className="text-2xl font-bold">Moderação de Anúncios</h1>
       <p className="text-muted-foreground">
-        {listings.length} anúncio(s) encontrado(s)
+        {total} anúncio(s) encontrado(s)
+        {totalPages > 1 && ` · página ${page} de ${totalPages}`}
       </p>
+
+      <div className="mt-4">
+        <AdminListingsSearch />
+      </div>
 
       {/* Status filter tabs */}
       <div className="mt-4 flex flex-wrap gap-2">
@@ -204,6 +245,36 @@ export default async function AdminAnunciosPage({
           </p>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-3">
+          {page > 1 ? (
+            <Link href={pageHref(page - 1)}>
+              <Button variant="outline" size="sm">
+                Anterior
+              </Button>
+            </Link>
+          ) : (
+            <Button variant="outline" size="sm" disabled>
+              Anterior
+            </Button>
+          )}
+          <span className="text-sm text-muted-foreground">
+            Página {page} de {totalPages}
+          </span>
+          {page < totalPages ? (
+            <Link href={pageHref(page + 1)}>
+              <Button variant="outline" size="sm">
+                Próxima
+              </Button>
+            </Link>
+          ) : (
+            <Button variant="outline" size="sm" disabled>
+              Próxima
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
