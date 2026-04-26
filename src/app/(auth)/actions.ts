@@ -62,7 +62,7 @@ export async function registerClinic(
     await nextAuthSignIn("credentials", {
       email,
       password,
-      redirectTo: "/painel",
+      redirectTo: "/painel?welcome=1",
     })
   } catch (error) {
     if (isRedirectError(error)) throw error

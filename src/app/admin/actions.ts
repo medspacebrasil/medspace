@@ -2,8 +2,16 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { createListingSchema } from "@/lib/validators"
+import { generateSlug } from "@/lib/utils"
+
+export type AdminCreateListingState = {
+  success: boolean
+  errors?: Record<string, string[]>
+}
 
 async function requireAdmin() {
   const session = await auth()
@@ -151,6 +159,87 @@ export async function toggleFeatured(formData: FormData) {
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/")
+}
+
+export async function adminCreateListing(
+  _prevState: AdminCreateListingState,
+  formData: FormData
+): Promise<AdminCreateListingState> {
+  const session = await auth()
+  if (session?.user?.role !== "ADMIN") {
+    return { success: false, errors: { _form: ["Não autorizado"] } }
+  }
+
+  const clinicId = formData.get("clinicId") as string | null
+  if (!clinicId) {
+    return { success: false, errors: { _form: ["Clínica não informada"] } }
+  }
+
+  const clinic = await prisma.clinic.findUnique({
+    where: { id: clinicId },
+    select: { id: true },
+  })
+  if (!clinic) {
+    return { success: false, errors: { _form: ["Clínica não encontrada"] } }
+  }
+
+  try {
+    const raw = {
+      title: formData.get("title"),
+      description: formData.get("description"),
+      fullDescription: formData.get("fullDescription") || undefined,
+      city: formData.get("city"),
+      state: formData.get("state") || "",
+      neighborhood: formData.get("neighborhood"),
+      whatsapp: formData.get("whatsapp"),
+      roomTypeId: formData.get("roomTypeId") || undefined,
+      specialtyIds: formData.getAll("specialtyIds"),
+      equipmentIds: formData.getAll("equipmentIds"),
+      customSpecialties: formData.get("customSpecialties") || undefined,
+      customEquipment: formData.get("customEquipment") || undefined,
+      requiresRqe: formData.get("requiresRqe") === "true",
+    }
+
+    const parsed = createListingSchema.safeParse(raw)
+    if (!parsed.success) {
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+      }
+    }
+
+    const { specialtyIds, equipmentIds, ...data } = parsed.data
+
+    const baseSlug = generateSlug(data.title)
+    let slug = baseSlug
+    const existing = await prisma.listing.findUnique({ where: { slug } })
+    if (existing) slug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`
+
+    const listing = await prisma.listing.create({
+      data: {
+        ...data,
+        slug,
+        type: "CLINIC",
+        status: "PUBLISHED",
+        // Admin-created listings are reviewed by definition
+        reviewedAt: new Date(),
+        clinicId,
+        specialties: {
+          create: specialtyIds.map((id) => ({ specialtyId: id })),
+        },
+        equipment: {
+          create: equipmentIds.map((id) => ({ equipmentId: id })),
+        },
+      },
+    })
+
+    revalidatePath("/admin/anuncios")
+    revalidatePath("/anuncios")
+    redirect(`/admin/anuncios/${listing.id}/editar`)
+  } catch (error) {
+    if (isRedirectError(error)) throw error
+    return { success: false, errors: { _form: ["Erro ao criar anúncio"] } }
+  }
 }
 
 export async function adminUpdateListing(formData: FormData) {

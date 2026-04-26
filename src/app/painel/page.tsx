@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { WelcomeModal } from "@/components/WelcomeModal"
 import {
   PlusCircle,
   FileText,
@@ -30,7 +31,12 @@ const statusLabels: Record<
   ARCHIVED: { label: "Arquivado", variant: "outline" },
 }
 
-export default async function PainelPage() {
+export default async function PainelPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>
+}) {
+  const sp = await searchParams
   const session = await auth()
   if (!session?.user) {
     redirect("/login")
@@ -64,6 +70,7 @@ export default async function PainelPage() {
 
   return (
     <div>
+      {sp.welcome === "1" && <WelcomeModal />}
       <div>
         <h1 className="text-2xl font-bold">Meus Anúncios</h1>
         <p className="text-muted-foreground">

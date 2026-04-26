@@ -26,9 +26,10 @@ export default function CadastroPage() {
   return (
     <Card className="border-border/50 shadow-lg">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Cadastrar Clínica</CardTitle>
+        <CardTitle className="text-2xl">Crie sua conta</CardTitle>
         <CardDescription>
-          Crie sua conta gratuitamente e comece a anunciar
+          Para clínicas e empresas que alugam aparelhos médicos. Cadastro
+          gratuito.
         </CardDescription>
       </CardHeader>
       <form action={formAction}>
@@ -82,11 +83,11 @@ export default function CadastroPage() {
           <Separator className="my-2" />
 
           <div className="space-y-2">
-            <Label htmlFor="clinicName">Nome da Clínica</Label>
+            <Label htmlFor="clinicName">Nome da clínica ou empresa</Label>
             <Input
               id="clinicName"
               name="clinicName"
-              placeholder="Clínica Saúde Total"
+              placeholder="Clínica Saúde Total ou Empresa de Aparelhos XYZ"
               required
             />
             {state.errors?.clinicName && (
@@ -125,7 +126,7 @@ export default function CadastroPage() {
             className="w-full bg-gold text-navy hover:bg-gold/90 font-semibold"
             disabled={isPending}
           >
-            {isPending ? "Cadastrando..." : "Cadastrar Clínica"}
+            {isPending ? "Cadastrando..." : "Criar conta"}
           </Button>
           <p className="text-sm text-muted-foreground">
             Já tem conta?{" "}

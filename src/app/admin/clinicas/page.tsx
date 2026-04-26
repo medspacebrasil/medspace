@@ -3,11 +3,12 @@ export const dynamic = "force-dynamic"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { notFound } from "next/navigation"
+import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { blockClinic } from "../actions"
-import { Ban } from "lucide-react"
+import { Ban, PlusCircle } from "lucide-react"
 
 export default async function AdminClinicasPage() {
   const session = await auth()
@@ -57,20 +58,28 @@ export default async function AdminClinicasPage() {
                     {clinic._count.listings} anúncio(s)
                   </p>
                 </div>
-                {!allArchived && clinic._count.listings > 0 && (
-                  <form action={blockClinic}>
-                    <input type="hidden" name="clinicId" value={clinic.id} />
-                    <Button
-                      type="submit"
-                      size="sm"
-                      variant="destructive"
-                      className="gap-1"
-                    >
-                      <Ban className="h-3.5 w-3.5" />
-                      Bloquear
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link href={`/admin/anuncios/novo?clinicId=${clinic.id}`}>
+                    <Button size="sm" variant="outline" className="gap-1">
+                      <PlusCircle className="h-3.5 w-3.5" />
+                      Novo anúncio
                     </Button>
-                  </form>
-                )}
+                  </Link>
+                  {!allArchived && clinic._count.listings > 0 && (
+                    <form action={blockClinic}>
+                      <input type="hidden" name="clinicId" value={clinic.id} />
+                      <Button
+                        type="submit"
+                        size="sm"
+                        variant="destructive"
+                        className="gap-1"
+                      >
+                        <Ban className="h-3.5 w-3.5" />
+                        Bloquear
+                      </Button>
+                    </form>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )

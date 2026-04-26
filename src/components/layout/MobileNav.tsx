@@ -69,6 +69,11 @@ export function MobileNav({ isLoggedIn }: MobileNavProps) {
                   </Button>
                 </Link>
                 <Link href="/cadastro" onClick={() => setOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full border-gold/40 text-gold-dark">
+                    Cadastrar Aparelho
+                  </Button>
+                </Link>
+                <Link href="/cadastro" onClick={() => setOpen(false)}>
                   <Button size="sm" className="w-full bg-gold text-navy hover:bg-gold/90">
                     Cadastrar Clínica
                   </Button>
