@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CepInput } from "@/components/forms/CepInput"
 import { ImageUpload } from "@/components/anuncios/ImageUpload"
+import { SaveStatusModal } from "@/components/ui/SaveStatusModal"
 import { ArrowLeft, Save } from "lucide-react"
 
 interface FilterOption {
@@ -53,18 +54,20 @@ export function AdminEditListingClient({
 }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState("")
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalStatus, setModalStatus] = useState<"success" | "error">("success")
 
   async function handleSubmit(formData: FormData) {
     setSaving(true)
-    setMessage("")
 
     try {
       const { adminUpdateListing } = await import("@/app/admin/actions")
       await adminUpdateListing(formData)
-      setMessage("Anúncio atualizado com sucesso!")
+      setModalStatus("success")
+      setModalOpen(true)
     } catch {
-      setMessage("Erro ao atualizar anúncio")
+      setModalStatus("error")
+      setModalOpen(true)
     } finally {
       setSaving(false)
     }
@@ -90,15 +93,16 @@ export function AdminEditListingClient({
         </div>
       </div>
 
-      {message && (
-        <div className={`mt-4 rounded-md p-3 text-sm ${
-          message.includes("sucesso")
-            ? "bg-green-50 text-green-800"
-            : "bg-destructive/10 text-destructive"
-        }`}>
-          {message}
-        </div>
-      )}
+      <SaveStatusModal
+        open={modalOpen}
+        status={modalStatus}
+        message={
+          modalStatus === "success"
+            ? "Suas alterações foram salvas e já estão no ar."
+            : "Não foi possível salvar. Verifique os campos e tente novamente."
+        }
+        onClose={() => setModalOpen(false)}
+      />
 
       <div className="mt-6">
         <ImageUpload listingId={listing.id} initialImages={listing.images} />

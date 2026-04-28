@@ -100,7 +100,10 @@ export const getCachedClinicListingsPage = unstable_cache(
         specialties: { include: { specialty: true } },
         images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
       },
-      orderBy: { createdAt: sort === "oldest" ? "asc" : "desc" },
+      orderBy: [
+        { featured: "desc" },
+        { createdAt: sort === "oldest" ? "asc" : "desc" },
+      ],
       skip,
       take,
     })

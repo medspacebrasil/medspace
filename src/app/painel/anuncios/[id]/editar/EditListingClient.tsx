@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { useActionState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import { updateListing, deleteListing, publishListing, type ActionState } from "../../actions"
 import { ListingForm } from "@/components/forms/ListingForm"
 import { ImageUpload } from "@/components/anuncios/ImageUpload"
+import { SaveStatusModal } from "@/components/ui/SaveStatusModal"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Send, ExternalLink, CheckCircle2 } from "lucide-react"
@@ -60,6 +61,11 @@ export function EditListingClient({
     publishListing,
     { success: false }
   )
+
+  const [updateModalOpen, setUpdateModalOpen] = useState(false)
+  useEffect(() => {
+    if (updateState.success) setUpdateModalOpen(true)
+  }, [updateState.success])
 
   const cfg = statusLabel[listing.status] ?? statusLabel.DRAFT
   const isPublished = listing.status === "PUBLISHED"
@@ -132,11 +138,12 @@ export function EditListingClient({
         </div>
       )}
 
-      {updateState.success && (
-        <div className="mt-4 rounded-md bg-green-50 p-3 text-sm text-green-800">
-          Anúncio atualizado com sucesso!
-        </div>
-      )}
+      <SaveStatusModal
+        open={updateModalOpen}
+        status="success"
+        message="Suas alterações foram salvas e já estão no ar."
+        onClose={() => setUpdateModalOpen(false)}
+      />
 
       <div className="mt-6">
         <ImageUpload listingId={listing.id} initialImages={listing.images} />
