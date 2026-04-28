@@ -5,10 +5,15 @@ import { redirect } from "next/navigation"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import { createListingSchema } from "@/lib/validators"
+import { createListingSchema, updateEquipmentSchema } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
 
 export type AdminCreateListingState = {
+  success: boolean
+  errors?: Record<string, string[]>
+}
+
+export type AdminUpdateEquipmentState = {
   success: boolean
   errors?: Record<string, string[]>
 }
@@ -272,6 +277,65 @@ export async function adminCreateListing(
   } catch (error) {
     if (isRedirectError(error)) throw error
     return { success: false, errors: { _form: ["Erro ao criar anúncio"] } }
+  }
+}
+
+export async function adminUpdateEquipment(
+  _prevState: AdminUpdateEquipmentState,
+  formData: FormData
+): Promise<AdminUpdateEquipmentState> {
+  const session = await auth()
+  if (session?.user?.role !== "ADMIN") {
+    return { success: false, errors: { _form: ["Não autorizado"] } }
+  }
+
+  const id = formData.get("id") as string
+  if (!id) {
+    return { success: false, errors: { _form: ["ID não fornecido"] } }
+  }
+
+  const listing = await prisma.listing.findUnique({
+    where: { id },
+    select: { type: true },
+  })
+  if (!listing || listing.type !== "EQUIPMENT") {
+    return { success: false, errors: { _form: ["Aparelho não encontrado"] } }
+  }
+
+  try {
+    const raw = {
+      title: formData.get("title") || undefined,
+      description: formData.get("description") || undefined,
+      fullDescription: formData.get("fullDescription") || undefined,
+      city: formData.get("city") || undefined,
+      state: formData.get("state") || undefined,
+      neighborhood: formData.get("neighborhood") || undefined,
+      whatsapp: formData.get("whatsapp") || undefined,
+      equipmentCategoryId: formData.get("equipmentCategoryId") || undefined,
+      brand: formData.get("brand") || undefined,
+      model: formData.get("model") || undefined,
+      condition: formData.get("condition") || undefined,
+    }
+
+    const parsed = updateEquipmentSchema.safeParse(raw)
+    if (!parsed.success) {
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+      }
+    }
+
+    await prisma.listing.update({
+      where: { id },
+      data: { ...parsed.data, reviewedAt: new Date() },
+    })
+
+    revalidatePath("/admin/anuncios")
+    revalidatePath("/aparelhos")
+    revalidateTag("listings")
+    return { success: true }
+  } catch {
+    return { success: false, errors: { _form: ["Erro ao atualizar aparelho"] } }
   }
 }
 
