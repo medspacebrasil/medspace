@@ -36,6 +36,6 @@ export async function POST(request: Request) {
     }),
   ])
 
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
   return NextResponse.json({ success: true })
 }

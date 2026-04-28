@@ -125,7 +125,7 @@ export async function POST(request: Request) {
       })
     }
 
-    if (listingId) revalidateTag("listings")
+    if (listingId) revalidateTag("listings", "max")
 
     return NextResponse.json(
       { url: publicUrl, id: imageRecord?.id },

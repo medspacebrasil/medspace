@@ -64,6 +64,6 @@ export async function DELETE(_request: Request, context: RouteContext) {
     }
   }
 
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
   return NextResponse.json({ success: true })
 }

@@ -37,7 +37,7 @@ export async function approveListing(formData: FormData) {
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
 }
 
 export async function rejectListing(formData: FormData) {
@@ -52,7 +52,7 @@ export async function rejectListing(formData: FormData) {
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
 }
 
 export async function archiveListing(formData: FormData) {
@@ -67,7 +67,7 @@ export async function archiveListing(formData: FormData) {
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
 }
 
 export async function unarchiveListing(formData: FormData) {
@@ -82,7 +82,7 @@ export async function unarchiveListing(formData: FormData) {
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
 }
 
 export async function setListingStatus(formData: FormData) {
@@ -98,7 +98,7 @@ export async function setListingStatus(formData: FormData) {
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
 }
 
 export async function deleteClinicPermanent(formData: FormData) {
@@ -121,7 +121,7 @@ export async function deleteClinicPermanent(formData: FormData) {
   revalidatePath("/admin/clinicas")
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
 }
 
 export async function blockClinic(formData: FormData) {
@@ -150,7 +150,7 @@ export async function blockClinic(formData: FormData) {
   revalidatePath("/admin/clinicas")
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
 }
 
 export async function markReviewed(formData: FormData) {
@@ -176,7 +176,7 @@ export async function deleteListingPermanent(formData: FormData) {
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
   redirect("/admin/anuncios")
 }
 
@@ -195,7 +195,7 @@ export async function toggleFeatured(formData: FormData) {
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
 }
 
 export async function adminCreateListing(
@@ -272,7 +272,7 @@ export async function adminCreateListing(
 
     revalidatePath("/admin/anuncios")
     revalidatePath("/anuncios")
-    revalidateTag("listings")
+    revalidateTag("listings", "max")
     redirect(`/admin/anuncios/${listing.id}/editar`)
   } catch (error) {
     if (isRedirectError(error)) throw error
@@ -332,7 +332,7 @@ export async function adminUpdateEquipment(
 
     revalidatePath("/admin/anuncios")
     revalidatePath("/aparelhos")
-    revalidateTag("listings")
+    revalidateTag("listings", "max")
     return { success: true }
   } catch {
     return { success: false, errors: { _form: ["Erro ao atualizar aparelho"] } }
@@ -386,5 +386,5 @@ export async function adminUpdateListing(formData: FormData) {
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
 }

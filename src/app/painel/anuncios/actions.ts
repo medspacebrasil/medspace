@@ -69,7 +69,7 @@ export async function createListing(
 
     revalidatePath("/painel")
     revalidatePath("/anuncios")
-    revalidateTag("listings")
+    revalidateTag("listings", "max")
     redirect(`/painel/anuncios/${listing.id}/editar?created=1`)
   } catch (error) {
     if (isRedirectError(error)) throw error
@@ -145,7 +145,7 @@ export async function updateListing(
 
     revalidatePath("/painel")
     revalidatePath(`/anuncios`)
-    revalidateTag("listings")
+    revalidateTag("listings", "max")
     return { success: true }
   } catch {
     return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] } }
@@ -173,7 +173,7 @@ export async function deleteListing(formData: FormData): Promise<void> {
   await prisma.listing.delete({ where: { id } })
   revalidatePath("/painel")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
 }
 
 export async function publishListing(
@@ -226,6 +226,6 @@ export async function publishListing(
 
   revalidatePath("/painel")
   revalidatePath("/anuncios")
-  revalidateTag("listings")
+  revalidateTag("listings", "max")
   return { success: true }
 }
