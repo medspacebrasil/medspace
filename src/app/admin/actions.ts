@@ -96,6 +96,29 @@ export async function setListingStatus(formData: FormData) {
   revalidateTag("listings")
 }
 
+export async function deleteClinicPermanent(formData: FormData) {
+  await requireAdmin()
+  const clinicId = formData.get("clinicId") as string
+  if (!clinicId) throw new Error("ID da clínica não fornecido")
+
+  // Find the user that owns the clinic so we can delete them too.
+  // Cascading deletes on the schema (Clinic -> Listing -> ListingImage, ListingSpecialty, ListingEquipment)
+  // remove related rows automatically. User -> Clinic is also Cascade,
+  // so deleting the user will delete the clinic and everything under it.
+  const clinic = await prisma.clinic.findUnique({
+    where: { id: clinicId },
+    select: { userId: true },
+  })
+  if (!clinic) throw new Error("Clínica não encontrada")
+
+  await prisma.user.delete({ where: { id: clinic.userId } })
+
+  revalidatePath("/admin/clinicas")
+  revalidatePath("/admin/anuncios")
+  revalidatePath("/anuncios")
+  revalidateTag("listings")
+}
+
 export async function blockClinic(formData: FormData) {
   await requireAdmin()
   const clinicId = formData.get("clinicId") as string

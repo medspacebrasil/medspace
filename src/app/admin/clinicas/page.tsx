@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { blockClinic } from "../actions"
+import { DeleteClinicButton } from "@/components/anuncios/DeleteClinicButton"
 import { Ban, PlusCircle } from "lucide-react"
 
 export default async function AdminClinicasPage() {
@@ -71,14 +72,20 @@ export default async function AdminClinicasPage() {
                       <Button
                         type="submit"
                         size="sm"
-                        variant="destructive"
+                        variant="outline"
                         className="gap-1"
+                        title="Arquivar todos os anúncios desta clínica"
                       >
                         <Ban className="h-3.5 w-3.5" />
                         Bloquear
                       </Button>
                     </form>
                   )}
+                  <DeleteClinicButton
+                    clinicId={clinic.id}
+                    clinicName={clinic.name}
+                    listingsCount={clinic._count.listings}
+                  />
                 </div>
               </CardContent>
             </Card>
