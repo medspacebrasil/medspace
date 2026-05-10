@@ -119,6 +119,58 @@ export default function CadastroPage() {
           {state.errors?.neighborhood && (
             <p className="text-sm text-destructive">{state.errors.neighborhood[0]}</p>
           )}
+
+          <Separator className="my-2" />
+
+          <div className="space-y-3 rounded-lg border border-border/60 bg-muted/30 p-4">
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                name="acceptTerms"
+                value="on"
+                required
+                className="mt-1 rounded"
+              />
+              <span>
+                Li e concordo com os{" "}
+                <Link
+                  href="/termos-de-uso"
+                  target="_blank"
+                  className="font-medium text-gold-dark underline"
+                >
+                  Termos de Uso
+                </Link>{" "}
+                e a{" "}
+                <Link
+                  href="/politica-de-privacidade"
+                  target="_blank"
+                  className="font-medium text-gold-dark underline"
+                >
+                  Política de Privacidade
+                </Link>{" "}
+                da MedSpace, e confirmo que tenho pelo menos 18 anos de idade.
+              </span>
+            </label>
+            {state.errors?.acceptTerms && (
+              <p className="text-sm text-destructive">
+                {state.errors.acceptTerms[0]}
+              </p>
+            )}
+
+            <label className="flex items-start gap-3 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                name="marketingOptIn"
+                value="on"
+                className="mt-1 rounded"
+              />
+              <span>
+                Aceito receber comunicações ocasionais sobre novidades,
+                oportunidades e conteúdos da MedSpace por e-mail. Você pode
+                cancelar a qualquer momento.
+              </span>
+            </label>
+          </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button

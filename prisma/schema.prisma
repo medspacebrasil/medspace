@@ -16,14 +16,17 @@ enum Role {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  name         String
-  role         Role     @default(CLINIC)
-  clinic       Clinic?
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  passwordHash           String    @map("password_hash")
+  name                   String
+  role                   Role      @default(CLINIC)
+  clinic                 Clinic?
+  acceptedTermsAt        DateTime? @map("accepted_terms_at")
+  acceptedTermsVersion   String?   @map("accepted_terms_version")
+  marketingOptIn         Boolean   @default(false) @map("marketing_opt_in")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
 
   @@map("users")
 }

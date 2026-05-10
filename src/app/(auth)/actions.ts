@@ -3,7 +3,7 @@
 import { hash } from "bcryptjs"
 import { signIn as nextAuthSignIn } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import { registerSchema, loginSchema } from "@/lib/validators"
+import { registerSchema, loginSchema, TERMS_VERSION } from "@/lib/validators"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 export type ActionState = {
@@ -24,6 +24,8 @@ export async function registerClinic(
     city: formData.get("city"),
     state: formData.get("state") || "",
     neighborhood: formData.get("neighborhood"),
+    acceptTerms: formData.get("acceptTerms"),
+    marketingOptIn: formData.get("marketingOptIn") === "on",
   }
 
   const parsed = registerSchema.safeParse(raw)
@@ -31,8 +33,17 @@ export async function registerClinic(
     return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
   }
 
-  const { email, password, name, clinicName, whatsapp, city, state, neighborhood } =
-    parsed.data
+  const {
+    email,
+    password,
+    name,
+    clinicName,
+    whatsapp,
+    city,
+    state,
+    neighborhood,
+    marketingOptIn,
+  } = parsed.data
 
   const existing = await prisma.user.findUnique({ where: { email } })
   if (existing) {
@@ -46,6 +57,9 @@ export async function registerClinic(
       email,
       passwordHash,
       name,
+      acceptedTermsAt: new Date(),
+      acceptedTermsVersion: TERMS_VERSION,
+      marketingOptIn,
       clinic: {
         create: {
           name: clinicName,

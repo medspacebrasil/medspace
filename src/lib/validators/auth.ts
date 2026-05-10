@@ -5,6 +5,8 @@ export const loginSchema = z.object({
   password: z.string().min(8, "Senha deve ter no mínimo 8 caracteres"),
 })
 
+export const TERMS_VERSION = "2026-05-09"
+
 export const registerSchema = z.object({
   email: z.email("Email inválido"),
   password: z.string().min(8, "Senha deve ter no mínimo 8 caracteres").max(128, "Senha muito longa"),
@@ -16,6 +18,11 @@ export const registerSchema = z.object({
   city: z.string().min(2, "Cidade é obrigatória").max(100, "Nome da cidade muito longo"),
   state: z.string().max(2).default(""),
   neighborhood: z.string().min(2, "Bairro é obrigatório").max(100, "Nome do bairro muito longo"),
+  acceptTerms: z
+    .literal("on", {
+      message: "Você precisa concordar com os Termos de Uso e Política de Privacidade",
+    }),
+  marketingOptIn: z.coerce.boolean().optional().default(false),
 })
 
 export type LoginInput = z.infer<typeof loginSchema>
