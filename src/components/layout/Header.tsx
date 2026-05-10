@@ -21,7 +21,7 @@ export async function Header() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-8 lg:flex">
           <Link
             href="/para-medicos"
             className="text-sm font-medium text-white/70 transition-colors hover:text-white"
