@@ -1,4 +1,4 @@
-export { loginSchema, registerSchema } from "./auth"
+export { loginSchema, registerSchema, TERMS_VERSION } from "./auth"
 export type { LoginInput, RegisterInput } from "./auth"
 
 export { createListingSchema, updateListingSchema } from "./listing"
