@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
+import { LegalFooter } from "@/components/layout/LegalFooter"
 
 export default function AuthLayout({
   children,
@@ -7,18 +8,21 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-warm-gray p-4">
-      <Link href="/" className="mb-8">
-        <Image
-          src="/logo.png"
-          alt="MedSpace"
-          width={220}
-          height={80}
-          className="h-16 w-auto"
-          priority
-        />
-      </Link>
-      <div className="w-full max-w-md">{children}</div>
+    <div className="flex min-h-screen flex-col bg-warm-gray">
+      <div className="flex flex-1 flex-col items-center justify-center p-4">
+        <Link href="/" className="mb-8">
+          <Image
+            src="/logo.png"
+            alt="MedSpace"
+            width={220}
+            height={80}
+            className="h-16 w-auto"
+            priority
+          />
+        </Link>
+        <div className="w-full max-w-md">{children}</div>
+      </div>
+      <LegalFooter />
     </div>
   )
 }
