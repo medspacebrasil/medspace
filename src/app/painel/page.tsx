@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { WelcomeModal } from "@/components/WelcomeModal"
+import { EquipmentMigrationNotice } from "@/components/EquipmentMigrationNotice"
 import {
   PlusCircle,
   FileText,
@@ -61,6 +62,10 @@ export default async function PainelPage({
   const clinicListings = listings.filter((l) => l.type === "CLINIC")
   const equipmentListings = listings.filter((l) => l.type === "EQUIPMENT")
 
+  // Show migration notice only to clinics that have at least one CLINIC listing.
+  // Equipment listings don't use the "Recursos disponíveis" taxonomy.
+  const showMigrationNotice = clinicListings.length > 0
+
   const counts = {
     total: listings.length,
     published: listings.filter((l) => l.status === "PUBLISHED").length,
@@ -71,6 +76,7 @@ export default async function PainelPage({
   return (
     <div>
       {sp.welcome === "1" && <WelcomeModal />}
+      {showMigrationNotice && <EquipmentMigrationNotice />}
       <div>
         <h1 className="text-2xl font-bold">Meus Anúncios</h1>
         <p className="text-muted-foreground">
