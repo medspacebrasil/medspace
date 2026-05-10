@@ -36,7 +36,9 @@ export const getCachedRoomTypes = unstable_cache(
 
 export const getCachedEquipment = unstable_cache(
   async () => {
-    return prisma.equipment.findMany({ orderBy: { name: "asc" } })
+    return prisma.equipment.findMany({
+      orderBy: [{ category: "asc" }, { name: "asc" }],
+    })
   },
   ["equipment:all"],
   { revalidate: TAXONOMY_TTL, tags: ["taxonomies"] }

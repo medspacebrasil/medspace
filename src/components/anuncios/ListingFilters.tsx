@@ -11,10 +11,33 @@ interface FilterOption {
   slug: string
 }
 
+interface EquipmentOption extends FilterOption {
+  category?: string
+}
+
+const CATEGORY_ORDER = ["Estrutura", "Procedimentos", "Premium"]
+
+function groupEquipmentByCategory(items: EquipmentOption[]): Map<string, EquipmentOption[]> {
+  const groups = new Map<string, EquipmentOption[]>()
+  for (const item of items) {
+    const cat = item.category || "Outros"
+    if (!groups.has(cat)) groups.set(cat, [])
+    groups.get(cat)!.push(item)
+  }
+  const ordered = new Map<string, EquipmentOption[]>()
+  for (const cat of CATEGORY_ORDER) {
+    if (groups.has(cat)) ordered.set(cat, groups.get(cat)!)
+  }
+  for (const [cat, list] of groups) {
+    if (!ordered.has(cat)) ordered.set(cat, list)
+  }
+  return ordered
+}
+
 interface ListingFiltersProps {
   specialties: FilterOption[]
   roomTypes: FilterOption[]
-  equipment: FilterOption[]
+  equipment: EquipmentOption[]
   states: { state: string; cities: string[] }[]
 }
 
@@ -192,26 +215,33 @@ export function ListingFilters({
                   Limpar seleção
                 </button>
               )}
-              {equipment.map((eq) => {
-                const checked = selectedEquipment.includes(eq.slug)
-                return (
-                  <button
-                    key={eq.id}
-                    type="button"
-                    onClick={() => toggleEquipment(eq.slug)}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
-                  >
-                    <span
-                      className={`flex h-4 w-4 items-center justify-center rounded border ${
-                        checked ? "border-gold bg-gold text-navy" : "border-input bg-background"
-                      }`}
-                    >
-                      {checked && <Check className="h-3 w-3" />}
-                    </span>
-                    {eq.name}
-                  </button>
-                )
-              })}
+              {Array.from(groupEquipmentByCategory(equipment)).map(([category, items]) => (
+                <div key={category}>
+                  <p className="border-b border-border/40 bg-muted/40 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {category}
+                  </p>
+                  {items.map((eq) => {
+                    const checked = selectedEquipment.includes(eq.slug)
+                    return (
+                      <button
+                        key={eq.id}
+                        type="button"
+                        onClick={() => toggleEquipment(eq.slug)}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+                      >
+                        <span
+                          className={`flex h-4 w-4 items-center justify-center rounded border ${
+                            checked ? "border-gold bg-gold text-navy" : "border-input bg-background"
+                          }`}
+                        >
+                          {checked && <Check className="h-3 w-3" />}
+                        </span>
+                        {eq.name}
+                      </button>
+                    )
+                  })}
+                </div>
+              ))}
             </div>
           )}
         </div>

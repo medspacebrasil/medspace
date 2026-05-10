@@ -16,6 +16,30 @@ interface FilterOption {
   slug: string
 }
 
+interface EquipmentOption extends FilterOption {
+  category?: string
+}
+
+const CATEGORY_ORDER = ["Estrutura", "Procedimentos", "Premium"]
+
+function groupByCategory(items: EquipmentOption[]): Map<string, EquipmentOption[]> {
+  const groups = new Map<string, EquipmentOption[]>()
+  for (const item of items) {
+    const cat = item.category || "Outros"
+    if (!groups.has(cat)) groups.set(cat, [])
+    groups.get(cat)!.push(item)
+  }
+  // Return groups in the desired order
+  const ordered = new Map<string, EquipmentOption[]>()
+  for (const cat of CATEGORY_ORDER) {
+    if (groups.has(cat)) ordered.set(cat, groups.get(cat)!)
+  }
+  for (const [cat, list] of groups) {
+    if (!ordered.has(cat)) ordered.set(cat, list)
+  }
+  return ordered
+}
+
 interface ListingFormProps {
   formAction: (payload: FormData) => void
   state: ActionState
@@ -38,7 +62,7 @@ interface ListingFormProps {
   }
   specialties?: FilterOption[]
   roomTypes?: FilterOption[]
-  equipment?: FilterOption[]
+  equipment?: EquipmentOption[]
 }
 
 export function ListingForm({
@@ -52,7 +76,7 @@ export function ListingForm({
 }: ListingFormProps) {
   const [specialties, setSpecialties] = useState<FilterOption[]>(propSpecialties ?? [])
   const [roomTypes, setRoomTypes] = useState<FilterOption[]>(propRoomTypes ?? [])
-  const [equipment, setEquipment] = useState<FilterOption[]>(propEquipment ?? [])
+  const [equipment, setEquipment] = useState<EquipmentOption[]>(propEquipment ?? [])
 
   useEffect(() => {
     if (!propSpecialties) {
@@ -213,21 +237,45 @@ export function ListingForm({
           </div>
 
           <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-sm font-normal">
+              <input
+                type="checkbox"
+                name="requiresRqe"
+                value="true"
+                defaultChecked={defaultValues?.requiresRqe ?? false}
+                className="rounded"
+              />
+              Exige RQE (Registro de Qualificação de Especialista)
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Marque se a clínica exige que o médico tenha RQE na especialidade
+              atendida.
+            </p>
+          </div>
+
+          <div className="space-y-3">
             <Label>Recursos disponíveis</Label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {equipment.map((eq) => (
-                <label key={eq.id} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    name="equipmentIds"
-                    value={eq.id}
-                    defaultChecked={defaultValues?.equipmentIds?.includes(eq.id)}
-                    className="rounded"
-                  />
-                  {eq.name}
-                </label>
-              ))}
-            </div>
+            {Array.from(groupByCategory(equipment)).map(([category, items]) => (
+              <div key={category} className="space-y-2 rounded-md border border-border/50 bg-muted/20 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {category}
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {items.map((eq) => (
+                    <label key={eq.id} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        name="equipmentIds"
+                        value={eq.id}
+                        defaultChecked={defaultValues?.equipmentIds?.includes(eq.id)}
+                        className="rounded"
+                      />
+                      {eq.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="space-y-2">
@@ -249,23 +297,6 @@ export function ListingForm({
                 {state.errors.customEquipment[0]}
               </p>
             )}
-          </div>
-
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-sm font-normal">
-              <input
-                type="checkbox"
-                name="requiresRqe"
-                value="true"
-                defaultChecked={defaultValues?.requiresRqe ?? false}
-                className="rounded"
-              />
-              Exige RQE (Registro de Qualificação de Especialista)
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              Marque se a clínica exige que o médico tenha RQE na especialidade
-              atendida.
-            </p>
           </div>
 
           <Button type="submit" className="w-full" disabled={isPending}>

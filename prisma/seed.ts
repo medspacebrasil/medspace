@@ -91,18 +91,30 @@ async function main() {
   }
   console.log(`  ✓ ${roomTypes.length} room types`)
 
-  // Equipment (recursos disponíveis nas clínicas - amenities)
-  const equipmentItems = [
-    "Estacionamento no local (gratuito)",
-    "Estacionamento no local (pago)",
-    "Recepcionista",
-    "Manobrista",
-    "Prontuário eletrônico",
-    "Computador",
-    "Wi-Fi",
-    "Impressora",
-    "Maca",
-    "Poltrona de estética",
+  // Equipment (recursos disponíveis nas clínicas - amenities), agrupados por categoria
+  const equipmentItems: { name: string; category: string }[] = [
+    // Estrutura
+    { name: "Ar condicionado", category: "Estrutura" },
+    { name: "Estacionamento (valet)", category: "Estrutura" },
+    { name: "Estacionamento público", category: "Estrutura" },
+    { name: "Café", category: "Estrutura" },
+    { name: "Recepcionista", category: "Estrutura" },
+    { name: "Prontuário eletrônico", category: "Estrutura" },
+    { name: "Bioimpedância", category: "Estrutura" },
+    { name: "Maca ginecológica", category: "Estrutura" },
+    { name: "Ultrassom", category: "Estrutura" },
+    { name: "Aparelhos de estética", category: "Estrutura" },
+    { name: "Computador", category: "Estrutura" },
+    { name: "Impressora", category: "Estrutura" },
+    { name: "Wi-Fi", category: "Estrutura" },
+    // Procedimentos
+    { name: "Sala de procedimentos", category: "Procedimentos" },
+    { name: "Sala de injetáveis", category: "Procedimentos" },
+    { name: "Centro cirúrgico", category: "Procedimentos" },
+    // Premium
+    { name: "Alto padrão", category: "Premium" },
+    { name: "Móveis planejados", category: "Premium" },
+    { name: "Porcelanato", category: "Premium" },
   ]
 
   // Equipment Categories (aparelhos médicos - Listing.type = EQUIPMENT)
@@ -134,38 +146,43 @@ async function main() {
   }
   console.log(`  ✓ ${equipmentCategories.length} equipment categories`)
 
-  // Remove deprecated equipment items (replaced or moved to separate "Aparelhos" catalog)
+  // Remove deprecated equipment items (renamed/replaced or moved to separate "Aparelhos" catalog)
   await prisma.equipment.deleteMany({
     where: {
       slug: {
         in: [
+          // Aparelhos m\u00e9dicos antigos (movidos para o cat\u00e1logo de Aparelhos)
           "cadeira-odontologica",
           "autoclave",
           "negatoscopio",
-          "ultrassom",
           "eletrocardiografo",
           "dermatoscopio",
           "oftalmoscopio",
           "otoscopio",
           "balanca-digital",
-          "ar-condicionado",
-          "bioimpedancia",
+          // Recursos antigos (substitu\u00eddos pela nova estrutura categorizada)
           "estacionamento",
+          "estacionamento-no-local-gratuito",
+          "estacionamento-no-local-pago",
+          "manobrista",
+          "maca",
+          "poltrona-de-estetica",
         ],
       },
     },
   })
 
-  for (const name of equipmentItems) {
+  for (const { name, category } of equipmentItems) {
     const slug = name
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/\s+/g, "-")
+      .replace(/[()]/g, "")
     await prisma.equipment.upsert({
       where: { slug },
-      update: {},
-      create: { name, slug },
+      update: { name, category },
+      create: { name, slug, category },
     })
   }
   console.log(`  ✓ ${equipmentItems.length} equipment items`)

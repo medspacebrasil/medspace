@@ -159,6 +159,7 @@ model Equipment {
   id       String             @id @default(cuid())
   name     String             @unique
   slug     String             @unique
+  category String             @default("Estrutura")
   listings ListingEquipment[]
 
   @@map("equipment")
