@@ -362,8 +362,8 @@ export default function PoliticaDePrivacidadePage() {
       <ul>
         <li>
           <strong>E-mail</strong>:{" "}
-          <a href="mailto:medspacebrasil@gmail.com" className="text-gold-dark underline">
-            medspacebrasil@gmail.com
+          <a href="mailto:privacidade@medspacebrasil.com.br" className="text-gold-dark underline">
+            privacidade@medspacebrasil.com.br
           </a>
         </li>
         <li>
