@@ -46,6 +46,7 @@ describe("registerSchema", () => {
     whatsapp: "11999998888",
     city: "São Paulo",
     neighborhood: "Centro",
+    acceptTerms: "on",
   }
 
   it("accepts valid registration data", () => {

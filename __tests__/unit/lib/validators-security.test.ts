@@ -10,6 +10,7 @@ describe("registerSchema - max length validation", () => {
     whatsapp: "11999998888",
     city: "São Paulo",
     neighborhood: "Centro",
+    acceptTerms: "on",
   }
 
   it("rejects password over 128 chars", () => {

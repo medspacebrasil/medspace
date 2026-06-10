@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import { createListingSchema, updateEquipmentSchema } from "@/lib/validators"
+import { createListingSchema, updateListingSchema, updateEquipmentSchema } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
 
 export type AdminCreateListingState = {
@@ -344,34 +344,35 @@ export async function adminUpdateListing(formData: FormData) {
   const id = formData.get("id") as string
   if (!id) throw new Error("ID não fornecido")
 
-  const title = formData.get("title") as string
-  const description = formData.get("description") as string
-  const fullDescription = formData.get("fullDescription") as string | null
-  const city = formData.get("city") as string
-  const state = formData.get("state") as string || ""
-  const neighborhood = formData.get("neighborhood") as string
-  const whatsapp = formData.get("whatsapp") as string
-  const roomTypeId = formData.get("roomTypeId") as string | null
-  const customSpecialties = formData.get("customSpecialties") as string | null
-  const customEquipment = formData.get("customEquipment") as string | null
-  const requiresRqe = formData.get("requiresRqe") === "true"
-  const specialtyIds = formData.getAll("specialtyIds") as string[]
-  const equipmentIds = formData.getAll("equipmentIds") as string[]
+  // Validate/normalize input even for admins — keeps malformed or oversized
+  // data out of the DB and matches the validation used everywhere else.
+  const parsed = updateListingSchema.safeParse({
+    title: formData.get("title") || undefined,
+    description: formData.get("description") || undefined,
+    fullDescription: formData.get("fullDescription") || undefined,
+    city: formData.get("city") || undefined,
+    state: formData.get("state") || undefined,
+    neighborhood: formData.get("neighborhood") || undefined,
+    whatsapp: formData.get("whatsapp") || undefined,
+    roomTypeId: formData.get("roomTypeId") || undefined,
+    customSpecialties: formData.get("customSpecialties") || undefined,
+    customEquipment: formData.get("customEquipment") || undefined,
+    requiresRqe: formData.get("requiresRqe") === "true",
+  })
+  if (!parsed.success) {
+    throw new Error("Dados inválidos para atualização do anúncio")
+  }
+
+  const specialtyIds = formData.getAll("specialtyIds").map(String).filter(Boolean)
+  const equipmentIds = formData.getAll("equipmentIds").map(String).filter(Boolean)
+
+  const { roomTypeId, ...data } = parsed.data
 
   await prisma.listing.update({
     where: { id },
     data: {
-      title,
-      description,
-      fullDescription: fullDescription || null,
-      city,
-      state,
-      neighborhood,
-      whatsapp,
+      ...data,
       roomTypeId: roomTypeId || null,
-      customSpecialties: customSpecialties || null,
-      customEquipment: customEquipment || null,
-      requiresRqe,
       reviewedAt: new Date(),
       specialties: {
         deleteMany: {},

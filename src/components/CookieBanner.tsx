@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button"
 import { Cookie, X } from "lucide-react"
 
 const STORAGE_KEY = "medspace:cookie-consent:v1"
+// Bump when the cookie/privacy policy changes so users are asked to re-consent.
+const CONSENT_VERSION = "2026-05-09"
 
 type Consent = {
   essential: true // always true, can't opt out
   analytics: boolean
   marketing: boolean
   decidedAt: string
+  version: string
 }
 
 function readConsent(): Consent | null {
@@ -19,7 +22,10 @@ function readConsent(): Consent | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    return JSON.parse(raw) as Consent
+    const parsed = JSON.parse(raw) as Consent
+    // Treat consent given against an older policy version as not given.
+    if (parsed.version !== CONSENT_VERSION) return null
+    return parsed
   } catch {
     return null
   }
@@ -35,11 +41,23 @@ function writeConsent(consent: Consent) {
 export function CookieBanner() {
   const [open, setOpen] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const [analytics, setAnalytics] = useState(true)
-  const [marketing, setMarketing] = useState(true)
+  // LGPD: non-essential categories must be opt-in (start unchecked).
+  const [analytics, setAnalytics] = useState(false)
+  const [marketing, setMarketing] = useState(false)
 
   useEffect(() => {
     if (!readConsent()) setOpen(true)
+
+    // Let the footer (or anywhere) reopen the preferences to withdraw consent.
+    function reopen() {
+      const current = readConsent()
+      setAnalytics(current?.analytics ?? false)
+      setMarketing(current?.marketing ?? false)
+      setShowSettings(true)
+      setOpen(true)
+    }
+    window.addEventListener("open-cookie-preferences", reopen)
+    return () => window.removeEventListener("open-cookie-preferences", reopen)
   }, [])
 
   function acceptAll() {
@@ -48,6 +66,7 @@ export function CookieBanner() {
       analytics: true,
       marketing: true,
       decidedAt: new Date().toISOString(),
+      version: CONSENT_VERSION,
     })
     setOpen(false)
   }
@@ -58,6 +77,7 @@ export function CookieBanner() {
       analytics: false,
       marketing: false,
       decidedAt: new Date().toISOString(),
+      version: CONSENT_VERSION,
     })
     setOpen(false)
   }
@@ -68,6 +88,7 @@ export function CookieBanner() {
       analytics,
       marketing,
       decidedAt: new Date().toISOString(),
+      version: CONSENT_VERSION,
     })
     setOpen(false)
   }

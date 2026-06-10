@@ -4,6 +4,7 @@ import { hash } from "bcryptjs"
 import { signIn as nextAuthSignIn } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { registerSchema, loginSchema, TERMS_VERSION } from "@/lib/validators"
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 export type ActionState = {
@@ -15,6 +16,15 @@ export async function registerClinic(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const ip = await getClientIp()
+  const limit = await rateLimit(RATE_LIMITS.register, ip)
+  if (!limit.success) {
+    return {
+      success: false,
+      errors: { _form: ["Muitas tentativas de cadastro. Tente novamente mais tarde."] },
+    }
+  }
+
   const raw = {
     email: formData.get("email"),
     password: formData.get("password"),
@@ -90,6 +100,19 @@ export async function signInAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const ip = await getClientIp()
+  const limit = await rateLimit(RATE_LIMITS.login, ip)
+  if (!limit.success) {
+    return {
+      success: false,
+      errors: {
+        _form: [
+          `Muitas tentativas de login. Aguarde ${limit.retryAfter || 60}s e tente novamente.`,
+        ],
+      },
+    }
+  }
+
   const raw = {
     email: formData.get("email"),
     password: formData.get("password"),
@@ -108,15 +131,10 @@ export async function signInAction(
     })
   } catch (error) {
     if (isRedirectError(error)) throw error
-    // Show the actual error for debugging
-    const msg = error instanceof Error ? error.message : String(error)
-    const name = error instanceof Error ? error.constructor.name : "Unknown"
+    // Generic message only — never leak internal error details to the client.
     return {
       success: false,
-      errors: {
-        _form: ["Email ou senha incorretos"],
-        _debug: [`${name}: ${msg}`],
-      },
+      errors: { _form: ["Email ou senha incorretos"] },
     }
   }
 

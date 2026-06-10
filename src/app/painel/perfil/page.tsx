@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { ProfileForm } from "./ProfileForm"
 import { ChangePasswordForm } from "@/components/forms/ChangePasswordForm"
+import { DataRights } from "./DataRights"
 
 export default async function PerfilPage() {
   const session = await auth()
@@ -30,6 +31,7 @@ export default async function PerfilPage() {
       <div className="mt-6 space-y-6">
         <ProfileForm clinic={clinic} />
         <ChangePasswordForm />
+        <DataRights />
       </div>
     </div>
   )

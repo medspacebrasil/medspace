@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Mail, MapPin } from "lucide-react"
+import { CookiePreferencesButton } from "@/components/CookiePreferencesButton"
 
 export function Footer() {
   return (
@@ -98,6 +99,9 @@ export function Footer() {
                 >
                   Política de Anúncios
                 </Link>
+              </li>
+              <li>
+                <CookiePreferencesButton className="cursor-pointer text-left transition-colors hover:text-white" />
               </li>
             </ul>
           </div>

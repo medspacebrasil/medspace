@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { CookiePreferencesButton } from "@/components/CookiePreferencesButton"
 
 /**
  * Minimal footer with only the LGPD-required legal links and copyright.
@@ -38,6 +39,7 @@ export function LegalFooter() {
           >
             Como funciona
           </Link>
+          <CookiePreferencesButton className="cursor-pointer transition-colors hover:text-foreground" />
         </nav>
       </div>
     </footer>

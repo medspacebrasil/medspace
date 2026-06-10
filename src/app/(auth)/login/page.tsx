@@ -42,8 +42,8 @@ export default function LoginPage() {
       } else {
         setError("Resposta inesperada do servidor")
       }
-    } catch (err) {
-      setError(`Erro: ${err instanceof Error ? err.message : String(err)}`)
+    } catch {
+      setError("Não foi possível entrar. Verifique sua conexão e tente novamente.")
     } finally {
       setLoading(false)
     }
