@@ -23,7 +23,7 @@ const CATEGORIES: CategoryConfig[] = [
     label: "Espaços e salas",
     icon: <Building2 className="h-4 w-4" />,
     intro:
-      "Para clínicas, consultórios e coworkings médicos que querem alugar salas e consultórios por período.",
+      "Para clínicas, consultórios e coworkings médicos que querem disponibilizar salas e consultórios por período.",
     details: [
       "Recursos disponíveis (autoclave, salas...)",
       "Especialidades desejadas",

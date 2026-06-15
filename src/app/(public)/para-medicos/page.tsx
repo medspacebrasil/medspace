@@ -32,7 +32,7 @@ import {
 export const metadata: Metadata = {
   title: "Para Médicos | MedSpace",
   description:
-    "Encontre salas, aparelhos e estruturas prontas para atender — direto com a clínica, sem burocracia.",
+    "Encontre salas, aparelhos e estruturas prontas para atender — direto com o anunciante, sem burocracia.",
 }
 
 export default async function ParaMedicosPage() {
@@ -111,7 +111,7 @@ export default async function ParaMedicosPage() {
               <div className="flex-1">
                 <h3 className="font-bold">Aparelhos médicos</h3>
                 <p className="text-sm text-muted-foreground">
-                  Aparelhos disponíveis para locação direto com a clínica.
+                  Aparelhos disponíveis direto com o anunciante.
                 </p>
               </div>
               <ArrowRight className="h-5 w-5 text-gold transition-transform group-hover:translate-x-1" />
@@ -266,7 +266,7 @@ export default async function ParaMedicosPage() {
                   Basta acessar a página de anúncios e usar os filtros por
                   cidade, especialidade, tipo de sala ou recursos disponíveis.
                   Ao encontrar um espaço que atenda suas necessidades, clique
-                  no botão de WhatsApp para falar direto com a clínica.
+                  no botão de WhatsApp para falar direto com o anunciante.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3" className="border-border/50">
@@ -278,12 +278,12 @@ export default async function ParaMedicosPage() {
               </AccordionItem>
               <AccordionItem value="item-4" className="border-border/50">
                 <AccordionTrigger>
-                  Como funciona o contato com a clínica?
+                  Como funciona o contato com o anunciante?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   O contato é feito diretamente pelo WhatsApp. Ao clicar no
                   botão de contato em um anúncio, você será redirecionado
-                  para uma conversa com a clínica, sem intermediários.
+                  para uma conversa com o anunciante, sem intermediários.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

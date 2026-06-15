@@ -12,7 +12,7 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Aparelhos disponíveis | MedSpace",
   description:
-    "Encontre aparelhos médicos disponíveis para locação — direto com a clínica, sem burocracia.",
+    "Encontre aparelhos médicos disponíveis para locação — direto com o anunciante, sem burocracia.",
 }
 
 interface PageProps {

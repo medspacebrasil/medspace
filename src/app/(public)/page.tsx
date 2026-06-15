@@ -167,7 +167,7 @@ export default function HomePage() {
                   <div>
                     <h4 className="font-semibold">Contate</h4>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Fale direto com a clínica pelo WhatsApp.
+                      Fale direto com o anunciante pelo WhatsApp.
                     </p>
                   </div>
                 </li>
@@ -250,7 +250,7 @@ export default function HomePage() {
                     Agilidade no contato
                   </h4>
                   <p className="mt-1 text-sm text-white/60">
-                    Fale direto com a clínica, sem burocracia.
+                    Fale direto com o anunciante, sem burocracia.
                   </p>
                 </div>
                 <div className="rounded-xl bg-white/5 p-5 backdrop-blur-sm">
