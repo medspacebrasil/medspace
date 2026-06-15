@@ -22,11 +22,18 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
   ARCHIVED: { label: "Arquivado", variant: "outline" },
 }
 
+const typeConfig: Record<string, { label: string }> = {
+  CLINIC: { label: "Clínica" },
+  EQUIPMENT: { label: "Aparelho" },
+  EDUCATION: { label: "Educação" },
+}
+
 export default async function AdminAnunciosPage({
   searchParams,
 }: {
   searchParams: Promise<{
     status?: string
+    type?: string
     review?: string
     q?: string
     page?: string
@@ -36,10 +43,12 @@ export default async function AdminAnunciosPage({
   if (session?.user?.role !== "ADMIN") notFound()
 
   const VALID_STATUSES = ["DRAFT", "PENDING", "PUBLISHED", "REJECTED", "ARCHIVED"]
+  const VALID_TYPES = ["CLINIC", "EQUIPMENT", "EDUCATION"]
   const params = await searchParams
   const page = Math.max(1, Number(params.page) || 1)
   const where: Record<string, unknown> = {}
   if (params.status && VALID_STATUSES.includes(params.status)) where.status = params.status
+  if (params.type && VALID_TYPES.includes(params.type)) where.type = params.type
   if (params.review === "pending") where.reviewedAt = null
 
   const q = (params.q ?? "").trim()
@@ -73,9 +82,18 @@ export default async function AdminAnunciosPage({
   function pageHref(p: number): string {
     const sp = new URLSearchParams()
     if (params.status) sp.set("status", params.status)
+    if (params.type) sp.set("type", params.type)
     if (params.review) sp.set("review", params.review)
     if (q) sp.set("q", q)
     sp.set("page", String(p))
+    return `/admin/anuncios?${sp.toString()}`
+  }
+
+  // Build a type-filter href preserving the active status filter.
+  function typeHref(t: string): string {
+    const sp = new URLSearchParams()
+    if (params.status) sp.set("status", params.status)
+    if (t) sp.set("type", t)
     return `/admin/anuncios?${sp.toString()}`
   }
 
@@ -120,6 +138,28 @@ export default async function AdminAnunciosPage({
         </a>
       </div>
 
+      {/* Type filter tabs */}
+      <div className="mt-2 flex flex-wrap gap-2">
+        {[
+          { value: "", label: "Todos os tipos" },
+          { value: "CLINIC", label: "Clínicas" },
+          { value: "EQUIPMENT", label: "Aparelhos" },
+          { value: "EDUCATION", label: "Educação" },
+        ].map((t) => (
+          <a
+            key={t.value}
+            href={typeHref(t.value)}
+            className={`rounded-md px-3 py-1 text-sm ${
+              (params.type ?? "") === t.value
+                ? "bg-gold text-navy"
+                : "bg-muted text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            {t.label}
+          </a>
+        ))}
+      </div>
+
       <div className="mt-6 space-y-3">
         {listings.map((listing) => {
           const cfg = statusConfig[listing.status]
@@ -129,6 +169,9 @@ export default async function AdminAnunciosPage({
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-medium">{listing.title}</h3>
+                    <Badge variant="outline" className="border-navy/30 text-navy">
+                      {typeConfig[listing.type]?.label ?? listing.type}
+                    </Badge>
                     <Badge variant={cfg.variant}>{cfg.label}</Badge>
                     {!listing.reviewedAt && (
                       <Badge variant="warning" className="border-amber-300 bg-amber-100 text-amber-800">
