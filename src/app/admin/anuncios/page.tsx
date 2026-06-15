@@ -61,7 +61,7 @@ export default async function AdminAnunciosPage({
     ]
   }
 
-  const [listings, total] = await Promise.all([
+  const [listings, total, pendingByType] = await Promise.all([
     prisma.listing.findMany({
       where,
       include: {
@@ -74,7 +74,22 @@ export default async function AdminAnunciosPage({
       take: PAGE_SIZE,
     }),
     prisma.listing.count({ where }),
+    prisma.listing.groupBy({
+      by: ["type"],
+      where: { status: "PENDING" },
+      _count: { _all: true },
+    }),
   ])
+
+  // Pending-moderation counts per type, shown as badges on the type tabs.
+  const pendingCounts = pendingByType.reduce<Record<string, number>>(
+    (acc, row) => {
+      acc[row.type] = row._count._all
+      return acc
+    },
+    {}
+  )
+  const pendingTotal = Object.values(pendingCounts).reduce((a, b) => a + b, 0)
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
@@ -138,26 +153,37 @@ export default async function AdminAnunciosPage({
         </a>
       </div>
 
-      {/* Type filter tabs */}
+      {/* Type filter tabs with pending-moderation counts */}
       <div className="mt-2 flex flex-wrap gap-2">
         {[
-          { value: "", label: "Todos os tipos" },
-          { value: "CLINIC", label: "Clínicas" },
-          { value: "EQUIPMENT", label: "Aparelhos" },
-          { value: "EDUCATION", label: "Educação" },
-        ].map((t) => (
-          <a
-            key={t.value}
-            href={typeHref(t.value)}
-            className={`rounded-md px-3 py-1 text-sm ${
-              (params.type ?? "") === t.value
-                ? "bg-gold text-navy"
-                : "bg-muted text-muted-foreground hover:bg-accent"
-            }`}
-          >
-            {t.label}
-          </a>
-        ))}
+          { value: "", label: "Todos os tipos", pending: pendingTotal },
+          { value: "CLINIC", label: "Clínicas", pending: pendingCounts.CLINIC ?? 0 },
+          { value: "EQUIPMENT", label: "Aparelhos", pending: pendingCounts.EQUIPMENT ?? 0 },
+          { value: "EDUCATION", label: "Educação", pending: pendingCounts.EDUCATION ?? 0 },
+        ].map((t) => {
+          const active = (params.type ?? "") === t.value
+          return (
+            <a
+              key={t.value}
+              href={typeHref(t.value)}
+              className={`inline-flex items-center gap-2 rounded-md px-3 py-1 text-sm ${
+                active ? "bg-gold text-navy" : "bg-muted text-muted-foreground hover:bg-accent"
+              }`}
+            >
+              {t.label}
+              {t.pending > 0 && (
+                <span
+                  className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-semibold ${
+                    active ? "bg-navy text-white" : "bg-amber-500 text-white"
+                  }`}
+                  title={`${t.pending} pendente(s) de moderação`}
+                >
+                  {t.pending}
+                </span>
+              )}
+            </a>
+          )
+        })}
       </div>
 
       <div className="mt-6 space-y-3">

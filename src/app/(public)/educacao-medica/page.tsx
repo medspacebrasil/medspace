@@ -29,16 +29,32 @@ export const metadata: Metadata = {
 const LEGAL_NOTICE =
   "Os cursos, mentorias e eventos divulgados nesta página são de responsabilidade exclusiva dos respectivos anunciantes. A MedSpace não organiza, certifica, valida nem garante os conteúdos anunciados."
 
-export default async function EducacaoMedicaPage() {
-  const listings = await prisma.listing.findMany({
-    where: { status: "PUBLISHED", type: "EDUCATION" },
-    include: {
-      clinic: true,
-      images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
-    },
-    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-    take: 60,
-  })
+const PAGE_SIZE = 12
+
+interface PageProps {
+  searchParams: Promise<{ page?: string }>
+}
+
+export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
+  const params = await searchParams
+  const page = Math.max(1, Number(params.page) || 1)
+  const where = { status: "PUBLISHED" as const, type: "EDUCATION" as const }
+
+  const [listings, total] = await Promise.all([
+    prisma.listing.findMany({
+      where,
+      include: {
+        clinic: true,
+        images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
+      },
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.listing.count({ where }),
+  ])
+
+  const totalPages = Math.ceil(total / PAGE_SIZE)
 
   return (
     <>
@@ -206,6 +222,7 @@ export default async function EducacaoMedicaPage() {
           </div>
 
           {listings.length > 0 ? (
+            <>
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {listings.map((listing) => {
                 const img = listing.images[0]
@@ -257,8 +274,30 @@ export default async function EducacaoMedicaPage() {
                 )
               })}
             </div>
+            {totalPages > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-2">
+                {page > 1 && (
+                  <Link href={`/educacao-medica?page=${page - 1}#oportunidades`}>
+                    <Button variant="outline" size="sm">
+                      Anterior
+                    </Button>
+                  </Link>
+                )}
+                <span className="text-sm text-muted-foreground">
+                  Página {page} de {totalPages}
+                </span>
+                {page < totalPages && (
+                  <Link href={`/educacao-medica?page=${page + 1}#oportunidades`}>
+                    <Button variant="outline" size="sm">
+                      Próxima
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            )}
+            </>
           ) : (
-            <div className="mt-10 rounded-2xl border border-dashed border-border bg-warm-gray/50 px-6 py-16 text-center">
+            <div id="empty" className="mt-10 rounded-2xl border border-dashed border-border bg-warm-gray/50 px-6 py-16 text-center">
               <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground/30" />
               <p className="mt-4 text-lg font-medium">
                 Em breve, novas oportunidades por aqui

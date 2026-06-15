@@ -16,16 +16,16 @@ import {
   X,
 } from "lucide-react"
 
-const links = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/clinicas", label: "Clínicas", icon: Building2 },
-  { href: "/admin/anuncios", label: "Anúncios", icon: FileText },
-  { href: "/admin/config", label: "Configurações", icon: Settings },
-]
-
-export function AdminSidebar() {
+export function AdminSidebar({ pendingCount = 0 }: { pendingCount?: number }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+
+  const links = [
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard, badge: 0 },
+    { href: "/admin/clinicas", label: "Clínicas", icon: Building2, badge: 0 },
+    { href: "/admin/anuncios", label: "Anúncios", icon: FileText, badge: pendingCount },
+    { href: "/admin/config", label: "Configurações", icon: Settings, badge: 0 },
+  ]
 
   useEffect(() => {
     function handleResize() {
@@ -58,6 +58,14 @@ export function AdminSidebar() {
             >
               <Icon className="h-4 w-4" />
               {link.label}
+              {link.badge > 0 && (
+                <span
+                  className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 py-0.5 text-xs font-semibold text-white"
+                  title={`${link.badge} anúncio(s) pendente(s) de moderação`}
+                >
+                  {link.badge}
+                </span>
+              )}
             </Link>
           )
         })}
