@@ -72,6 +72,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/educacao-medica"
+                  className="transition-colors hover:text-white"
+                >
+                  Educação médica
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/planos"
                   className="transition-colors hover:text-white"
                 >

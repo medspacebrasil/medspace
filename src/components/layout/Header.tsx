@@ -47,6 +47,12 @@ export async function Header() {
             Aparelhos
           </Link>
           <Link
+            href="/educacao-medica"
+            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+          >
+            Educação
+          </Link>
+          <Link
             href="/planos"
             className="text-sm font-medium text-white/70 transition-colors hover:text-white"
           >

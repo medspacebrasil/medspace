@@ -8,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { LaunchBanner } from "@/components/layout/LaunchBanner"
 import {
   ArrowRight,
   CheckCircle2,
@@ -19,6 +20,7 @@ import {
   ImagePlus,
   Users,
   Zap,
+  Network,
 } from "lucide-react"
 
 export const metadata = {
@@ -137,6 +139,38 @@ export default function ParaClinicasPage() {
                 </p>
               </CardContent>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Coworking médico */}
+      <section className="px-4 pb-4 md:pb-8">
+        <div className="container mx-auto">
+          <div className="overflow-hidden rounded-2xl border border-gold/20 bg-navy p-8 md:p-12">
+            <div className="grid items-center gap-8 md:grid-cols-[auto_1fr]">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gold/15 md:mx-0">
+                <Network className="h-10 w-10 text-gold" />
+              </div>
+              <div className="text-center md:text-left">
+                <h2 className="text-2xl font-bold text-white md:text-3xl">
+                  Você tem um espaço de coworking médico?
+                </h2>
+                <p className="mt-3 text-white/70">
+                  Anuncie suas salas na MedSpace e conecte-se com médicos que
+                  buscam estrutura flexível para atender. Sem intermediação, sem
+                  comissão. Você gerencia tudo direto pelo seu painel.
+                </p>
+                <Link href="/cadastro">
+                  <Button
+                    size="lg"
+                    className="mt-6 gap-2 bg-gold text-navy hover:bg-gold/90 font-semibold"
+                  >
+                    Cadastrar meu coworking
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -437,6 +471,8 @@ export default function ParaClinicasPage() {
           </div>
         </div>
       </section>
+
+      <LaunchBanner />
     </>
   )
 }

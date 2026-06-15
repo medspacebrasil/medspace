@@ -16,6 +16,7 @@ import {
   ArrowRight,
   Sparkles,
   Zap,
+  GraduationCap,
 } from "lucide-react"
 
 export default function HomePage() {
@@ -34,59 +35,83 @@ export default function HomePage() {
             priority
           />
           <h1 className="text-3xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
-            Conectamos <span className="text-gold">médicos</span> e{" "}
-            <span className="text-gold">clínicas</span>
+            Conectando <span className="text-gold">médicos</span>,{" "}
+            <span className="text-gold">clínicas</span> e{" "}
+            <span className="text-gold">empresas</span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-white/70">
-            Salas, aparelhos e estruturas prontas para atender — direto pelo
-            WhatsApp, sem burocracia.
+            Encontre ou anuncie salas, equipamentos e oportunidades de educação
+            médica — direto pelo WhatsApp, sem burocracia.
           </p>
         </div>
       </section>
 
-      {/* Two Blocks: Médico | Clínica */}
+      {/* Three Blocks: Médico | Clínica/Coworking | Empresa/Instituição */}
       <section className="px-4 py-16 md:py-20">
         <div className="container mx-auto">
           <div className="text-center">
             <h2 className="text-2xl font-bold md:text-3xl">
-              Você é médico ou representa uma clínica?
+              Qual é o seu perfil?
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-              Escolha o caminho que faz mais sentido para você.
+              Escolha como quer usar a MedSpace.
             </p>
           </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
             <Link
               href="/para-medicos"
-              className="group relative overflow-hidden rounded-2xl border border-gold/20 bg-white p-8 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-gold/60 hover:shadow-xl md:p-12"
+              className="group relative overflow-hidden rounded-2xl border border-gold/20 bg-white p-8 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-gold/60 hover:shadow-xl md:p-10"
             >
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/10 transition-colors group-hover:bg-gold/20">
                 <Stethoscope className="h-8 w-8 text-gold" />
               </div>
               <h3 className="mt-6 text-xl font-bold md:text-2xl">Sou Médico</h3>
               <p className="mx-auto mt-3 max-w-xs text-sm text-muted-foreground">
-                Encontre salas e equipamentos disponíveis para atender seus
-                pacientes.
+                Encontre salas, equipamentos ou oportunidades de educação. Ou
+                anuncie seus próprios serviços.
               </p>
               <div className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-gold">
-                Ver espaços disponíveis
+                Ver oportunidades
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </div>
             </Link>
 
             <Link
               href="/para-clinicas"
-              className="group relative overflow-hidden rounded-2xl border border-gold/20 bg-white p-8 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-gold/60 hover:shadow-xl md:p-12"
+              className="group relative overflow-hidden rounded-2xl border border-gold/20 bg-white p-8 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-gold/60 hover:shadow-xl md:p-10"
             >
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/10 transition-colors group-hover:bg-gold/20">
                 <Building2 className="h-8 w-8 text-gold" />
               </div>
-              <h3 className="mt-6 text-xl font-bold md:text-2xl">Sou Clínica</h3>
+              <h3 className="mt-6 text-xl font-bold md:text-2xl">
+                Sou Clínica ou Coworking
+              </h3>
               <p className="mx-auto mt-3 max-w-xs text-sm text-muted-foreground">
-                Anuncie seus espaços ociosos e receba médicos interessados.
+                Anuncie salas e equipamentos ociosos e receba contatos de
+                médicos interessados.
               </p>
               <div className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-gold">
-                Cadastrar minha clínica
+                Cadastrar agora
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </div>
+            </Link>
+
+            <Link
+              href="/cadastro"
+              className="group relative overflow-hidden rounded-2xl border border-gold/20 bg-white p-8 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-gold/60 hover:shadow-xl md:p-10"
+            >
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/10 transition-colors group-hover:bg-gold/20">
+                <GraduationCap className="h-8 w-8 text-gold" />
+              </div>
+              <h3 className="mt-6 text-xl font-bold md:text-2xl">
+                Sou Empresa ou Instituição
+              </h3>
+              <p className="mx-auto mt-3 max-w-xs text-sm text-muted-foreground">
+                Anuncie equipamentos médicos disponíveis ou oferte cursos e
+                capacitações para profissionais de saúde.
+              </p>
+              <div className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-gold">
+                Cadastrar agora
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </div>
             </Link>
@@ -100,7 +125,7 @@ export default function HomePage() {
           <div className="text-center">
             <h2 className="text-2xl font-bold md:text-3xl">Como funciona</h2>
             <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-              Simples para médicos, simples para clínicas.
+              Simples para médicos, clínicas, empresas e instituições.
             </p>
           </div>
           <div className="mx-auto mt-12 grid max-w-5xl gap-10 md:grid-cols-2">

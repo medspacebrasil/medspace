@@ -18,6 +18,7 @@ import { ListingCard } from "@/components/anuncios/ListingCard"
 import { HeroSearch } from "@/components/home/HeroSearch"
 import Image from "next/image"
 import type { Metadata } from "next"
+import { LaunchBanner } from "@/components/layout/LaunchBanner"
 import {
   Search,
   Stethoscope,
@@ -25,6 +26,7 @@ import {
   ArrowRight,
   Wrench,
   Building2,
+  GraduationCap,
 } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -55,12 +57,12 @@ export default async function ParaMedicosPage() {
             priority
           />
           <h1 className="text-3xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
-            Encontre o espaço ideal para sua{" "}
-            <span className="text-gold">prática médica</span>
+            Encontre estrutura ou oportunidades para sua{" "}
+            <span className="text-gold">carreira médica</span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-white/70">
-            Conectamos médicos e clínicas com salas e equipamentos disponíveis.
-            Sem burocracia, direto pelo WhatsApp.
+            Salas, equipamentos e educação médica num só lugar. Sem burocracia,
+            direto pelo WhatsApp.
           </p>
 
           {/* Search bar */}
@@ -80,10 +82,10 @@ export default async function ParaMedicosPage() {
         </div>
       </section>
 
-      {/* Quick access: Salas / Aparelhos */}
+      {/* Quick access: Salas / Aparelhos / Educação */}
       <section className="px-4 py-12">
         <div className="container mx-auto">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             <Link
               href="/anuncios"
               className="group flex items-center gap-4 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-md"
@@ -110,6 +112,21 @@ export default async function ParaMedicosPage() {
                 <h3 className="font-bold">Aparelhos médicos</h3>
                 <p className="text-sm text-muted-foreground">
                   Aparelhos disponíveis para locação direto com a clínica.
+                </p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-gold transition-transform group-hover:translate-x-1" />
+            </Link>
+            <Link
+              href="/educacao-medica"
+              className="group flex items-center gap-4 rounded-2xl border border-gold/20 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-md"
+            >
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gold/10 transition-colors group-hover:bg-gold/20">
+                <GraduationCap className="h-7 w-7 text-gold" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold">Educação Médica</h3>
+                <p className="text-sm text-muted-foreground">
+                  Mentorias, cursos e pós-graduações para avançar na carreira.
                 </p>
               </div>
               <ArrowRight className="h-5 w-5 text-gold transition-transform group-hover:translate-x-1" />
@@ -158,8 +175,8 @@ export default async function ParaMedicosPage() {
                 </div>
                 <h3 className="mt-5 text-lg font-semibold">1. Busque</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Encontre salas e equipamentos por cidade, especialidade ou
-                  estrutura.
+                  Encontre salas, equipamentos ou oportunidades de educação por
+                  cidade, especialidade ou área de interesse.
                 </p>
               </CardContent>
             </Card>
@@ -181,7 +198,7 @@ export default async function ParaMedicosPage() {
                 </div>
                 <h3 className="mt-5 text-lg font-semibold">3. Contate</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Fale direto com a clínica pelo WhatsApp.
+                  Fale direto com o anunciante pelo WhatsApp.
                 </p>
               </CardContent>
             </Card>
@@ -273,6 +290,8 @@ export default async function ParaMedicosPage() {
           </div>
         </div>
       </section>
+
+      <LaunchBanner />
     </>
   )
 }
