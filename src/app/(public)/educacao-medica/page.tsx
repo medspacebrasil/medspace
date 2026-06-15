@@ -10,6 +10,12 @@ import { Button } from "@/components/ui/button"
 import { WhatsAppButton } from "@/components/anuncios/WhatsAppButton"
 import { LaunchBanner } from "@/components/layout/LaunchBanner"
 import {
+  EDUCATION_TYPE_LABELS,
+  EDUCATION_MODALITY_LABELS,
+  type EducationType,
+  type EducationModality,
+} from "@/lib/validators"
+import {
   GraduationCap,
   BookOpen,
   Award,
@@ -255,15 +261,55 @@ export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
                       )}
                     </div>
                     <CardContent className="flex flex-1 flex-col p-4">
+                      {(listing.educationType || listing.educationModality) && (
+                        <div className="mb-2 flex flex-wrap gap-1.5">
+                          {listing.educationType && (
+                            <Badge className="border-0 bg-gold/15 text-xs text-gold-dark">
+                              {EDUCATION_TYPE_LABELS[listing.educationType as EducationType]}
+                            </Badge>
+                          )}
+                          {listing.educationModality && (
+                            <Badge variant="outline" className="text-xs">
+                              {EDUCATION_MODALITY_LABELS[listing.educationModality as EducationModality]}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                       <h3 className="line-clamp-2 font-semibold text-foreground">
                         {listing.title}
                       </h3>
                       <p className="mt-1 line-clamp-3 flex-1 text-sm text-muted-foreground">
                         {listing.description}
                       </p>
+                      {(listing.workload || listing.investment) && (
+                        <dl className="mt-3 space-y-1 text-xs text-muted-foreground">
+                          {listing.workload && (
+                            <div className="flex gap-1">
+                              <dt className="font-medium text-foreground/70">Carga horária:</dt>
+                              <dd>{listing.workload}</dd>
+                            </div>
+                          )}
+                          {listing.investment && (
+                            <div className="flex gap-1">
+                              <dt className="font-medium text-foreground/70">Investimento:</dt>
+                              <dd>{listing.investment}</dd>
+                            </div>
+                          )}
+                        </dl>
+                      )}
                       <p className="mt-3 text-xs text-muted-foreground">
                         {listing.clinic.name}
                       </p>
+                      {listing.externalLink && (
+                        <a
+                          href={listing.externalLink}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="mt-2 text-xs font-medium text-gold-dark underline"
+                        >
+                          Mais informações
+                        </a>
+                      )}
                       <WhatsAppButton
                         phone={listing.whatsapp}
                         message={`Olá! Vi seu anúncio "${listing.title}" na MedSpace e tenho interesse.`}
