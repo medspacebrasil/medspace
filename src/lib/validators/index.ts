@@ -1,5 +1,13 @@
-export { loginSchema, registerSchema, TERMS_VERSION } from "./auth"
-export type { LoginInput, RegisterInput } from "./auth"
+export {
+  loginSchema,
+  registerSchema,
+  TERMS_VERSION,
+  ADVERTISER_TYPES,
+  documentTypeFor,
+} from "./auth"
+export type { LoginInput, RegisterInput, AdvertiserType } from "./auth"
+
+export { isValidCPF, isValidCNPJ, formatDocument, onlyDigits } from "./document"
 
 export { createListingSchema, updateListingSchema } from "./listing"
 export type { CreateListingInput, UpdateListingInput } from "./listing"

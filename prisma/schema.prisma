@@ -15,6 +15,21 @@ enum Role {
   ADMIN
 }
 
+// Perfil do anunciante. Define que tipo de anuncio ele pode publicar e
+// qual documento (CPF para medico, CNPJ para os demais).
+enum AdvertiserType {
+  MEDICO
+  CLINICA
+  EMPRESA
+  COWORKING
+  INSTITUICAO
+}
+
+enum DocumentType {
+  CPF
+  CNPJ
+}
+
 model User {
   id                     String    @id @default(cuid())
   email                  String    @unique
@@ -40,6 +55,12 @@ model Clinic {
   userId       String    @unique @map("user_id")
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   name         String
+  // Tipo de anunciante. Default CLINICA para nao quebrar contas legadas,
+  // que foram criadas antes da introducao dos tipos.
+  advertiserType AdvertiserType @default(CLINICA) @map("advertiser_type")
+  // Documento sem mascara (so digitos). Nulavel: contas legadas nao tem.
+  document     String?
+  documentType DocumentType? @map("document_type")
   phone        String?
   whatsapp     String
   city         String
@@ -68,6 +89,7 @@ enum ListingStatus {
 enum ListingType {
   CLINIC
   EQUIPMENT
+  EDUCATION
 }
 
 enum EquipmentCondition {

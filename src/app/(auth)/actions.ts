@@ -3,7 +3,7 @@
 import { hash } from "bcryptjs"
 import { signIn as nextAuthSignIn } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import { registerSchema, loginSchema, TERMS_VERSION } from "@/lib/validators"
+import { registerSchema, loginSchema, TERMS_VERSION, documentTypeFor } from "@/lib/validators"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 
@@ -29,7 +29,9 @@ export async function registerClinic(
     email: formData.get("email"),
     password: formData.get("password"),
     name: formData.get("name"),
+    advertiserType: formData.get("advertiserType"),
     clinicName: formData.get("clinicName"),
+    document: formData.get("document"),
     whatsapp: formData.get("whatsapp"),
     city: formData.get("city"),
     state: formData.get("state") || "",
@@ -47,7 +49,9 @@ export async function registerClinic(
     email,
     password,
     name,
+    advertiserType,
     clinicName,
+    document,
     whatsapp,
     city,
     state,
@@ -73,6 +77,9 @@ export async function registerClinic(
       clinic: {
         create: {
           name: clinicName,
+          advertiserType,
+          document,
+          documentType: documentTypeFor(advertiserType),
           whatsapp,
           city,
           state: state || "",

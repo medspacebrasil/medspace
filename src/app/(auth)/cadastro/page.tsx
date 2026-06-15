@@ -1,12 +1,13 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import Link from "next/link"
 import { registerClinic, type ActionState } from "../actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CepInput } from "@/components/forms/CepInput"
+import { formatDocument } from "@/lib/validators/document"
 import {
   Card,
   CardContent,
@@ -17,11 +18,32 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
+const ADVERTISER_OPTIONS = [
+  { value: "MEDICO", label: "Médico" },
+  { value: "CLINICA", label: "Clínica ou consultório" },
+  { value: "COWORKING", label: "Coworking médico" },
+  { value: "EMPRESA", label: "Empresa" },
+  { value: "INSTITUICAO", label: "Instituição de ensino" },
+] as const
+
+const NAME_LABEL: Record<string, string> = {
+  MEDICO: "Seu nome profissional ou do consultório",
+  CLINICA: "Nome da clínica",
+  COWORKING: "Nome do coworking",
+  EMPRESA: "Nome da empresa",
+  INSTITUICAO: "Nome da instituição",
+}
+
 export default function CadastroPage() {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     registerClinic,
     { success: false }
   )
+
+  const [advertiserType, setAdvertiserType] = useState<string>("MEDICO")
+  const isMedico = advertiserType === "MEDICO"
+  const docType = isMedico ? "CPF" : "CNPJ"
+  const [document, setDocument] = useState("")
 
   return (
     <Card className="border-border/50 shadow-lg">
@@ -83,16 +105,69 @@ export default function CadastroPage() {
           <Separator className="my-2" />
 
           <div className="space-y-2">
-            <Label htmlFor="clinicName">Nome da clínica ou empresa</Label>
+            <Label htmlFor="advertiserType">Tipo de anunciante</Label>
+            <select
+              id="advertiserType"
+              name="advertiserType"
+              value={advertiserType}
+              onChange={(e) => {
+                setAdvertiserType(e.target.value)
+                setDocument("")
+              }}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {ADVERTISER_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-muted-foreground">
+              {isMedico
+                ? "Médicos anunciam como pessoa física (CPF)."
+                : "Empresas, clínicas, coworkings e instituições anunciam com CNPJ."}
+            </p>
+            {state.errors?.advertiserType && (
+              <p className="text-sm text-destructive">
+                {state.errors.advertiserType[0]}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="clinicName">{NAME_LABEL[advertiserType]}</Label>
             <Input
               id="clinicName"
               name="clinicName"
-              placeholder="Clínica Saúde Total ou Empresa de Aparelhos XYZ"
+              placeholder={
+                isMedico
+                  ? "Dr. João Silva ou Consultório Silva"
+                  : "Clínica Saúde Total"
+              }
               required
             />
             {state.errors?.clinicName && (
               <p className="text-sm text-destructive">
                 {state.errors.clinicName[0]}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="document">{docType}</Label>
+            <Input
+              id="document"
+              name="document"
+              inputMode="numeric"
+              value={document}
+              onChange={(e) => setDocument(formatDocument(e.target.value, docType))}
+              placeholder={isMedico ? "000.000.000-00" : "00.000.000/0000-00"}
+              maxLength={isMedico ? 14 : 18}
+              required
+            />
+            {state.errors?.document && (
+              <p className="text-sm text-destructive">
+                {state.errors.document[0]}
               </p>
             )}
           </div>

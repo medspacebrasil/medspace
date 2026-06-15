@@ -6,7 +6,9 @@ describe("registerSchema - max length validation", () => {
     email: "clinica@test.com",
     password: "12345678",
     name: "Dr. João",
+    advertiserType: "CLINICA",
     clinicName: "Clínica Saúde",
+    document: "11222333000181", // CNPJ válido
     whatsapp: "11999998888",
     city: "São Paulo",
     neighborhood: "Centro",
