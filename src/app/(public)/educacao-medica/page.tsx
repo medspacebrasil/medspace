@@ -10,11 +10,16 @@ import { Button } from "@/components/ui/button"
 import { WhatsAppButton } from "@/components/anuncios/WhatsAppButton"
 import { LaunchBanner } from "@/components/layout/LaunchBanner"
 import {
+  EDUCATION_TYPES,
+  EDUCATION_MODALITIES,
   EDUCATION_TYPE_LABELS,
   EDUCATION_MODALITY_LABELS,
   type EducationType,
   type EducationModality,
 } from "@/lib/validators"
+import { Select } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   GraduationCap,
   BookOpen,
@@ -37,14 +42,50 @@ const LEGAL_NOTICE =
 
 const PAGE_SIZE = 12
 
+const VALID_TYPES = EDUCATION_TYPES as readonly string[]
+const VALID_MODALITIES = EDUCATION_MODALITIES as readonly string[]
+
 interface PageProps {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{
+    page?: string
+    type?: string
+    modality?: string
+    area?: string
+    city?: string
+  }>
 }
 
 export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
   const params = await searchParams
   const page = Math.max(1, Number(params.page) || 1)
-  const where = { status: "PUBLISHED" as const, type: "EDUCATION" as const }
+
+  const area = (params.area ?? "").trim()
+  const city = (params.city ?? "").trim()
+  const typeFilter = params.type && VALID_TYPES.includes(params.type) ? params.type : ""
+  const modalityFilter =
+    params.modality && VALID_MODALITIES.includes(params.modality) ? params.modality : ""
+
+  const where: Record<string, unknown> = {
+    status: "PUBLISHED",
+    type: "EDUCATION",
+  }
+  if (typeFilter) where.educationType = typeFilter
+  if (modalityFilter) where.educationModality = modalityFilter
+  if (area) where.customSpecialties = { contains: area, mode: "insensitive" }
+  if (city) where.city = { contains: city, mode: "insensitive" }
+
+  // Preserve active filters across pagination links.
+  const filterQs = new URLSearchParams()
+  if (typeFilter) filterQs.set("type", typeFilter)
+  if (modalityFilter) filterQs.set("modality", modalityFilter)
+  if (area) filterQs.set("area", area)
+  if (city) filterQs.set("city", city)
+  const hasFilters = [...filterQs.keys()].length > 0
+  function pageHref(p: number): string {
+    const sp = new URLSearchParams(filterQs)
+    sp.set("page", String(p))
+    return `/educacao-medica?${sp.toString()}#oportunidades`
+  }
 
   const [listings, total] = await Promise.all([
     prisma.listing.findMany({
@@ -227,6 +268,66 @@ export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
             <p>{LEGAL_NOTICE}</p>
           </div>
 
+          {/* Filters (GET form — works without client JS) */}
+          <form
+            method="get"
+            action="/educacao-medica"
+            className="mt-6 grid gap-3 rounded-2xl border border-border bg-white p-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end"
+          >
+            <div className="space-y-1.5">
+              <Label htmlFor="f-type" className="text-xs">Categoria</Label>
+              <Select id="f-type" name="type" defaultValue={typeFilter}>
+                <option value="">Todas</option>
+                {EDUCATION_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {EDUCATION_TYPE_LABELS[t]}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="f-modality" className="text-xs">Formato</Label>
+              <Select id="f-modality" name="modality" defaultValue={modalityFilter}>
+                <option value="">Todos</option>
+                {EDUCATION_MODALITIES.map((m) => (
+                  <option key={m} value={m}>
+                    {EDUCATION_MODALITY_LABELS[m]}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="f-area" className="text-xs">Área / interesse</Label>
+              <Input
+                id="f-area"
+                name="area"
+                defaultValue={area}
+                placeholder="Ex: Cardiologia"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="f-city" className="text-xs">Cidade</Label>
+              <Input
+                id="f-city"
+                name="city"
+                defaultValue={city}
+                placeholder="Ex: Brasília"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1 bg-gold text-navy hover:bg-gold/90 font-semibold">
+                Buscar
+              </Button>
+              {hasFilters && (
+                <Link href="/educacao-medica#oportunidades">
+                  <Button type="button" variant="outline">
+                    Limpar
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </form>
+
           {listings.length > 0 ? (
             <>
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -323,7 +424,7 @@ export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
             {totalPages > 1 && (
               <div className="mt-8 flex items-center justify-center gap-2">
                 {page > 1 && (
-                  <Link href={`/educacao-medica?page=${page - 1}#oportunidades`}>
+                  <Link href={pageHref(page - 1)}>
                     <Button variant="outline" size="sm">
                       Anterior
                     </Button>
@@ -333,7 +434,7 @@ export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
                   Página {page} de {totalPages}
                 </span>
                 {page < totalPages && (
-                  <Link href={`/educacao-medica?page=${page + 1}#oportunidades`}>
+                  <Link href={pageHref(page + 1)}>
                     <Button variant="outline" size="sm">
                       Próxima
                     </Button>
@@ -342,6 +443,21 @@ export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
               </div>
             )}
             </>
+          ) : hasFilters ? (
+            <div className="mt-10 rounded-2xl border border-dashed border-border bg-warm-gray/50 px-6 py-16 text-center">
+              <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground/30" />
+              <p className="mt-4 text-lg font-medium">
+                Nenhuma oportunidade encontrada com esses filtros
+              </p>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                Tente ampliar a busca ou limpar os filtros.
+              </p>
+              <Link href="/educacao-medica#oportunidades">
+                <Button variant="outline" className="mt-6">
+                  Limpar filtros
+                </Button>
+              </Link>
+            </div>
           ) : (
             <div id="empty" className="mt-10 rounded-2xl border border-dashed border-border bg-warm-gray/50 px-6 py-16 text-center">
               <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground/30" />
