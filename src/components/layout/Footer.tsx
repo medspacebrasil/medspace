@@ -70,6 +70,14 @@ export function Footer() {
                   Aparelhos médicos
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/planos"
+                  className="transition-colors hover:text-white"
+                >
+                  Ver planos
+                </Link>
+              </li>
             </ul>
           </div>
 

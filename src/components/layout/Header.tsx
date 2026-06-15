@@ -46,6 +46,12 @@ export async function Header() {
           >
             Aparelhos
           </Link>
+          <Link
+            href="/planos"
+            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+          >
+            Planos
+          </Link>
           {session ? (
             <Link href="/painel">
               <Button size="sm" className="bg-gold text-navy hover:bg-gold/90 font-medium">
