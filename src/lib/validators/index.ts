@@ -14,3 +14,18 @@ export type { CreateListingInput, UpdateListingInput } from "./listing"
 
 export { createEquipmentSchema, updateEquipmentSchema } from "./equipment"
 export type { CreateEquipmentInput, UpdateEquipmentInput } from "./equipment"
+
+export {
+  createEducationSchema,
+  updateEducationSchema,
+  EDUCATION_TYPES,
+  EDUCATION_MODALITIES,
+  EDUCATION_TYPE_LABELS,
+  EDUCATION_MODALITY_LABELS,
+} from "./education"
+export type {
+  CreateEducationInput,
+  UpdateEducationInput,
+  EducationType,
+  EducationModality,
+} from "./education"

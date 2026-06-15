@@ -16,6 +16,7 @@ import {
   Clock,
   Building2,
   Wrench,
+  GraduationCap,
 } from "lucide-react"
 
 const statusLabels: Record<
@@ -61,6 +62,7 @@ export default async function PainelPage({
 
   const clinicListings = listings.filter((l) => l.type === "CLINIC")
   const equipmentListings = listings.filter((l) => l.type === "EQUIPMENT")
+  const educationListings = listings.filter((l) => l.type === "EDUCATION")
 
   // Show migration notice only to clinics that have at least one CLINIC listing.
   // Equipment listings don't use the "Recursos disponíveis" taxonomy.
@@ -222,6 +224,61 @@ export default async function PainelPage({
                         </p>
                       </div>
                       <Link href={`/painel/aparelhos/${listing.id}/editar`}>
+                        <Button variant="outline" size="sm">
+                          Editar
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Educação Médica */}
+      <section className="mt-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-gold" />
+            <h2 className="text-lg font-bold">Educação Médica</h2>
+            <Badge variant="secondary">{educationListings.length}</Badge>
+          </div>
+          <Link href="/painel/educacao/novo">
+            <Button size="sm" className="gap-2">
+              <PlusCircle className="h-4 w-4" />
+              Nova Oportunidade
+            </Button>
+          </Link>
+        </div>
+        <div className="mt-4">
+          {educationListings.length === 0 ? (
+            <Card>
+              <CardContent className="py-10 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Nenhuma oportunidade educacional anunciada ainda.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {educationListings.map((listing) => {
+                const status = statusLabels[listing.status]
+                return (
+                  <Card key={listing.id}>
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium">{listing.title}</h3>
+                          <Badge variant={status.variant}>{status.label}</Badge>
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {listing.city || "Online"} &middot;{" "}
+                          {listing._count.images} fotos
+                        </p>
+                      </div>
+                      <Link href={`/painel/educacao/${listing.id}/editar`}>
                         <Button variant="outline" size="sm">
                           Editar
                         </Button>

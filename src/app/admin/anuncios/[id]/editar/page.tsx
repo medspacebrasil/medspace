@@ -26,8 +26,10 @@ export default async function AdminEditarAnuncioPage({ params }: PageProps) {
 
   if (!listing) notFound()
 
-  if (listing.type === "EQUIPMENT") {
-    // Admin edit for equipment isn't implemented yet — moderate from list view.
+  if (listing.type !== "CLINIC") {
+    // Admin edit for equipment/education isn't implemented yet — moderate from
+    // the list view (approve/reject/feature/delete) or let the owner edit
+    // content from their own painel.
     notFound()
   }
 

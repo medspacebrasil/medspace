@@ -98,6 +98,21 @@ enum EquipmentCondition {
   USADO
 }
 
+// Tipo da oportunidade educacional (usado quando Listing.type = EDUCATION)
+enum EducationType {
+  MENTORIA
+  CURSO
+  POS_GRADUACAO
+  EVENTO
+  OUTRO
+}
+
+enum EducationModality {
+  PRESENCIAL
+  ONLINE
+  HIBRIDO
+}
+
 model Listing {
   id              String             @id @default(cuid())
   clinicId        String             @map("clinic_id")
@@ -130,6 +145,15 @@ model Listing {
   brand               String?
   model               String?
   condition           EquipmentCondition?
+
+  // Education-only fields (type = EDUCATION)
+  educationType     EducationType?     @map("education_type")
+  educationModality EducationModality? @map("education_modality")
+  audience          String?            // "Para quem é indicado"
+  workload          String?            // Carga horaria
+  duration          String?            // Duracao / periodo
+  investment        String?            // Investimento (texto livre: Gratuito / A combinar / valor)
+  externalLink      String?            @map("external_link")
 
   images          ListingImage[]
   specialties     ListingSpecialty[]

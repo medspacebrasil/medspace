@@ -171,18 +171,20 @@ export default async function AdminAnunciosPage({
                       </Button>
                     </form>
                   )}
-                  <Link
-                    href={
-                      listing.type === "EQUIPMENT"
-                        ? `/admin/aparelhos/${listing.id}/editar`
-                        : `/admin/anuncios/${listing.id}/editar`
-                    }
-                  >
-                    <Button size="sm" variant="outline" className="gap-1">
-                      <Pencil className="h-3.5 w-3.5" />
-                      Editar
-                    </Button>
-                  </Link>
+                  {listing.type !== "EDUCATION" && (
+                    <Link
+                      href={
+                        listing.type === "EQUIPMENT"
+                          ? `/admin/aparelhos/${listing.id}/editar`
+                          : `/admin/anuncios/${listing.id}/editar`
+                      }
+                    >
+                      <Button size="sm" variant="outline" className="gap-1">
+                        <Pencil className="h-3.5 w-3.5" />
+                        Editar
+                      </Button>
+                    </Link>
+                  )}
                   {listing.status === "PENDING" && (
                     <>
                       <form action={approveListing}>
