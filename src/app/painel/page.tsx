@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { WelcomeModal } from "@/components/WelcomeModal"
 import { EquipmentMigrationNotice } from "@/components/EquipmentMigrationNotice"
+import { PlanStatusBanner } from "@/components/PlanStatusBanner"
 import {
   PlusCircle,
   FileText,
@@ -79,6 +80,7 @@ export default async function PainelPage({
     <div>
       {sp.welcome === "1" && <WelcomeModal />}
       {showMigrationNotice && <EquipmentMigrationNotice />}
+      <PlanStatusBanner />
       <div>
         <h1 className="text-2xl font-bold">Meus Anúncios</h1>
         <p className="text-muted-foreground">
