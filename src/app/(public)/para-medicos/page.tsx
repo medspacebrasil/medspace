@@ -236,6 +236,49 @@ export default async function ParaMedicosPage() {
         </section>
       )}
 
+      {/* Por que usar — Para Médicos */}
+      <section className="bg-navy px-4 py-16 md:py-20">
+        <div className="container mx-auto">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white md:text-3xl">
+              Por que usar o MedSpace?
+            </h2>
+          </div>
+          <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-xl bg-white/5 p-5 backdrop-blur-sm">
+              <h4 className="font-semibold text-white">
+                Encontre mais oportunidades
+              </h4>
+              <p className="mt-1 text-sm text-white/60">
+                Acesse espaços e equipamentos disponíveis em diversas regiões.
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/5 p-5 backdrop-blur-sm">
+              <h4 className="font-semibold text-white">Agilidade no contato</h4>
+              <p className="mt-1 text-sm text-white/60">
+                Fale direto com o anunciante, sem burocracia.
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/5 p-5 backdrop-blur-sm">
+              <h4 className="font-semibold text-white">
+                Flexibilidade de atendimento
+              </h4>
+              <p className="mt-1 text-sm text-white/60">
+                Atenda onde e quando quiser.
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/5 p-5 backdrop-blur-sm">
+              <h4 className="font-semibold text-white">
+                Cresça profissionalmente
+              </h4>
+              <p className="mt-1 text-sm text-white/60">
+                Acesse mentorias, cursos e pós-graduações.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
       <section id="faq" className="bg-warm-gray px-4 py-16 md:py-20">
         <div className="container mx-auto">

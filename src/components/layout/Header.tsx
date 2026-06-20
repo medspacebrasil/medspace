@@ -77,6 +77,11 @@ export async function Header() {
                 </Button>
               </Link>
               <Link href="/cadastro">
+                <Button variant="outline" size="sm" className="border-gold/40 bg-transparent font-medium text-gold hover:bg-gold/10 hover:text-gold">
+                  Cadastrar Curso
+                </Button>
+              </Link>
+              <Link href="/cadastro">
                 <Button size="sm" className="bg-gold text-navy hover:bg-gold/90 font-medium">
                   Cadastrar Clínica
                 </Button>

@@ -23,7 +23,7 @@ export function LegalPage({ title, subtitle, lastUpdated, children }: LegalPageP
               {subtitle}
             </p>
           )}
-          <p className="mt-4 text-sm text-white/50">
+          <p className="mt-4 inline-block rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/80">
             Última atualização: {lastUpdated}
           </p>
         </div>

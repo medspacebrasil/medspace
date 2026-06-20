@@ -1,6 +1,25 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Mail, MapPin } from "lucide-react"
+import { Mail, MapPin, MessageCircle } from "lucide-react"
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  )
+}
 import { CookiePreferencesButton } from "@/components/CookiePreferencesButton"
 
 export function Footer() {
@@ -132,6 +151,28 @@ export function Footer() {
                   className="transition-colors hover:text-white"
                 >
                   contato@medspacebrasil.com.br
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <MessageCircle className="h-4 w-4 shrink-0" />
+                <a
+                  href="https://wa.me/5561991863638"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-white"
+                >
+                  (61) 99186-3638
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <InstagramIcon className="h-4 w-4 shrink-0" />
+                <a
+                  href="https://instagram.com/med.spacebrasil"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-white"
+                >
+                  @med.spacebrasil
                 </a>
               </li>
               <li className="flex items-center gap-2">

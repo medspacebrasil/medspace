@@ -221,7 +221,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Por que usar — 2 colunas */}
+      {/* Por que usar — 3 colunas */}
       <section className="bg-navy px-4 py-16 md:py-20">
         <div className="container mx-auto">
           <div className="text-center">
@@ -229,7 +229,7 @@ export default function HomePage() {
               Por que usar o MedSpace?
             </h2>
           </div>
-          <div className="mx-auto mt-12 grid max-w-5xl gap-8 md:grid-cols-2">
+          <div className="mx-auto mt-12 grid max-w-6xl gap-8 md:grid-cols-3">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1.5 text-sm font-medium text-gold">
                 <Stethoscope className="h-4 w-4" />
@@ -292,6 +292,35 @@ export default function HomePage() {
                   </h4>
                   <p className="mt-1 text-sm text-white/60">
                     Negocie rapidamente pelo WhatsApp.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1.5 text-sm font-medium text-gold">
+                <GraduationCap className="h-4 w-4" />
+                Educação Médica
+              </div>
+              <div className="mt-6 space-y-4">
+                <div className="rounded-xl bg-white/5 p-5 backdrop-blur-sm">
+                  <h4 className="font-semibold text-white">
+                    Avance na carreira
+                  </h4>
+                  <p className="mt-1 text-sm text-white/60">
+                    Mentorias, cursos e pós-graduações em um só lugar.
+                  </p>
+                </div>
+                <div className="rounded-xl bg-white/5 p-5 backdrop-blur-sm">
+                  <h4 className="font-semibold text-white">Anuncie e ensine</h4>
+                  <p className="mt-1 text-sm text-white/60">
+                    Divulgue suas formações para profissionais de saúde.
+                  </p>
+                </div>
+                <div className="rounded-xl bg-white/5 p-5 backdrop-blur-sm">
+                  <h4 className="font-semibold text-white">Contato direto</h4>
+                  <p className="mt-1 text-sm text-white/60">
+                    Fale com o anunciante pelo WhatsApp, sem intermediários.
                   </p>
                 </div>
               </div>
