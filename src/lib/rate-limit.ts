@@ -45,6 +45,8 @@ export const RATE_LIMITS = {
   loginEmail: { tokens: 10, window: "10 m", prefix: "login-email" },
   register: { tokens: 3, window: "1 h", prefix: "register" },
   password: { tokens: 5, window: "1 h", prefix: "password" },
+  /** Password-reset requests, per IP and per email (anti-abuse / anti-enumeration). */
+  passwordReset: { tokens: 4, window: "1 h", prefix: "pwreset" },
   upload: { tokens: 40, window: "1 h", prefix: "upload" },
 } as const satisfies Record<string, RateLimitConfig>
 

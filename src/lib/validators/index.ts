@@ -9,6 +9,9 @@ export type { LoginInput, RegisterInput, AdvertiserType } from "./auth"
 
 export { isValidCPF, isValidCNPJ, formatDocument, onlyDigits } from "./document"
 
+export { forgotPasswordSchema, resetPasswordSchema } from "./password-reset"
+export type { ForgotPasswordInput, ResetPasswordInput } from "./password-reset"
+
 export { createListingSchema, updateListingSchema } from "./listing"
 export type { CreateListingInput, UpdateListingInput } from "./listing"
 
