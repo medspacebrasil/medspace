@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { auth } from "@/lib/auth"
+import { getActiveClinicSession } from "@/lib/auth/guards"
 import { prisma } from "@/lib/db"
 import { createListingSchema, updateListingSchema } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
@@ -17,7 +18,7 @@ export async function createListing(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const session = await auth()
+  const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
   }
@@ -56,7 +57,9 @@ export async function createListing(
         ...data,
         slug,
         type: "CLINIC",
-        status: "PUBLISHED",
+        // Entra na fila de verificação (PENDING) antes de ficar público; só o
+        // admin pode aprovar (PUBLISHED). Igual a aparelhos/educação.
+        status: "PENDING",
         clinicId: session.user.clinicId,
         specialties: {
           create: specialtyIds.map((id) => ({ specialtyId: id })),
@@ -81,7 +84,7 @@ export async function updateListing(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const session = await auth()
+  const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
   }
@@ -89,7 +92,7 @@ export async function updateListing(
   const id = formData.get("id") as string
   const listing = await prisma.listing.findUnique({
     where: { id },
-    select: { clinicId: true },
+    select: { clinicId: true, status: true },
   })
 
   if (!listing || listing.clinicId !== session.user.clinicId) {
@@ -124,10 +127,19 @@ export async function updateListing(
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
 
+    // Anti bait-and-switch: editar um anúncio já PUBLICADO o devolve para a
+    // fila de revisão (PENDING) — o conteúdo aprovado não pode ser trocado
+    // sem nova moderação. Demais estados não mudam por uma edição do dono.
+    const reReview =
+      listing.status === "PUBLISHED"
+        ? { status: "PENDING" as const, reviewedAt: null }
+        : {}
+
     await prisma.listing.update({
       where: { id },
       data: {
         ...data,
+        ...reReview,
         ...(specialtyIds && {
           specialties: {
             deleteMany: {},
@@ -174,13 +186,16 @@ export async function deleteListing(formData: FormData): Promise<void> {
   revalidatePath("/painel")
   revalidatePath("/anuncios")
   revalidateTag("listings", "max")
+  // Leave the now-deleted listing's edit page back to the panel with a success
+  // flag — otherwise the edit route 404s (the listing no longer exists).
+  redirect("/painel?excluido=1")
 }
 
 export async function publishListing(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const session = await auth()
+  const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
   }
@@ -198,10 +213,11 @@ export async function publishListing(
     return { success: false, errors: { _form: ["Anúncio não encontrado"] } }
   }
 
-  if (listing.status === "PUBLISHED") {
+  // O dono envia para revisão; quem publica (PUBLISHED) é só o admin.
+  if (listing.status !== "DRAFT" && listing.status !== "REJECTED") {
     return {
       success: false,
-      errors: { _form: ["Este anúncio já está publicado"] },
+      errors: { _form: ["Apenas rascunhos ou anúncios rejeitados podem ser enviados para revisão"] },
     }
   }
 
@@ -221,7 +237,7 @@ export async function publishListing(
 
   await prisma.listing.update({
     where: { id },
-    data: { status: "PUBLISHED" },
+    data: { status: "PENDING", reviewedAt: null },
   })
 
   revalidatePath("/painel")

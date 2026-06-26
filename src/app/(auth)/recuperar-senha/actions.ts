@@ -55,8 +55,13 @@ export async function requestPasswordReset(
 
   const user = await prisma.user.findUnique({ where: { email } })
   if (user) {
-    // Invalida tokens anteriores e cria um novo.
-    await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } })
+    // Limpa apenas tokens EXPIRADOS (higiene). NÃO apagamos tokens válidos:
+    // se apagássemos, um atacante poderia disparar resets repetidos para
+    // invalidar o link que a vítima está usando (denial-of-reset). Cada token
+    // é de uso único e expira em 1h, então conviver com alguns válidos é ok.
+    await prisma.passwordResetToken.deleteMany({
+      where: { userId: user.id, expiresAt: { lt: new Date() } },
+    })
     const rawToken = randomBytes(32).toString("hex")
     await prisma.passwordResetToken.create({
       data: {

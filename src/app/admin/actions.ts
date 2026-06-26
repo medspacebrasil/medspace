@@ -85,15 +85,21 @@ export async function unarchiveListing(formData: FormData) {
   revalidateTag("listings", "max")
 }
 
+const LISTING_STATUSES = ["DRAFT", "PENDING", "PUBLISHED", "REJECTED", "ARCHIVED"] as const
+type ListingStatusValue = (typeof LISTING_STATUSES)[number]
+
 export async function setListingStatus(formData: FormData) {
   await requireAdmin()
   const id = formData.get("id") as string
-  const status = formData.get("status") as "DRAFT" | "PENDING" | "PUBLISHED" | "REJECTED" | "ARCHIVED"
+  const status = formData.get("status") as string | null
   if (!id || !status) throw new Error("Dados incompletos")
+  if (!LISTING_STATUSES.includes(status as ListingStatusValue)) {
+    throw new Error("Status inválido")
+  }
 
   await prisma.listing.update({
     where: { id },
-    data: { status },
+    data: { status: status as ListingStatusValue },
   })
 
   revalidatePath("/admin/anuncios")
@@ -135,7 +141,9 @@ export async function blockClinic(formData: FormData) {
     data: { status: "ARCHIVED" },
   })
 
-  // Deactivate the user account
+  // Bloqueia a conta de verdade: marca blockedAt. O login passa a ser negado
+  // (authorize) e os guards de escrita (getActiveClinicSession) rejeitam a
+  // sessão atual imediatamente, mesmo com JWT ainda válido.
   const clinic = await prisma.clinic.findUnique({
     where: { id: clinicId },
     select: { userId: true },
@@ -143,7 +151,7 @@ export async function blockClinic(formData: FormData) {
   if (clinic) {
     await prisma.user.update({
       where: { id: clinic.userId },
-      data: { role: "CLINIC" }, // keep role but we mark via naming
+      data: { blockedAt: new Date() },
     })
   }
 
@@ -151,6 +159,27 @@ export async function blockClinic(formData: FormData) {
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
   revalidateTag("listings", "max")
+}
+
+export async function unblockClinic(formData: FormData) {
+  await requireAdmin()
+  const clinicId = formData.get("clinicId") as string
+  if (!clinicId) throw new Error("ID da clínica não fornecido")
+
+  const clinic = await prisma.clinic.findUnique({
+    where: { id: clinicId },
+    select: { userId: true },
+  })
+  if (clinic) {
+    await prisma.user.update({
+      where: { id: clinic.userId },
+      data: { blockedAt: null },
+    })
+  }
+  // Os anúncios arquivados pelo bloqueio permanecem arquivados; o admin pode
+  // republicá-los individualmente (não restauramos status automaticamente).
+
+  revalidatePath("/admin/clinicas")
 }
 
 export async function markReviewed(formData: FormData) {
@@ -339,10 +368,22 @@ export async function adminUpdateEquipment(
   }
 }
 
-export async function adminUpdateListing(formData: FormData) {
-  await requireAdmin()
+export type AdminUpdateListingState = {
+  success: boolean
+  errors?: Record<string, string[]>
+}
+
+export async function adminUpdateListing(
+  _prevState: AdminUpdateListingState,
+  formData: FormData
+): Promise<AdminUpdateListingState> {
+  const session = await auth()
+  if (session?.user?.role !== "ADMIN") {
+    return { success: false, errors: { _form: ["Não autorizado"] } }
+  }
+
   const id = formData.get("id") as string
-  if (!id) throw new Error("ID não fornecido")
+  if (!id) return { success: false, errors: { _form: ["ID não fornecido"] } }
 
   // Validate/normalize input even for admins — keeps malformed or oversized
   // data out of the DB and matches the validation used everywhere else.
@@ -360,7 +401,10 @@ export async function adminUpdateListing(formData: FormData) {
     requiresRqe: formData.get("requiresRqe") === "true",
   })
   if (!parsed.success) {
-    throw new Error("Dados inválidos para atualização do anúncio")
+    return {
+      success: false,
+      errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    }
   }
 
   const specialtyIds = formData.getAll("specialtyIds").map(String).filter(Boolean)
@@ -368,24 +412,30 @@ export async function adminUpdateListing(formData: FormData) {
 
   const { roomTypeId, ...data } = parsed.data
 
-  await prisma.listing.update({
-    where: { id },
-    data: {
-      ...data,
-      roomTypeId: roomTypeId || null,
-      reviewedAt: new Date(),
-      specialties: {
-        deleteMany: {},
-        create: specialtyIds.map((sid) => ({ specialtyId: sid })),
+  try {
+    await prisma.listing.update({
+      where: { id },
+      data: {
+        ...data,
+        roomTypeId: roomTypeId || null,
+        reviewedAt: new Date(),
+        specialties: {
+          deleteMany: {},
+          create: specialtyIds.map((sid) => ({ specialtyId: sid })),
+        },
+        equipment: {
+          deleteMany: {},
+          create: equipmentIds.map((eid) => ({ equipmentId: eid })),
+        },
       },
-      equipment: {
-        deleteMany: {},
-        create: equipmentIds.map((eid) => ({ equipmentId: eid })),
-      },
-    },
-  })
+    })
+  } catch (error) {
+    console.error("[adminUpdateListing] prisma update failed:", error)
+    return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] } }
+  }
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
   revalidateTag("listings", "max")
+  return { success: true }
 }

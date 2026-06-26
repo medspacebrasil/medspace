@@ -41,14 +41,15 @@ export async function PUT(request: Request, context: RouteContext) {
 
   const listing = await prisma.listing.findUnique({
     where: { id },
-    select: { clinicId: true },
+    select: { clinicId: true, status: true },
   })
 
   if (!listing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 })
   }
 
-  if (listing.clinicId !== session.user.clinicId && session.user.role !== "ADMIN") {
+  const isAdmin = session.user.role === "ADMIN"
+  if (listing.clinicId !== session.user.clinicId && !isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -65,10 +66,18 @@ export async function PUT(request: Request, context: RouteContext) {
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
 
+    // Anti bait-and-switch: edição do DONO em um anúncio publicado volta à
+    // revisão. Admin é confiável e mantém o status.
+    const reReview =
+      !isAdmin && listing.status === "PUBLISHED"
+        ? { status: "PENDING" as const, reviewedAt: null }
+        : {}
+
     const updated = await prisma.listing.update({
       where: { id },
       data: {
         ...data,
+        ...reReview,
         ...(specialtyIds && {
           specialties: {
             deleteMany: {},

@@ -7,9 +7,9 @@ import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { blockClinic } from "../actions"
+import { blockClinic, unblockClinic } from "../actions"
 import { DeleteClinicButton } from "@/components/anuncios/DeleteClinicButton"
-import { Ban, PlusCircle } from "lucide-react"
+import { Ban, Check, PlusCircle } from "lucide-react"
 
 export default async function AdminClinicasPage() {
   const session = await auth()
@@ -17,7 +17,7 @@ export default async function AdminClinicasPage() {
 
   const clinics = await prisma.clinic.findMany({
     include: {
-      user: { select: { email: true, name: true } },
+      user: { select: { email: true, name: true, blockedAt: true } },
       _count: { select: { listings: true } },
       listings: {
         select: { status: true },
@@ -35,7 +35,7 @@ export default async function AdminClinicasPage() {
         {clinics.map((clinic) => {
           const published = clinic.listings.filter((l) => l.status === "PUBLISHED").length
           const pending = clinic.listings.filter((l) => l.status === "PENDING").length
-          const allArchived = clinic.listings.length > 0 && clinic.listings.every((l) => l.status === "ARCHIVED")
+          const blocked = clinic.user.blockedAt !== null
 
           return (
             <Card key={clinic.id}>
@@ -43,7 +43,7 @@ export default async function AdminClinicasPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="font-medium">{clinic.name}</h3>
-                    {allArchived && (
+                    {blocked && (
                       <Badge variant="destructive">Bloqueada</Badge>
                     )}
                     {published > 0 && (
@@ -66,7 +66,21 @@ export default async function AdminClinicasPage() {
                       Novo anúncio
                     </Button>
                   </Link>
-                  {!allArchived && clinic._count.listings > 0 && (
+                  {blocked ? (
+                    <form action={unblockClinic}>
+                      <input type="hidden" name="clinicId" value={clinic.id} />
+                      <Button
+                        type="submit"
+                        size="sm"
+                        variant="outline"
+                        className="gap-1"
+                        title="Desbloquear a conta desta clínica"
+                      >
+                        <Check className="h-3.5 w-3.5" />
+                        Desbloquear
+                      </Button>
+                    </form>
+                  ) : (
                     <form action={blockClinic}>
                       <input type="hidden" name="clinicId" value={clinic.id} />
                       <Button
@@ -74,7 +88,7 @@ export default async function AdminClinicasPage() {
                         size="sm"
                         variant="outline"
                         className="gap-1"
-                        title="Arquivar todos os anúncios desta clínica"
+                        title="Bloquear a conta e arquivar todos os anúncios desta clínica"
                       >
                         <Ban className="h-3.5 w-3.5" />
                         Bloquear

@@ -5,6 +5,10 @@ import { prisma } from "@/lib/db"
 import { loginSchema } from "@/lib/validators"
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 
+// Hash bcrypt fixo (de uma senha aleatória descartada) usado só para igualar
+// o tempo de `compare` quando o e-mail não existe. Não autentica nada.
+const DUMMY_HASH = "$2a$12$C6UzMDM.H6dfI/f/IKcEeO3Z0wYJ8e6tD8WbQ1bqv0rN5p7Xh9Iu"
+
 function ipFromRequest(request: Request | undefined): string {
   const xff = request?.headers.get("x-forwarded-for")
   if (xff) return xff.split(",")[0]!.trim()
@@ -43,10 +47,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           include: { clinic: true },
         })
 
-        if (!user) return null
+        if (!user) {
+          // Compara contra um hash dummy para igualar o tempo de resposta ao
+          // do caminho "senha errada" e não vazar quais e-mails existem.
+          await compare(parsed.data.password, DUMMY_HASH)
+          return null
+        }
 
         const isValid = await compare(parsed.data.password, user.passwordHash)
         if (!isValid) return null
+
+        // Conta bloqueada pelo admin não autentica.
+        if (user.blockedAt) return null
 
         return {
           id: user.id,

@@ -46,3 +46,4 @@ prisma/migrations/*.sql.bak
 # IDE
 .vscode/settings.json
 .idea/
+backups/

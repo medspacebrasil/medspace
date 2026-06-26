@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { auth } from "@/lib/auth"
+import { getActiveClinicSession } from "@/lib/auth/guards"
 import { prisma } from "@/lib/db"
 import { createEquipmentSchema, updateEquipmentSchema } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
@@ -17,7 +18,7 @@ export async function createEquipment(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const session = await auth()
+  const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
   }
@@ -71,7 +72,7 @@ export async function updateEquipment(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const session = await auth()
+  const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
   }
@@ -79,7 +80,7 @@ export async function updateEquipment(
   const id = formData.get("id") as string
   const listing = await prisma.listing.findUnique({
     where: { id },
-    select: { clinicId: true, type: true },
+    select: { clinicId: true, type: true, status: true },
   })
 
   if (!listing || listing.clinicId !== session.user.clinicId || listing.type !== "EQUIPMENT") {
@@ -106,9 +107,15 @@ export async function updateEquipment(
       return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
     }
 
+    // Anti bait-and-switch: editar um aparelho já PUBLICADO o devolve à revisão.
+    const reReview =
+      listing.status === "PUBLISHED"
+        ? { status: "PENDING" as const, reviewedAt: null }
+        : {}
+
     await prisma.listing.update({
       where: { id },
-      data: parsed.data,
+      data: { ...parsed.data, ...reReview },
     })
 
     revalidatePath("/painel")
@@ -139,13 +146,15 @@ export async function deleteEquipment(formData: FormData): Promise<void> {
 
   await prisma.listing.delete({ where: { id } })
   revalidatePath("/painel")
+  // Back to the panel with a success flag — the edit route would 404 otherwise.
+  redirect("/painel?excluido=1")
 }
 
 export async function publishEquipment(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const session = await auth()
+  const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
   }

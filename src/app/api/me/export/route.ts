@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 
 /**
  * LGPD — right to access & data portability (art. 18, II and V).
@@ -11,6 +12,16 @@ export async function GET() {
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  // Consulta pesada (joins profundos + serialização) — limita a frequência por
+  // usuário para evitar amplificação de carga. Não vaza dados de terceiros.
+  const limit = await rateLimit(RATE_LIMITS.export, session.user.id)
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Muitas solicitações. Tente novamente mais tarde." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+    )
   }
 
   const user = await prisma.user.findUnique({

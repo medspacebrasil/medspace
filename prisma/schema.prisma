@@ -36,6 +36,9 @@ model User {
   passwordHash           String    @map("password_hash")
   name                   String
   role                   Role      @default(CLINIC)
+  // Quando preenchido, a conta está bloqueada pelo admin: não loga e não
+  // cria/edita/publica anúncios. Nulável e aditivo (não afeta contas legadas).
+  blockedAt              DateTime? @map("blocked_at")
   clinic                 Clinic?
   passwordResetTokens    PasswordResetToken[]
   acceptedTermsAt        DateTime? @map("accepted_terms_at")

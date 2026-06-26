@@ -8,6 +8,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/client"
 import { compare, hash } from "bcryptjs"
 import { z } from "zod/v4"
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit"
+import { whatsappSchema, optionalPhoneSchema } from "@/lib/validators/phone"
 
 function storagePathFromPublicUrl(url: string): string | null {
   const marker = "/storage/v1/object/public/listings/"
@@ -22,11 +23,11 @@ export type ActionState = {
 }
 
 const profileSchema = z.object({
-  name: z.string().min(2).max(150),
-  phone: z.string().regex(/^\d{10,11}$/, "Telefone deve ter 10 ou 11 dígitos").optional().or(z.literal("")),
-  whatsapp: z.string().regex(/^\d{10,11}$/),
-  city: z.string().min(2).max(100),
-  neighborhood: z.string().min(2).max(100),
+  name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres").max(150, "Nome muito longo"),
+  phone: optionalPhoneSchema,
+  whatsapp: whatsappSchema,
+  city: z.string().min(2, "Cidade é obrigatória").max(100, "Nome da cidade muito longo"),
+  neighborhood: z.string().min(2, "Bairro é obrigatório").max(100, "Nome do bairro muito longo"),
   description: z.string().max(2000, "Descrição muito longa").optional(),
 })
 
@@ -118,10 +119,15 @@ export async function changePassword(
   }
 
   const newHash = await hash(parsed.data.newPassword, 12)
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: { passwordHash: newHash },
-  })
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: session.user.id },
+      data: { passwordHash: newHash },
+    }),
+    // Troca voluntária de senha invalida quaisquer links de redefinição
+    // pendentes (que poderiam continuar válidos por até 1h).
+    prisma.passwordResetToken.deleteMany({ where: { userId: session.user.id } }),
+  ])
 
   return { success: true }
 }
@@ -143,6 +149,14 @@ export async function deleteAccount(
   const session = await auth()
   if (!session?.user?.id || !session.user.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
+  }
+
+  const limit = await rateLimit(RATE_LIMITS.destructive, session.user.id)
+  if (!limit.success) {
+    return {
+      success: false,
+      errors: { _form: ["Muitas tentativas. Tente novamente mais tarde."] },
+    }
   }
 
   const parsed = deleteAccountSchema.safeParse({

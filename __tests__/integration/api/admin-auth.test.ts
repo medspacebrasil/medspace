@@ -31,7 +31,8 @@ describe("Admin API Authorization", () => {
       mockAuthFn = vi.fn().mockResolvedValue(testSession)
       const { GET } = await import("@/app/api/admin/clinicas/route")
 
-      const response = await GET()
+      const request = new Request("http://localhost:3000/api/admin/clinicas")
+      const response = await GET(request)
       expect(response.status).toBe(403)
     })
 
@@ -39,7 +40,8 @@ describe("Admin API Authorization", () => {
       mockAuthFn = vi.fn().mockResolvedValue(null)
       const { GET } = await import("@/app/api/admin/clinicas/route")
 
-      const response = await GET()
+      const request = new Request("http://localhost:3000/api/admin/clinicas")
+      const response = await GET(request)
       expect(response.status).toBe(403)
     })
 
@@ -51,7 +53,8 @@ describe("Admin API Authorization", () => {
         { id: "clinic-1", name: "Test Clinic" },
       ])
 
-      const response = await GET()
+      const request = new Request("http://localhost:3000/api/admin/clinicas")
+      const response = await GET(request)
       expect(response.status).toBe(200)
       const body = await response.json()
       expect(body).toHaveLength(1)

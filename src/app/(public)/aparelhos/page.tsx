@@ -39,7 +39,10 @@ export default async function AparelhosMarketplace({ searchParams }: PageProps) 
   if (params.category) {
     where.equipmentCategory = { slug: params.category }
   }
-  if (params.condition) where.condition = params.condition
+  const VALID_CONDITIONS = ["NOVO", "SEMINOVO", "USADO"]
+  if (params.condition && VALID_CONDITIONS.includes(params.condition)) {
+    where.condition = params.condition
+  }
 
   const [listings, total, categories] = await Promise.all([
     prisma.listing.findMany({

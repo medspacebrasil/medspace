@@ -35,19 +35,29 @@ export type RateLimitConfig = {
   window: Duration
   /** Stable key prefix to namespace this limiter. */
   prefix: string
+  /**
+   * Limiter de segurança crítico (auth/senha). Quando o limiter não puder ser
+   * construído e `RATE_LIMIT_FAIL_CLOSED=true`, estes falham FECHADO (negam)
+   * em vez de abrir. Ver `rateLimit()`.
+   */
+  critical?: boolean
 }
 
 /** Centralised limits so they're easy to audit and tune. */
 export const RATE_LIMITS = {
   /** Per-IP login attempts (stops single-source brute force / stuffing). */
-  login: { tokens: 5, window: "60 s", prefix: "login" },
+  login: { tokens: 5, window: "60 s", prefix: "login", critical: true },
   /** Per-account login attempts (stops distributed brute force on one email). */
-  loginEmail: { tokens: 10, window: "10 m", prefix: "login-email" },
-  register: { tokens: 3, window: "1 h", prefix: "register" },
-  password: { tokens: 5, window: "1 h", prefix: "password" },
+  loginEmail: { tokens: 10, window: "10 m", prefix: "login-email", critical: true },
+  register: { tokens: 3, window: "1 h", prefix: "register", critical: true },
+  password: { tokens: 5, window: "1 h", prefix: "password", critical: true },
   /** Password-reset requests, per IP and per email (anti-abuse / anti-enumeration). */
-  passwordReset: { tokens: 4, window: "1 h", prefix: "pwreset" },
+  passwordReset: { tokens: 4, window: "1 h", prefix: "pwreset", critical: true },
   upload: { tokens: 40, window: "1 h", prefix: "upload" },
+  /** Exportação de dados (LGPD) — baixa frequência legítima. */
+  export: { tokens: 5, window: "1 h", prefix: "export" },
+  /** Ações destrutivas (excluir conta/anúncio). */
+  destructive: { tokens: 10, window: "1 h", prefix: "destructive" },
 } as const satisfies Record<string, RateLimitConfig>
 
 const _limiters = new Map<string, Ratelimit>()
@@ -88,8 +98,21 @@ export async function rateLimit(
     if (process.env.NODE_ENV === "production" && !_warned) {
       _warned = true
       console.warn(
-        "[rate-limit] UPSTASH_REDIS_REST_URL/TOKEN not set — requests are NOT being rate limited."
+        "[rate-limit] UPSTASH_REDIS_REST_URL/TOKEN not set — requests are NOT being rate limited. " +
+          "Configure o Upstash em produção. Defina RATE_LIMIT_FAIL_CLOSED=true para negar " +
+          "rotas de autenticação quando o limiter estiver indisponível."
       )
+    }
+    // Fail-closed opcional: em produção, com a flag ligada, limiters críticos
+    // (login/senha/registro/reset) NEGAM quando o Redis não está configurado —
+    // assim uma falha de config não deixa a autenticação sem proteção. Ative
+    // apenas DEPOIS de provisionar o Upstash, senão ninguém consegue logar.
+    if (
+      config.critical &&
+      process.env.NODE_ENV === "production" &&
+      process.env.RATE_LIMIT_FAIL_CLOSED === "true"
+    ) {
+      return { success: false, retryAfter: 60 }
     }
     return { success: true, retryAfter: 0 }
   }

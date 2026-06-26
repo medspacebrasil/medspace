@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { auth } from "@/lib/auth"
+import { getActiveClinicSession } from "@/lib/auth/guards"
 import { prisma } from "@/lib/db"
 import { createEducationSchema, updateEducationSchema } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
@@ -71,7 +72,7 @@ export async function createEducation(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const session = await auth()
+  const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
   }
@@ -110,7 +111,7 @@ export async function updateEducation(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const session = await auth()
+  const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
   }
@@ -118,7 +119,7 @@ export async function updateEducation(
   const id = formData.get("id") as string
   const listing = await prisma.listing.findUnique({
     where: { id },
-    select: { clinicId: true, type: true },
+    select: { clinicId: true, type: true, status: true },
   })
   if (!listing || listing.clinicId !== session.user.clinicId || listing.type !== "EDUCATION") {
     return { success: false, errors: { _form: ["Anúncio não encontrado"] } }
@@ -131,9 +132,15 @@ export async function updateEducation(
     }
 
     const d = parsed.data
+    // Anti bait-and-switch: editar um anúncio já PUBLICADO o devolve à revisão.
+    const reReview =
+      listing.status === "PUBLISHED"
+        ? { status: "PENDING" as const, reviewedAt: null }
+        : {}
     await prisma.listing.update({
       where: { id },
       data: {
+        ...reReview,
         ...(d.title !== undefined && { title: d.title }),
         ...(d.description !== undefined && {
           description: d.description.slice(0, 300),
@@ -181,6 +188,8 @@ export async function deleteEducation(formData: FormData): Promise<void> {
   await prisma.listing.delete({ where: { id } })
   revalidatePath("/painel")
   revalidatePath("/educacao-medica")
+  // Back to the panel with a success flag — the edit route would 404 otherwise.
+  redirect("/painel?excluido=1")
 }
 
 /** Resubmit a rejected education listing for review. */
@@ -188,7 +197,7 @@ export async function resubmitEducation(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const session = await auth()
+  const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
     return { success: false, errors: { _form: ["Não autorizado"] } }
   }
