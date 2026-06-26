@@ -50,8 +50,8 @@ export default function CadastroPage() {
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Crie sua conta</CardTitle>
         <CardDescription>
-          Para clínicas e empresas que alugam aparelhos médicos. Cadastro
-          gratuito.
+          Para médicos, clínicas, coworkings, empresas e instituições que querem
+          anunciar na MedSpace. Cadastro gratuito.
         </CardDescription>
       </CardHeader>
       <form action={formAction}>

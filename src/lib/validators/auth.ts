@@ -1,5 +1,6 @@
 import { z } from "zod/v4"
 import { isValidCPF, isValidCNPJ, onlyDigits } from "./document"
+import { whatsappSchema } from "./phone"
 
 export const loginSchema = z.object({
   email: z.email("Email inválido"),
@@ -33,9 +34,7 @@ export const registerSchema = z
     }),
     clinicName: z.string().min(2, "Nome deve ter no mínimo 2 caracteres").max(150, "Nome muito longo"),
     document: z.string().min(1, "Documento é obrigatório"),
-    whatsapp: z
-      .string()
-      .regex(/^\d{10,11}$/, "WhatsApp deve ter 10 ou 11 dígitos (DDD + número)"),
+    whatsapp: whatsappSchema,
     city: z.string().min(2, "Cidade é obrigatória").max(100, "Nome da cidade muito longo"),
     state: z.string().max(2).default(""),
     neighborhood: z.string().min(2, "Bairro é obrigatório").max(100, "Nome do bairro muito longo"),

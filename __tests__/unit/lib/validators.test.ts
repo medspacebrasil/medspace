@@ -96,12 +96,15 @@ describe("registerSchema", () => {
     expect(result.success).toBe(true)
   })
 
-  it("rejects whatsapp with non-digits", () => {
+  it("normalizes formatted whatsapp to digits only", () => {
     const result = registerSchema.safeParse({
       ...validRegister,
       whatsapp: "(11) 99999-8888",
     })
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.whatsapp).toBe("11999998888")
+    }
   })
 
   it("rejects short name", () => {
@@ -170,6 +173,25 @@ describe("createListingSchema", () => {
     const result = createListingSchema.safeParse({
       ...validListing,
       specialtyIds: [],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it("normalizes formatted whatsapp to digits only", () => {
+    const result = createListingSchema.safeParse({
+      ...validListing,
+      whatsapp: "(11) 99999-8888",
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.whatsapp).toBe("11999998888")
+    }
+  })
+
+  it("rejects whatsapp with too many digits even when formatted", () => {
+    const result = createListingSchema.safeParse({
+      ...validListing,
+      whatsapp: "+55 (11) 99999-8888",
     })
     expect(result.success).toBe(false)
   })

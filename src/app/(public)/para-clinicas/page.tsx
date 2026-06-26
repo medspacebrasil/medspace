@@ -69,8 +69,8 @@ export default function ParaClinicasPage() {
             <a href="#como-funciona">
               <Button
                 size="lg"
-                variant="ghost"
-                className="font-medium text-white/80 hover:text-white hover:bg-white/10"
+                variant="outline"
+                className="border-gold bg-transparent text-base font-semibold text-gold hover:bg-gold/10 hover:text-gold"
               >
                 Como funciona?
               </Button>
@@ -306,8 +306,9 @@ export default function ParaClinicasPage() {
                   Sem taxas ou comissões
                 </h3>
                 <p className="mt-1 text-sm text-white/60">
-                  Cadastre-se de graça, publique de graça. Não cobramos nenhum
-                  percentual sobre suas negociações.
+                  Sem comissão sobre suas negociações — nunca cobramos percentual
+                  do que você fecha. Durante o lançamento, anunciar também é
+                  gratuito.
                 </p>
               </div>
             </div>
@@ -369,8 +370,10 @@ export default function ParaClinicasPage() {
                   Quanto custa anunciar no MedSpace?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  Nada. O cadastro e a publicação de anúncios são 100%
-                  gratuitos. Não cobramos comissão nem taxa de adesão.
+                  Durante o período de lançamento, anunciar é gratuito. Em breve
+                  teremos planos de anúncio, com condições especiais para quem já
+                  estiver cadastrado. A MedSpace nunca cobra comissão sobre suas
+                  negociações.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2" className="border-border/50">
@@ -453,7 +456,7 @@ export default function ParaClinicasPage() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-gold" />
-                <span className="text-sm">Anúncios ilimitados</span>
+                <span className="text-sm">Publique seus anúncios</span>
               </div>
             </div>
             <Link href="/cadastro">

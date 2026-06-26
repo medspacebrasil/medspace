@@ -141,8 +141,8 @@ export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
             <Link href="/cadastro">
               <Button
                 size="lg"
-                variant="ghost"
-                className="font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                variant="outline"
+                className="border-gold bg-transparent text-base font-semibold text-gold hover:bg-gold/10 hover:text-gold"
               >
                 Quero anunciar uma oportunidade educacional
               </Button>
@@ -487,8 +487,9 @@ export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
             Quer anunciar uma oportunidade educacional?
           </h2>
           <p className="mx-auto mt-3 max-w-md text-white/70">
-            Cadastre-se gratuitamente, descreva o que você oferece e receba
-            contatos direto pelo WhatsApp. Sem taxas, sem comissão.
+            Descreva o que você oferece e receba contatos direto pelo WhatsApp,
+            sem comissão sobre suas negociações. Durante o lançamento, anunciar é
+            gratuito.
           </p>
           <Link href="/cadastro">
             <Button

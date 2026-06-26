@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { adminUpdateListing, type AdminUpdateListingState } from "@/app/admin/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -53,25 +54,17 @@ export function AdminEditListingClient({
   equipment,
 }: Props) {
   const router = useRouter()
-  const [saving, setSaving] = useState(false)
+  const [state, formAction, isPending] = useActionState<AdminUpdateListingState, FormData>(
+    adminUpdateListing,
+    { success: false }
+  )
   const [modalOpen, setModalOpen] = useState(false)
-  const [modalStatus, setModalStatus] = useState<"success" | "error">("success")
 
-  async function handleSubmit(formData: FormData) {
-    setSaving(true)
-
-    try {
-      const { adminUpdateListing } = await import("@/app/admin/actions")
-      await adminUpdateListing(formData)
-      setModalStatus("success")
-      setModalOpen(true)
-    } catch {
-      setModalStatus("error")
-      setModalOpen(true)
-    } finally {
-      setSaving(false)
-    }
-  }
+  // Open the success modal whenever a save succeeds. Validation errors are shown
+  // inline (per field) below, so the form keeps the values the admin typed.
+  useEffect(() => {
+    if (state.success) setModalOpen(true)
+  }, [state])
 
   return (
     <div>
@@ -95,12 +88,8 @@ export function AdminEditListingClient({
 
       <SaveStatusModal
         open={modalOpen}
-        status={modalStatus}
-        message={
-          modalStatus === "success"
-            ? "Suas alterações foram salvas e já estão no ar."
-            : "Não foi possível salvar. Verifique os campos e tente novamente."
-        }
+        status="success"
+        message="Suas alterações foram salvas e já estão no ar."
         onClose={() => setModalOpen(false)}
       />
 
@@ -108,11 +97,17 @@ export function AdminEditListingClient({
         <ImageUpload listingId={listing.id} initialImages={listing.images} />
       </div>
 
-      <form action={handleSubmit} className="mt-6">
+      <form action={formAction} className="mt-6">
         <input type="hidden" name="id" value={listing.id} />
 
         <Card>
           <CardContent className="space-y-4 pt-6">
+            {state.errors?._form && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {state.errors._form[0]}
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="title">Título do anúncio</Label>
               <Input
@@ -121,6 +116,9 @@ export function AdminEditListingClient({
                 defaultValue={listing.title}
                 required
               />
+              {state.errors?.title && (
+                <p className="text-sm text-destructive">{state.errors.title[0]}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -132,6 +130,9 @@ export function AdminEditListingClient({
                 maxLength={300}
                 required
               />
+              {state.errors?.description && (
+                <p className="text-sm text-destructive">{state.errors.description[0]}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -159,6 +160,9 @@ export function AdminEditListingClient({
                   defaultValue={listing.whatsapp}
                   required
                 />
+                {state.errors?.whatsapp && (
+                  <p className="text-sm text-destructive">{state.errors.whatsapp[0]}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="roomTypeId">Tipo de sala</Label>
@@ -259,9 +263,9 @@ export function AdminEditListingClient({
               </Label>
             </div>
 
-            <Button type="submit" className="w-full gap-2" disabled={saving}>
+            <Button type="submit" className="w-full gap-2" disabled={isPending}>
               <Save className="h-4 w-4" />
-              {saving ? "Salvando..." : "Salvar Alterações"}
+              {isPending ? "Salvando..." : "Salvar Alterações"}
             </Button>
           </CardContent>
         </Card>

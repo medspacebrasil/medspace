@@ -144,8 +144,8 @@ export default function HomePage() {
                   <div>
                     <h4 className="font-semibold">Busque</h4>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Encontre salas e equipamentos por cidade, especialidade
-                      ou estrutura.
+                      Encontre salas, equipamentos ou oportunidades de educação
+                      por cidade, especialidade ou área de interesse.
                     </p>
                   </div>
                 </li>
@@ -342,7 +342,8 @@ export default function HomePage() {
                   Sem intermediários
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Conexão direta entre médicos e clínicas.
+                  Conexão direta entre médicos, clínicas, empresas e
+                  instituições.
                 </p>
               </CardContent>
             </Card>
@@ -355,8 +356,8 @@ export default function HomePage() {
                   Mais oportunidades
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Espaços disponíveis para médicos e mais ocupação para
-                  clínicas.
+                  Mais opções para médicos e mais visibilidade para quem
+                  anuncia.
                 </p>
               </CardContent>
             </Card>
@@ -398,8 +399,12 @@ export default function HomePage() {
               <AccordionItem value="item-2" className="border-border/50">
                 <AccordionTrigger>A plataforma é gratuita?</AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  Sim! Tanto para médicos que buscam salas quanto para clínicas
-                  que anunciam seus espaços, o uso da plataforma é gratuito.
+                  Para médicos que buscam salas, equipamentos ou educação
+                  médica, o acesso é sempre gratuito. Para quem anuncia
+                  (clínicas, coworkings, empresas e instituições), os anúncios
+                  estão gratuitos durante o período de lançamento. Em breve
+                  lançaremos planos com condições especiais para quem já estiver
+                  cadastrado.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3" className="border-border/50">
@@ -427,13 +432,20 @@ export default function HomePage() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-5" className="border-border/50">
-                <AccordionTrigger>Sou clínica, por onde começo?</AccordionTrigger>
+                <AccordionTrigger>
+                  Sou clínica, empresa ou instituição, por onde começo?
+                </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   Acesse{" "}
                   <Link href="/para-clinicas" className="text-gold underline">
                     Para Clínicas
                   </Link>{" "}
-                  para conhecer as vantagens e criar sua conta gratuita.
+                  para conhecer as vantagens e criar sua conta gratuita. Se você
+                  oferece cursos, mentorias ou pós-graduações, veja também a{" "}
+                  <Link href="/educacao-medica" className="text-gold underline">
+                    Educação Médica
+                  </Link>
+                  .
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

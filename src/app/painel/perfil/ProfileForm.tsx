@@ -55,6 +55,9 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
               defaultValue={clinic.name}
               required
             />
+            {state.errors?.name && (
+              <p className="text-sm text-destructive">{state.errors.name[0]}</p>
+            )}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -65,6 +68,9 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
                 name="phone"
                 defaultValue={clinic.phone ?? ""}
               />
+              {state.errors?.phone && (
+                <p className="text-sm text-destructive">{state.errors.phone[0]}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="whatsapp">WhatsApp</Label>
@@ -74,6 +80,9 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
                 defaultValue={clinic.whatsapp}
                 required
               />
+              {state.errors?.whatsapp && (
+                <p className="text-sm text-destructive">{state.errors.whatsapp[0]}</p>
+              )}
             </div>
           </div>
 
@@ -86,6 +95,9 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
                 defaultValue={clinic.city}
                 required
               />
+              {state.errors?.city && (
+                <p className="text-sm text-destructive">{state.errors.city[0]}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="neighborhood">Bairro</Label>
@@ -95,6 +107,9 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
                 defaultValue={clinic.neighborhood}
                 required
               />
+              {state.errors?.neighborhood && (
+                <p className="text-sm text-destructive">{state.errors.neighborhood[0]}</p>
+              )}
             </div>
           </div>
 
@@ -106,6 +121,9 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
               defaultValue={clinic.description ?? ""}
               rows={4}
             />
+            {state.errors?.description && (
+              <p className="text-sm text-destructive">{state.errors.description[0]}</p>
+            )}
           </div>
 
           <Button type="submit" disabled={isPending}>

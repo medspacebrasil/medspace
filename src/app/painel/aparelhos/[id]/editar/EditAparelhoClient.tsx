@@ -67,7 +67,18 @@ export function EditAparelhoClient({ listing, categories }: Props) {
               </Button>
             </form>
           )}
-          <form action={deleteEquipment}>
+          <form
+            action={deleteEquipment}
+            onSubmit={(e) => {
+              if (
+                !confirm(
+                  "Tem certeza que deseja excluir este aparelho? Esta ação não pode ser desfeita."
+                )
+              ) {
+                e.preventDefault()
+              }
+            }}
+          >
             <input type="hidden" name="id" value={listing.id} />
             <Button type="submit" variant="destructive" className="gap-2">
               <Trash2 className="h-4 w-4" />

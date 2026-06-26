@@ -163,8 +163,8 @@ export default async function ParaMedicosPage() {
           <div className="text-center">
             <h2 className="text-2xl font-bold md:text-3xl">Como funciona</h2>
             <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-              Em 3 passos simples, encontre o espaço perfeito para atender seus
-              pacientes.
+              Em 3 passos simples, encontre o que você precisa para sua
+              carreira.
             </p>
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
@@ -203,6 +203,13 @@ export default async function ParaMedicosPage() {
               </CardContent>
             </Card>
           </div>
+          <p className="mx-auto mt-10 max-w-xl text-center text-sm text-muted-foreground">
+            Procurando cursos, mentorias ou pós-graduação? Acesse a página de{" "}
+            <Link href="/educacao-medica" className="font-medium text-gold underline">
+              Educação Médica
+            </Link>
+            .
+          </p>
         </div>
       </section>
 
@@ -315,8 +322,8 @@ export default async function ParaMedicosPage() {
               <AccordionItem value="item-3" className="border-border/50">
                 <AccordionTrigger>A plataforma é gratuita?</AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  Sim! Para médicos que buscam salas, o uso da plataforma é
-                  totalmente gratuito.
+                  Sim! Para médicos que buscam salas, equipamentos ou educação
+                  médica, o uso da plataforma é sempre gratuito.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-4" className="border-border/50">

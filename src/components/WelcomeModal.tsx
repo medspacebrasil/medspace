@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, X, ArrowRight, Building2, Wrench } from "lucide-react"
+import { CheckCircle2, X, ArrowRight } from "lucide-react"
 
 export function WelcomeModal() {
   const [open, setOpen] = useState(true)
@@ -42,40 +41,32 @@ export function WelcomeModal() {
 
         <div className="mt-6 space-y-3 rounded-lg bg-muted/40 p-4 text-sm">
           <p>
-            Para que sua clínica ou aparelho apareça na plataforma e possa ser
-            encontrado por médicos interessados, você precisa clicar em{" "}
-            <strong>NOVO ANÚNCIO DE CLÍNICA</strong> ou{" "}
-            <strong>NOVO APARELHO</strong>.
+            Para que seu anúncio apareça na plataforma e possa ser encontrado
+            por médicos interessados, você precisa criar um anúncio. Na próxima
+            etapa, escolha a categoria (<strong>espaço/sala</strong>,{" "}
+            <strong>aparelho</strong> ou <strong>educação médica</strong>),
+            preencha as informações e anexe fotos.
           </p>
           <p>
-            Na próxima etapa, você deverá preencher as informações do espaço ou
-            equipamento e <strong>anexar fotos</strong>. Anúncios com fotos têm
-            muito mais chances de receber contatos.
+            Anúncios com <strong>fotos</strong> têm muito mais chances de receber
+            contatos.
           </p>
           <p className="rounded-md bg-amber-100 p-3 text-amber-900">
-            <strong>Importante:</strong> o cadastro sozinho não torna sua
-            clínica visível na plataforma. É necessário criar o anúncio para
-            que ele seja publicado.
+            <strong>Importante:</strong> o cadastro sozinho não torna seu anúncio
+            visível na plataforma. É necessário criar o anúncio para que ele seja
+            publicado.
           </p>
         </div>
 
-        <div className="mt-6 grid gap-2 sm:grid-cols-2">
-          <Link
-            href="/painel/anuncios/novo"
+        <div className="mt-6">
+          <button
+            type="button"
             onClick={() => setOpen(false)}
-            className="flex items-center justify-center gap-2 rounded-md bg-gold px-4 py-2.5 text-sm font-semibold text-navy hover:bg-gold/90"
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-gold px-4 py-2.5 text-sm font-semibold text-navy hover:bg-gold/90"
           >
-            <Building2 className="h-4 w-4" />
-            Novo anúncio de clínica
-          </Link>
-          <Link
-            href="/painel/aparelhos/novo"
-            onClick={() => setOpen(false)}
-            className="flex items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2.5 text-sm font-semibold hover:bg-muted"
-          >
-            <Wrench className="h-4 w-4" />
-            Novo aparelho
-          </Link>
+            Criar anúncio
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
 
         <div className="mt-3 text-center">

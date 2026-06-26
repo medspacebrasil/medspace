@@ -65,7 +65,18 @@ export function EditEducacaoClient({ listing, justCreated }: Props) {
               </Button>
             </form>
           )}
-          <form action={deleteEducation}>
+          <form
+            action={deleteEducation}
+            onSubmit={(e) => {
+              if (
+                !confirm(
+                  "Tem certeza que deseja excluir esta oportunidade? Esta ação não pode ser desfeita."
+                )
+              ) {
+                e.preventDefault()
+              }
+            }}
+          >
             <input type="hidden" name="id" value={listing.id} />
             <Button type="submit" variant="destructive" className="gap-2">
               <Trash2 className="h-4 w-4" />

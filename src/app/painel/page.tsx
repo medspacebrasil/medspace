@@ -37,7 +37,7 @@ const statusLabels: Record<
 export default async function PainelPage({
   searchParams,
 }: {
-  searchParams: Promise<{ welcome?: string }>
+  searchParams: Promise<{ welcome?: string; excluido?: string }>
 }) {
   const sp = await searchParams
   const session = await auth()
@@ -81,10 +81,15 @@ export default async function PainelPage({
       {sp.welcome === "1" && <WelcomeModal />}
       {showMigrationNotice && <EquipmentMigrationNotice />}
       <PlanStatusBanner />
+      {sp.excluido === "1" && (
+        <div className="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+          Anúncio excluído.
+        </div>
+      )}
       <div>
         <h1 className="text-2xl font-bold">Meus Anúncios</h1>
         <p className="text-muted-foreground">
-          Gerencie anúncios de clínicas e de aparelhos
+          Gerencie anúncios de clínicas, aparelhos e educação médica.
         </p>
       </div>
 

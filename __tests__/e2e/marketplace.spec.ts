@@ -49,7 +49,13 @@ test.describe("Marketplace", () => {
 
   test("footer renders correctly", async ({ page }) => {
     await page.goto("/")
-    await expect(page.getByText("Conectando médicos e clínicas")).toBeVisible()
+    await expect(
+      page
+        .getByText(
+          "Plataforma digital de anúncios e divulgação de oportunidades voltadas à área da saúde."
+        )
+        .first()
+    ).toBeVisible()
     await expect(
       page.getByText("Todos os direitos reservados")
     ).toBeVisible()
