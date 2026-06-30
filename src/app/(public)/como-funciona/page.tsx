@@ -143,7 +143,7 @@ export default function ComoFuncionaPage() {
         <div className="container mx-auto max-w-3xl text-center">
           <h2 className="text-2xl font-bold md:text-3xl">Pronto pra começar?</h2>
           <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-            Cadastre-se gratuitamente em poucos minutos.
+            Cadastre-se em poucos minutos.
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/cadastro">

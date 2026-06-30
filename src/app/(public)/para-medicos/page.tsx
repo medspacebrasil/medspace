@@ -320,10 +320,11 @@ export default async function ParaMedicosPage() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3" className="border-border/50">
-                <AccordionTrigger>A plataforma é gratuita?</AccordionTrigger>
+                <AccordionTrigger>Médicos pagam para usar?</AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  Sim! Para médicos que buscam salas, equipamentos ou educação
-                  médica, o uso da plataforma é sempre gratuito.
+                  Não. Médicos que buscam salas, equipamentos ou educação médica
+                  usam a plataforma e falam com os anunciantes sem pagar nada. A
+                  cobrança, quando os planos entrarem, é apenas para quem anuncia.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-4" className="border-border/50">

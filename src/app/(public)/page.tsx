@@ -397,14 +397,15 @@ export default function HomePage() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2" className="border-border/50">
-                <AccordionTrigger>A plataforma é gratuita?</AccordionTrigger>
+                <AccordionTrigger>Quanto custa usar a MedSpace?</AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  Para médicos que buscam salas, equipamentos ou educação
-                  médica, o acesso é sempre gratuito. Para quem anuncia
-                  (clínicas, coworkings, empresas e instituições), os anúncios
-                  estão gratuitos durante o período de lançamento. Em breve
-                  lançaremos planos com condições especiais para quem já estiver
-                  cadastrado.
+                  Médicos que buscam salas, equipamentos ou educação médica não
+                  pagam para usar a plataforma e falar com os anunciantes. Para
+                  quem anuncia (clínicas, coworkings, empresas e instituições),
+                  durante o período de lançamento os anúncios não têm custo; em
+                  breve lançaremos planos com condições especiais para quem já
+                  estiver cadastrado. A MedSpace não cobra comissão sobre as
+                  negociações.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3" className="border-border/50">
@@ -440,8 +441,8 @@ export default function HomePage() {
                   <Link href="/para-clinicas" className="text-gold underline">
                     Para Clínicas
                   </Link>{" "}
-                  para conhecer as vantagens e criar sua conta gratuita. Se você
-                  oferece cursos, mentorias ou pós-graduações, veja também a{" "}
+                  para conhecer as vantagens e criar sua conta. Se você oferece
+                  cursos, mentorias ou pós-graduações, veja também a{" "}
                   <Link href="/educacao-medica" className="text-gold underline">
                     Educação Médica
                   </Link>

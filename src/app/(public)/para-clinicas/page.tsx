@@ -26,7 +26,7 @@ import {
 export const metadata = {
   title: "Para Clínicas | MedSpace",
   description:
-    "Anuncie seus espaços e equipamentos no MedSpace. Alcance médicos que buscam salas prontas para atender. Cadastro gratuito.",
+    "Anuncie seus espaços e equipamentos no MedSpace. Alcance médicos que buscam salas prontas para atender, sem comissão sobre suas negociações.",
 }
 
 export default function ParaClinicasPage() {
@@ -45,7 +45,7 @@ export default function ParaClinicasPage() {
             priority
           />
           <span className="inline-block rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-sm font-medium text-gold">
-            100% gratuito para clínicas
+            Sem comissão nas suas negociações
           </span>
           <h1 className="mt-6 text-3xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
             Sua clínica tem salas ou equipamentos{" "}
@@ -197,8 +197,8 @@ export default function ParaClinicasPage() {
               </div>
               <h3 className="mt-5 text-lg font-semibold">Crie sua conta</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Cadastre-se gratuitamente com e-mail e WhatsApp da clínica. Leva
-                menos de 1 minuto.
+                Cadastre-se com e-mail e WhatsApp da clínica. Leva menos de 1
+                minuto.
               </p>
             </div>
             <div className="relative text-center">
@@ -218,7 +218,7 @@ export default function ParaClinicasPage() {
               <h3 className="mt-5 text-lg font-semibold">Receba contatos</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 Médicos interessados entram em contato pelo WhatsApp. Você
-                negocia direto, sem taxas.
+                negocia direto, sem comissão.
               </p>
             </div>
           </div>
@@ -229,7 +229,7 @@ export default function ParaClinicasPage() {
                 size="lg"
                 className="gap-2 bg-gold text-navy hover:bg-gold/90 font-semibold"
               >
-                Criar conta gratuita
+                Criar conta
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -303,12 +303,11 @@ export default function ParaClinicasPage() {
               <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-gold" />
               <div>
                 <h3 className="font-semibold text-white">
-                  Sem taxas ou comissões
+                  Sem comissão nas negociações
                 </h3>
                 <p className="mt-1 text-sm text-white/60">
-                  Sem comissão sobre suas negociações — nunca cobramos percentual
-                  do que você fecha. Durante o lançamento, anunciar também é
-                  gratuito.
+                  Nunca cobramos percentual do que você fecha. O que você negocia
+                  com o médico é seu, sem intermediação da MedSpace.
                 </p>
               </div>
             </div>
@@ -438,8 +437,7 @@ export default function ParaClinicasPage() {
               Comece a receber contatos hoje mesmo
             </h2>
             <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-              Cadastre sua clínica gratuitamente e transforme espaços ociosos em
-              receita.
+              Cadastre sua clínica e transforme espaços ociosos em receita.
             </p>
             <div className="mt-6 grid grid-cols-1 gap-3 text-left sm:grid-cols-2 sm:gap-x-8 sm:gap-y-3">
               <div className="flex items-center gap-2">
@@ -448,7 +446,7 @@ export default function ParaClinicasPage() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-gold" />
-                <span className="text-sm">Sem taxas ou comissões</span>
+                <span className="text-sm">Sem comissão nas negociações</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-gold" />
@@ -469,7 +467,7 @@ export default function ParaClinicasPage() {
               </Button>
             </Link>
             <p className="mt-3 text-xs text-muted-foreground">
-              Gratuito &middot; Sem cartão de crédito &middot; Comece agora
+              Sem cartão de crédito &middot; Sem comissão &middot; Comece agora
             </p>
           </div>
         </div>

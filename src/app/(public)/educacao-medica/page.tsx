@@ -488,15 +488,14 @@ export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
           </h2>
           <p className="mx-auto mt-3 max-w-md text-white/70">
             Descreva o que você oferece e receba contatos direto pelo WhatsApp,
-            sem comissão sobre suas negociações. Durante o lançamento, anunciar é
-            gratuito.
+            sem comissão sobre suas negociações.
           </p>
           <Link href="/cadastro">
             <Button
               size="lg"
               className="mt-6 gap-2 bg-gold text-navy hover:bg-gold/90 font-semibold"
             >
-              Criar conta gratuita
+              Criar conta
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
