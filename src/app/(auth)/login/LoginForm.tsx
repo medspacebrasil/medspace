@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import {
   Card,
@@ -88,10 +89,9 @@ export function LoginForm({ justReset }: { justReset: boolean }) {
                 Esqueci minha senha
               </Link>
             </div>
-            <Input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               placeholder="Mínimo 8 caracteres"
               autoComplete="current-password"
               required

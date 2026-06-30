@@ -5,7 +5,14 @@ import { redirect } from "next/navigation"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import { createListingSchema, updateListingSchema, updateEquipmentSchema } from "@/lib/validators"
+import {
+  createListingSchema,
+  updateListingSchema,
+  createEquipmentSchema,
+  updateEquipmentSchema,
+  createEducationSchema,
+  updateEducationSchema,
+} from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
 
 export type AdminCreateListingState = {
@@ -438,4 +445,226 @@ export async function adminUpdateListing(
   revalidatePath("/anuncios")
   revalidateTag("listings", "max")
   return { success: true }
+}
+
+export type AdminUpdateEducationState = {
+  success: boolean
+  errors?: Record<string, string[]>
+}
+
+export async function adminUpdateEducation(
+  _prevState: AdminUpdateEducationState,
+  formData: FormData
+): Promise<AdminUpdateEducationState> {
+  const session = await auth()
+  if (session?.user?.role !== "ADMIN") {
+    return { success: false, errors: { _form: ["Não autorizado"] } }
+  }
+
+  const id = formData.get("id") as string
+  if (!id) return { success: false, errors: { _form: ["ID não fornecido"] } }
+
+  const listing = await prisma.listing.findUnique({
+    where: { id },
+    select: { type: true },
+  })
+  if (!listing || listing.type !== "EDUCATION") {
+    return { success: false, errors: { _form: ["Oportunidade não encontrada"] } }
+  }
+
+  const parsed = updateEducationSchema.safeParse({
+    title: formData.get("title"),
+    educationType: formData.get("educationType"),
+    area: formData.get("area") || undefined,
+    description: formData.get("description"),
+    audience: formData.get("audience") || undefined,
+    educationModality: formData.get("educationModality"),
+    workload: formData.get("workload") || undefined,
+    duration: formData.get("duration") || undefined,
+    city: formData.get("city") || undefined,
+    state: formData.get("state") || undefined,
+    investment: formData.get("investment") || undefined,
+    whatsapp: formData.get("whatsapp"),
+    externalLink: formData.get("externalLink") || undefined,
+  })
+  if (!parsed.success) {
+    return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+  }
+
+  const d = parsed.data
+  try {
+    await prisma.listing.update({
+      where: { id },
+      data: {
+        // Admin é o moderador: editar marca como revisado, sem reenviar p/ fila.
+        reviewedAt: new Date(),
+        ...(d.title !== undefined && { title: d.title }),
+        ...(d.description !== undefined && {
+          description: d.description.slice(0, 300),
+          fullDescription: d.description,
+        }),
+        ...(d.city !== undefined && { city: d.city }),
+        ...(d.state !== undefined && { state: d.state }),
+        ...(d.whatsapp !== undefined && { whatsapp: d.whatsapp }),
+        ...(d.educationType !== undefined && { educationType: d.educationType as never }),
+        ...(d.educationModality !== undefined && { educationModality: d.educationModality as never }),
+        ...(d.audience !== undefined && { audience: d.audience || null }),
+        ...(d.workload !== undefined && { workload: d.workload || null }),
+        ...(d.duration !== undefined && { duration: d.duration || null }),
+        ...(d.investment !== undefined && { investment: d.investment || null }),
+        ...(d.externalLink !== undefined && { externalLink: d.externalLink || null }),
+        ...(d.area !== undefined && { customSpecialties: d.area || null }),
+      },
+    })
+  } catch (error) {
+    console.error("[adminUpdateEducation] prisma update failed:", error)
+    return { success: false, errors: { _form: ["Erro ao atualizar oportunidade"] } }
+  }
+
+  revalidatePath("/admin/anuncios")
+  revalidatePath("/educacao-medica")
+  revalidateTag("listings", "max")
+  return { success: true }
+}
+
+export async function adminCreateEquipment(
+  _prevState: AdminCreateListingState,
+  formData: FormData
+): Promise<AdminCreateListingState> {
+  const session = await auth()
+  if (session?.user?.role !== "ADMIN") {
+    return { success: false, errors: { _form: ["Não autorizado"] } }
+  }
+
+  const clinicId = formData.get("clinicId") as string | null
+  if (!clinicId) {
+    return { success: false, errors: { _form: ["Anunciante não informado"] } }
+  }
+  const clinic = await prisma.clinic.findUnique({ where: { id: clinicId }, select: { id: true } })
+  if (!clinic) {
+    return { success: false, errors: { _form: ["Anunciante não encontrado"] } }
+  }
+
+  try {
+    const parsed = createEquipmentSchema.safeParse({
+      title: formData.get("title"),
+      description: formData.get("description"),
+      fullDescription: formData.get("fullDescription") || undefined,
+      city: formData.get("city"),
+      state: formData.get("state") || "",
+      neighborhood: formData.get("neighborhood"),
+      whatsapp: formData.get("whatsapp"),
+      equipmentCategoryId: formData.get("equipmentCategoryId"),
+      brand: formData.get("brand") || undefined,
+      model: formData.get("model") || undefined,
+      condition: formData.get("condition") || undefined,
+    })
+    if (!parsed.success) {
+      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+    }
+
+    const data = parsed.data
+    const baseSlug = generateSlug(data.title)
+    let slug = baseSlug
+    const existing = await prisma.listing.findUnique({ where: { slug } })
+    if (existing) slug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`
+
+    const listing = await prisma.listing.create({
+      data: {
+        ...data,
+        slug,
+        type: "EQUIPMENT",
+        status: "PUBLISHED",
+        reviewedAt: new Date(),
+        clinicId,
+      },
+    })
+
+    revalidatePath("/admin/anuncios")
+    revalidatePath("/aparelhos")
+    revalidateTag("listings", "max")
+    redirect(`/admin/aparelhos/${listing.id}/editar`)
+  } catch (error) {
+    if (isRedirectError(error)) throw error
+    return { success: false, errors: { _form: ["Erro ao criar aparelho"] } }
+  }
+}
+
+export async function adminCreateEducation(
+  _prevState: AdminCreateListingState,
+  formData: FormData
+): Promise<AdminCreateListingState> {
+  const session = await auth()
+  if (session?.user?.role !== "ADMIN") {
+    return { success: false, errors: { _form: ["Não autorizado"] } }
+  }
+
+  const clinicId = formData.get("clinicId") as string | null
+  if (!clinicId) {
+    return { success: false, errors: { _form: ["Anunciante não informado"] } }
+  }
+  const clinic = await prisma.clinic.findUnique({ where: { id: clinicId }, select: { id: true } })
+  if (!clinic) {
+    return { success: false, errors: { _form: ["Anunciante não encontrado"] } }
+  }
+
+  try {
+    const parsed = createEducationSchema.safeParse({
+      title: formData.get("title"),
+      educationType: formData.get("educationType"),
+      area: formData.get("area") || undefined,
+      description: formData.get("description"),
+      audience: formData.get("audience") || undefined,
+      educationModality: formData.get("educationModality"),
+      workload: formData.get("workload") || undefined,
+      duration: formData.get("duration") || undefined,
+      city: formData.get("city") || undefined,
+      state: formData.get("state") || undefined,
+      investment: formData.get("investment") || undefined,
+      whatsapp: formData.get("whatsapp"),
+      externalLink: formData.get("externalLink") || undefined,
+    })
+    if (!parsed.success) {
+      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+    }
+
+    const d = parsed.data
+    const baseSlug = generateSlug(d.title)
+    let slug = baseSlug
+    const existing = await prisma.listing.findUnique({ where: { slug } })
+    if (existing) slug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`
+
+    const listing = await prisma.listing.create({
+      data: {
+        title: d.title,
+        description: d.description.slice(0, 300),
+        fullDescription: d.description,
+        city: d.city || "",
+        state: d.state || "",
+        neighborhood: "",
+        whatsapp: d.whatsapp,
+        educationType: d.educationType as never,
+        educationModality: d.educationModality as never,
+        audience: d.audience || null,
+        workload: d.workload || null,
+        duration: d.duration || null,
+        investment: d.investment || null,
+        externalLink: d.externalLink || null,
+        customSpecialties: d.area || null,
+        slug,
+        type: "EDUCATION",
+        status: "PUBLISHED",
+        reviewedAt: new Date(),
+        clinicId,
+      },
+    })
+
+    revalidatePath("/admin/anuncios")
+    revalidatePath("/educacao-medica")
+    revalidateTag("listings", "max")
+    redirect(`/admin/educacao/${listing.id}/editar`)
+  } catch (error) {
+    if (isRedirectError(error)) throw error
+    return { success: false, errors: { _form: ["Erro ao criar oportunidade"] } }
+  }
 }

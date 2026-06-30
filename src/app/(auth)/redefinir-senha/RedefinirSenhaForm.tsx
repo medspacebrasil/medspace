@@ -4,7 +4,7 @@ import { useActionState } from "react"
 import Link from "next/link"
 import { resetPassword, type ActionState } from "../recuperar-senha/actions"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { CardContent, CardFooter } from "@/components/ui/card"
 
@@ -26,10 +26,9 @@ export function RedefinirSenhaForm({ token }: { token: string }) {
 
         <div className="space-y-2">
           <Label htmlFor="password">Nova senha</Label>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             placeholder="Mínimo 8 caracteres"
             autoComplete="new-password"
             required
@@ -41,10 +40,9 @@ export function RedefinirSenhaForm({ token }: { token: string }) {
 
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Confirme a nova senha</Label>
-          <Input
+          <PasswordInput
             id="confirmPassword"
             name="confirmPassword"
-            type="password"
             placeholder="Repita a senha"
             autoComplete="new-password"
             required

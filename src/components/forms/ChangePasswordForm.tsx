@@ -4,7 +4,7 @@ import { useActionState } from "react"
 import { changePassword } from "@/app/painel/perfil/actions"
 import type { ActionState } from "@/app/painel/perfil/actions"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Lock } from "lucide-react"
@@ -38,10 +38,10 @@ export function ChangePasswordForm() {
 
           <div className="space-y-2">
             <Label htmlFor="currentPassword">Senha atual</Label>
-            <Input
+            <PasswordInput
               id="currentPassword"
               name="currentPassword"
-              type="password"
+              autoComplete="current-password"
               required
             />
             {state.errors?.currentPassword && (
@@ -51,11 +51,11 @@ export function ChangePasswordForm() {
 
           <div className="space-y-2">
             <Label htmlFor="newPassword">Nova senha</Label>
-            <Input
+            <PasswordInput
               id="newPassword"
               name="newPassword"
-              type="password"
               placeholder="Mínimo 8 caracteres"
+              autoComplete="new-password"
               required
             />
             {state.errors?.newPassword && (
@@ -65,10 +65,10 @@ export function ChangePasswordForm() {
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
-            <Input
+            <PasswordInput
               id="confirmPassword"
               name="confirmPassword"
-              type="password"
+              autoComplete="new-password"
               required
             />
             {state.errors?.confirmPassword && (

@@ -28,8 +28,8 @@ export default async function AdminClinicasPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Clínicas Cadastradas</h1>
-      <p className="text-muted-foreground">{clinics.length} clínica(s)</p>
+      <h1 className="text-2xl font-bold">Cadastros</h1>
+      <p className="text-muted-foreground">{clinics.length} cadastro(s)</p>
 
       <div className="mt-6 space-y-3">
         {clinics.map((clinic) => {

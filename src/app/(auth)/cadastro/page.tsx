@@ -5,6 +5,7 @@ import Link from "next/link"
 import { registerClinic, type ActionState } from "../actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { CepInput } from "@/components/forms/CepInput"
 import { formatDocument } from "@/lib/validators/document"
@@ -51,7 +52,7 @@ export default function CadastroPage() {
         <CardTitle className="text-2xl">Crie sua conta</CardTitle>
         <CardDescription>
           Para médicos, clínicas, coworkings, empresas e instituições que querem
-          anunciar na MedSpace. Cadastro gratuito.
+          anunciar na MedSpace.
         </CardDescription>
       </CardHeader>
       <form action={formAction}>
@@ -87,10 +88,9 @@ export default function CadastroPage() {
 
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
-            <Input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               placeholder="Mínimo 8 caracteres"
               autoComplete="new-password"
               required
