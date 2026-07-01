@@ -113,21 +113,6 @@ export function EducationForm({
             )}
           </div>
 
-          {/* Área / Especialidade */}
-          <div className="space-y-2">
-            <Label htmlFor="area">Área / Especialidade (opcional)</Label>
-            <Input
-              id="area"
-              name="area"
-              defaultValue={defaultValues?.area}
-              placeholder="Ex: Cardiologia, Gestão médica, Dermatologia"
-              maxLength={300}
-            />
-            {state.errors?.area && (
-              <p className="text-sm text-destructive">{state.errors.area[0]}</p>
-            )}
-          </div>
-
           {/* Descrição */}
           <div className="space-y-2">
             <Label htmlFor="description">Descrição completa</Label>
@@ -143,19 +128,6 @@ export function EducationForm({
             {state.errors?.description && (
               <p className="text-sm text-destructive">{state.errors.description[0]}</p>
             )}
-          </div>
-
-          {/* Para quem é indicado */}
-          <div className="space-y-2">
-            <Label htmlFor="audience">Para quem é indicado (opcional)</Label>
-            <Textarea
-              id="audience"
-              name="audience"
-              defaultValue={defaultValues?.audience}
-              placeholder="Ex: Médicos em início de carreira, residentes, especialistas que querem abrir consultório..."
-              rows={2}
-              maxLength={300}
-            />
           </div>
 
           {/* Formato */}
@@ -215,47 +187,6 @@ export function EducationForm({
             </div>
           )}
 
-          {/* Carga horária + Duração */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="workload">Carga horária (opcional)</Label>
-              <Select
-                id="workload"
-                name="workload"
-                defaultValue={defaultValues?.workload ?? ""}
-              >
-                <option value="">Selecione...</option>
-                {WORKLOAD_OPTIONS.map((w) => (
-                  <option key={w} value={w}>
-                    {w}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="duration">Duração / Período (opcional)</Label>
-              <Input
-                id="duration"
-                name="duration"
-                defaultValue={defaultValues?.duration}
-                placeholder="Ex: 3 meses, encontros semanais por 8 semanas"
-                maxLength={120}
-              />
-            </div>
-          </div>
-
-          {/* Investimento */}
-          <div className="space-y-2">
-            <Label htmlFor="investment">Investimento (opcional)</Label>
-            <Input
-              id="investment"
-              name="investment"
-              defaultValue={defaultValues?.investment}
-              placeholder="Ex: Gratuito, A combinar, R$ 1.200"
-              maxLength={120}
-            />
-          </div>
-
           {/* WhatsApp */}
           <div className="space-y-2">
             <Label htmlFor="whatsapp">WhatsApp (DDD + número)</Label>
@@ -271,21 +202,94 @@ export function EducationForm({
             )}
           </div>
 
-          {/* Link externo */}
-          <div className="space-y-2">
-            <Label htmlFor="externalLink">Link externo (opcional)</Label>
-            <Input
-              id="externalLink"
-              name="externalLink"
-              type="url"
-              defaultValue={defaultValues?.externalLink}
-              placeholder="https://site, página de inscrição ou Instagram"
-              maxLength={300}
-            />
-            {state.errors?.externalLink && (
-              <p className="text-sm text-destructive">{state.errors.externalLink[0]}</p>
-            )}
-          </div>
+          {/* Detalhes adicionais — recolhidos p/ simplificar o cadastro.
+              Os campos continuam sendo enviados mesmo com o bloco fechado. */}
+          <details className="rounded-md border border-border/60">
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
+              Detalhes adicionais (opcional)
+            </summary>
+            <div className="space-y-4 border-t border-border/60 p-4">
+              <div className="space-y-2">
+                <Label htmlFor="area">Área / Especialidade</Label>
+                <Input
+                  id="area"
+                  name="area"
+                  defaultValue={defaultValues?.area}
+                  placeholder="Ex: Cardiologia, Gestão médica, Dermatologia"
+                  maxLength={300}
+                />
+                {state.errors?.area && (
+                  <p className="text-sm text-destructive">{state.errors.area[0]}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="audience">Para quem é indicado</Label>
+                <Textarea
+                  id="audience"
+                  name="audience"
+                  defaultValue={defaultValues?.audience}
+                  placeholder="Ex: Médicos em início de carreira, residentes, especialistas que querem abrir consultório..."
+                  rows={2}
+                  maxLength={300}
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="workload">Carga horária</Label>
+                  <Select
+                    id="workload"
+                    name="workload"
+                    defaultValue={defaultValues?.workload ?? ""}
+                  >
+                    <option value="">Selecione...</option>
+                    {WORKLOAD_OPTIONS.map((w) => (
+                      <option key={w} value={w}>
+                        {w}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duração / Período</Label>
+                  <Input
+                    id="duration"
+                    name="duration"
+                    defaultValue={defaultValues?.duration}
+                    placeholder="Ex: 3 meses, encontros semanais por 8 semanas"
+                    maxLength={120}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="investment">Investimento</Label>
+                <Input
+                  id="investment"
+                  name="investment"
+                  defaultValue={defaultValues?.investment}
+                  placeholder="Ex: Gratuito, A combinar, R$ 1.200"
+                  maxLength={120}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="externalLink">Link externo</Label>
+                <Input
+                  id="externalLink"
+                  name="externalLink"
+                  type="url"
+                  defaultValue={defaultValues?.externalLink}
+                  placeholder="https://site, página de inscrição ou Instagram"
+                  maxLength={300}
+                />
+                {state.errors?.externalLink && (
+                  <p className="text-sm text-destructive">{state.errors.externalLink[0]}</p>
+                )}
+              </div>
+            </div>
+          </details>
 
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending
