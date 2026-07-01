@@ -33,6 +33,8 @@ export default async function AparelhosMarketplace({ searchParams }: PageProps) 
   const where: Record<string, unknown> = {
     status: "PUBLISHED" as const,
     type: "EQUIPMENT" as const,
+    // Só mostra aparelhos com ao menos 1 foto.
+    images: { some: {} },
   }
   if (params.state) where.state = params.state
   if (params.city) where.city = params.city

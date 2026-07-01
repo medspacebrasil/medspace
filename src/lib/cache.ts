@@ -72,7 +72,7 @@ export const getCachedPublishedClinicCities = unstable_cache(
 export const getCachedFeaturedClinicListings = unstable_cache(
   async (take: number) => {
     return prisma.listing.findMany({
-      where: { status: "PUBLISHED", type: "CLINIC", featured: true },
+      where: { status: "PUBLISHED", type: "CLINIC", featured: true, images: { some: {} } },
       include: {
         clinic: true,
         roomType: true,

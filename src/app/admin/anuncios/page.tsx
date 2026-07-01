@@ -189,6 +189,10 @@ export default async function AdminAnunciosPage({
       <div className="mt-6 space-y-3">
         {listings.map((listing) => {
           const cfg = statusConfig[listing.status]
+          // Clínicas e aparelhos precisam de ao menos 1 foto para ir ao ar.
+          // (Educação/mentoria é isenta — foto é opcional lá.)
+          const requiresPhoto = listing.type === "CLINIC" || listing.type === "EQUIPMENT"
+          const missingPhoto = requiresPhoto && listing._count.images === 0
           return (
             <Card key={listing.id}>
               <CardContent className="flex items-center justify-between gap-4 p-4">
@@ -205,6 +209,9 @@ export default async function AdminAnunciosPage({
                       </Badge>
                     )}
                     {listing.featured && <Badge variant="default" className="bg-gold text-navy">Destaque</Badge>}
+                    {missingPhoto && (
+                      <Badge variant="destructive">Sem foto</Badge>
+                    )}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {listing.clinic.name} &middot; {listing.city},{" "}
@@ -256,18 +263,32 @@ export default async function AdminAnunciosPage({
                   </Link>
                   {listing.status === "PENDING" && (
                     <>
-                      <form action={approveListing}>
-                        <input type="hidden" name="id" value={listing.id} />
+                      {missingPhoto ? (
                         <Button
-                          type="submit"
+                          type="button"
                           size="sm"
                           variant="default"
-                          className="gap-1"
+                          className="gap-1 opacity-50"
+                          disabled
+                          title="Adicione ao menos 1 foto antes de aprovar"
                         >
                           <CheckCircle className="h-3.5 w-3.5" />
                           Aprovar
                         </Button>
-                      </form>
+                      ) : (
+                        <form action={approveListing}>
+                          <input type="hidden" name="id" value={listing.id} />
+                          <Button
+                            type="submit"
+                            size="sm"
+                            variant="default"
+                            className="gap-1"
+                          >
+                            <CheckCircle className="h-3.5 w-3.5" />
+                            Aprovar
+                          </Button>
+                        </form>
+                      )}
                       <form action={rejectListing}>
                         <input type="hidden" name="id" value={listing.id} />
                         <Button

@@ -40,6 +40,8 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
   const where: Record<string, unknown> = {
     status: "PUBLISHED" as const,
     type: "CLINIC" as const,
+    // Só mostra anúncios com ao menos 1 foto (clínicas sem foto ficam ocultas).
+    images: { some: {} },
   }
   if (params.state) where.state = params.state
   if (params.city) where.city = params.city

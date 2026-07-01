@@ -32,10 +32,29 @@ async function requireAdmin() {
   }
 }
 
+/**
+ * Clínicas e aparelhos precisam de ao menos 1 foto para serem publicados.
+ * Educação/mentoria é isenta (foto é opcional). Backstop de servidor — a UI
+ * já desabilita o botão "Aprovar" nesses casos.
+ */
+async function assertCanPublish(id: string) {
+  const listing = await prisma.listing.findUnique({
+    where: { id },
+    select: { type: true, _count: { select: { images: true } } },
+  })
+  if (!listing) throw new Error("Anúncio não encontrado")
+  const requiresPhoto = listing.type === "CLINIC" || listing.type === "EQUIPMENT"
+  if (requiresPhoto && listing._count.images === 0) {
+    throw new Error("Adicione ao menos 1 foto antes de publicar este anúncio")
+  }
+}
+
 export async function approveListing(formData: FormData) {
   await requireAdmin()
   const id = formData.get("id") as string
   if (!id) throw new Error("ID não fornecido")
+
+  await assertCanPublish(id)
 
   await prisma.listing.update({
     where: { id },
@@ -82,6 +101,8 @@ export async function unarchiveListing(formData: FormData) {
   const id = formData.get("id") as string
   if (!id) throw new Error("ID não fornecido")
 
+  await assertCanPublish(id)
+
   await prisma.listing.update({
     where: { id },
     data: { status: "PUBLISHED" },
@@ -102,6 +123,10 @@ export async function setListingStatus(formData: FormData) {
   if (!id || !status) throw new Error("Dados incompletos")
   if (!LISTING_STATUSES.includes(status as ListingStatusValue)) {
     throw new Error("Status inválido")
+  }
+
+  if (status === "PUBLISHED") {
+    await assertCanPublish(id)
   }
 
   await prisma.listing.update({
