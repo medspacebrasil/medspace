@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import { Providers } from "@/components/Providers"
 import { CookieBanner } from "@/components/CookieBanner"
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics"
+import { MetaPixel } from "@/components/analytics/MetaPixel"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -37,6 +38,7 @@ export default function RootLayout({
         <Providers>{children}</Providers>
         <CookieBanner />
         <GoogleAnalytics />
+        <MetaPixel />
       </body>
     </html>
   )

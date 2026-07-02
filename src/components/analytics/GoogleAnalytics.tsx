@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation"
 import { useEffect, useRef } from "react"
 
 const GA_ID = "G-XMBZHGMXEH"
+// Google Ads — conversões (Clique WhatsApp, Cadastro) definidas em lib/analytics.
+const ADS_ID = "AW-18129650685"
 const STORAGE_KEY = "medspace:cookie-consent:v1"
 
 declare global {
@@ -97,6 +99,7 @@ export function GoogleAnalytics() {
           });
           gtag('js', new Date());
           gtag('config', '${GA_ID}');
+          gtag('config', '${ADS_ID}');
         `}
       </Script>
       <Script

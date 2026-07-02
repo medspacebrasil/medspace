@@ -1,11 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, X, ArrowRight } from "lucide-react"
+import { trackRegistration } from "@/lib/analytics"
 
 export function WelcomeModal() {
   const [open, setOpen] = useState(true)
+
+  // This modal only renders right after a successful sign-up
+  // (/painel?welcome=1), so it's the reliable "cadastro concluído" moment.
+  useEffect(() => {
+    trackRegistration()
+  }, [])
 
   if (!open) return null
 
