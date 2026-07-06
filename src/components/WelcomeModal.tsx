@@ -8,10 +8,16 @@ import { trackRegistration } from "@/lib/analytics"
 export function WelcomeModal() {
   const [open, setOpen] = useState(true)
 
-  // This modal only renders right after a successful sign-up
-  // (/painel?welcome=1), so it's the reliable "cadastro concluído" moment.
+  // This modal renders right after a successful sign-up (/painel?welcome=1),
+  // so it's the reliable "cadastro concluído" moment. Fire the conversion once
+  // and strip ?welcome=1 from the URL (without a re-render, so the modal stays
+  // open) — otherwise a reload or back-nav to this page re-fires it and inflates
+  // the signup metric that drives ad bidding.
   useEffect(() => {
     trackRegistration()
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/painel")
+    }
   }, [])
 
   if (!open) return null
