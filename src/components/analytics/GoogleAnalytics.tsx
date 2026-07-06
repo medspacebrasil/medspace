@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react"
 
 const GA_ID = "G-XMBZHGMXEH"
 // Google Ads — conversões (Clique WhatsApp, Cadastro) definidas em lib/analytics.
-const ADS_ID = "AW-18129650685"
+const ADS_ID = "AW-18151653017"
 const STORAGE_KEY = "medspace:cookie-consent:v1"
 
 declare global {

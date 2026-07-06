@@ -14,13 +14,13 @@
  * live in code like the GA measurement id.
  */
 
-const GOOGLE_ADS_ID = "AW-18129650685"
+const GOOGLE_ADS_ID = "AW-18151653017"
 
 const ADS_CONVERSIONS = {
   // "Clique WhatsApp" — lead de médico (demanda).
-  whatsappLead: `${GOOGLE_ADS_ID}/HElDCNGWqskcEP2H8sRD`,
+  whatsappLead: `${GOOGLE_ADS_ID}/lCDSCJ3SvcscEJn9sM9D`,
   // "Cadastro" — cadastro de clínica/anunciante (oferta).
-  registration: `${GOOGLE_ADS_ID}/Jh9oCJ7dwskcEP2H8sRD`,
+  registration: `${GOOGLE_ADS_ID}/GX1GCJrSvcscEJn9sM9D`,
 } as const
 
 declare global {
