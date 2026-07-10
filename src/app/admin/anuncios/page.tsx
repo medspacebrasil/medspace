@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db"
 import { notFound } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { PendingButton } from "@/components/ui/pending-button"
 import { Card, CardContent } from "@/components/ui/card"
 import { approveListing, rejectListing, archiveListing, toggleFeatured, markReviewed } from "../actions"
 import { DeleteListingButton } from "@/components/anuncios/DeleteListingButton"
@@ -222,29 +223,28 @@ export default async function AdminAnunciosPage({
                 <div className="flex flex-wrap items-center justify-end gap-1">
                   <form action={toggleFeatured}>
                     <input type="hidden" name="id" value={listing.id} />
-                    <Button
-                      type="submit"
+                    <PendingButton
                       size="sm"
                       variant={listing.featured ? "default" : "ghost"}
                       className="gap-1"
                       title={listing.featured ? "Remover destaque" : "Destacar"}
                     >
                       <Star className={`h-3.5 w-3.5 ${listing.featured ? "fill-current" : ""}`} />
-                    </Button>
+                    </PendingButton>
                   </form>
                   {!listing.reviewedAt && (
                     <form action={markReviewed}>
                       <input type="hidden" name="id" value={listing.id} />
-                      <Button
-                        type="submit"
+                      <PendingButton
                         size="sm"
                         variant="outline"
                         className="gap-1"
                         title="Marcar como revisado"
+                        pendingText="Salvando..."
                       >
                         <Eye className="h-3.5 w-3.5" />
                         Revisado
-                      </Button>
+                      </PendingButton>
                     </form>
                   )}
                   <Link
@@ -278,57 +278,57 @@ export default async function AdminAnunciosPage({
                       ) : (
                         <form action={approveListing}>
                           <input type="hidden" name="id" value={listing.id} />
-                          <Button
-                            type="submit"
+                          <PendingButton
                             size="sm"
                             variant="default"
                             className="gap-1"
+                            pendingText="Aprovando..."
                           >
                             <CheckCircle className="h-3.5 w-3.5" />
                             Aprovar
-                          </Button>
+                          </PendingButton>
                         </form>
                       )}
                       <form action={rejectListing}>
                         <input type="hidden" name="id" value={listing.id} />
-                        <Button
-                          type="submit"
+                        <PendingButton
                           size="sm"
                           variant="destructive"
                           className="gap-1"
+                          pendingText="Rejeitando..."
                         >
                           <XCircle className="h-3.5 w-3.5" />
                           Rejeitar
-                        </Button>
+                        </PendingButton>
                       </form>
                     </>
                   )}
                   {listing.status === "PUBLISHED" && (
                     <form action={archiveListing}>
                       <input type="hidden" name="id" value={listing.id} />
-                      <Button
-                        type="submit"
+                      <PendingButton
                         size="sm"
                         variant="outline"
                         className="gap-1"
+                        pendingText="Arquivando..."
                       >
                         <Archive className="h-3.5 w-3.5" />
                         Arquivar
-                      </Button>
+                      </PendingButton>
                     </form>
                   )}
                   {(listing.status === "ARCHIVED" || listing.status === "REJECTED" || listing.status === "DRAFT") && (
                     <form action={approveListing}>
                       <input type="hidden" name="id" value={listing.id} />
-                      <Button
-                        type="submit"
+                      <PendingButton
                         size="sm"
                         variant="default"
                         className="gap-1"
+                        pendingText="Publicando..."
                       >
                         <RotateCcw className="h-3.5 w-3.5" />
                         Publicar
-                      </Button>
+                      </PendingButton>
                     </form>
                   )}
                   <DeleteListingButton id={listing.id} title={listing.title} />

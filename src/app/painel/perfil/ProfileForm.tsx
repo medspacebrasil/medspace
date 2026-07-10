@@ -52,7 +52,8 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
             <Input
               id="name"
               name="name"
-              defaultValue={clinic.name}
+              autoComplete="organization"
+              defaultValue={state.values?.name ?? clinic.name}
               required
             />
             {state.errors?.name && (
@@ -66,7 +67,10 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
               <Input
                 id="phone"
                 name="phone"
-                defaultValue={clinic.phone ?? ""}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel-national"
+                defaultValue={state.values?.phone ?? clinic.phone ?? ""}
               />
               {state.errors?.phone && (
                 <p className="text-sm text-destructive">{state.errors.phone[0]}</p>
@@ -77,7 +81,10 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
               <Input
                 id="whatsapp"
                 name="whatsapp"
-                defaultValue={clinic.whatsapp}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel-national"
+                defaultValue={state.values?.whatsapp ?? clinic.whatsapp}
                 required
               />
               {state.errors?.whatsapp && (
@@ -92,7 +99,8 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
               <Input
                 id="city"
                 name="city"
-                defaultValue={clinic.city}
+                autoComplete="address-level2"
+                defaultValue={state.values?.city ?? clinic.city}
                 required
               />
               {state.errors?.city && (
@@ -104,7 +112,8 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
               <Input
                 id="neighborhood"
                 name="neighborhood"
-                defaultValue={clinic.neighborhood}
+                autoComplete="address-level3"
+                defaultValue={state.values?.neighborhood ?? clinic.neighborhood}
                 required
               />
               {state.errors?.neighborhood && (
@@ -118,7 +127,7 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
             <Textarea
               id="description"
               name="description"
-              defaultValue={clinic.description ?? ""}
+              defaultValue={state.values?.description ?? clinic.description ?? ""}
               rows={4}
             />
             {state.errors?.description && (

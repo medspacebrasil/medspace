@@ -54,6 +54,7 @@ export default function RecuperarSenhaPage() {
                 type="email"
                 placeholder="seu@email.com"
                 autoComplete="email"
+                defaultValue={state.values?.email}
                 required
               />
               {state.errors?.email && (

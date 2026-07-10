@@ -38,14 +38,17 @@ export function LoginForm({ justReset }: { justReset: boolean }) {
 
       if (result?.error) {
         setError("Email ou senha incorretos")
+        setLoading(false)
       } else if (result?.ok) {
+        // Mantém loading=true durante a navegação: reabilitar o botão aqui
+        // permitiria re-submits que consomem o rate limit à toa.
         window.location.href = "/painel"
       } else {
         setError("Resposta inesperada do servidor")
+        setLoading(false)
       }
     } catch {
       setError("Não foi possível entrar. Verifique sua conexão e tente novamente.")
-    } finally {
       setLoading(false)
     }
   }

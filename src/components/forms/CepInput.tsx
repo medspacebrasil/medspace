@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { onlyDigits } from "@/lib/validators"
 import { Loader2, Search } from "lucide-react"
 
 interface CepData {
@@ -29,21 +30,33 @@ export function CepInput({ defaultCity, defaultNeighborhood, defaultState, defau
   const [uf, setUf] = useState(defaultState ?? "")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  // Last CEP a lookup was started for — dedupes the automatic trigger and
+  // marks stale responses (latest lookup wins when two fetches race).
+  const lastLookup = useRef(defaultCity ? onlyDigits(defaultCep ?? "") : "")
+  // Monotonic id per request so out-of-order responses can be discarded.
+  const reqSeq = useRef(0)
 
   function formatCep(value: string) {
-    const digits = value.replace(/\D/g, "").slice(0, 8)
+    const digits = onlyDigits(value).slice(0, 8)
     if (digits.length > 5) {
       return digits.slice(0, 5) + "-" + digits.slice(5)
     }
     return digits
   }
 
-  async function lookupCep() {
-    const digits = cep.replace(/\D/g, "")
+  async function lookupCep(rawCep: string, opts?: { auto?: boolean }) {
+    const digits = onlyDigits(rawCep)
     if (digits.length !== 8) {
-      setError("CEP deve ter 8 dígitos")
+      // Automatic triggers stay silent while the user is still typing.
+      if (!opts?.auto) setError("CEP deve ter 8 dígitos")
       return
     }
+    // Skip when this CEP was already looked up automatically, or when the
+    // same CEP is being fetched right now (e.g. Enter right after the 8th
+    // digit triggered the automatic lookup).
+    if ((opts?.auto || loading) && lastLookup.current === digits) return
+    lastLookup.current = digits
+    const reqId = ++reqSeq.current
 
     setLoading(true)
     setError("")
@@ -51,6 +64,7 @@ export function CepInput({ defaultCity, defaultNeighborhood, defaultState, defau
     try {
       const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`)
       const data: CepData = await res.json()
+      if (reqId !== reqSeq.current) return // a newer lookup superseded this one
 
       if (data.erro) {
         setError("CEP não encontrado")
@@ -58,12 +72,17 @@ export function CepInput({ defaultCity, defaultNeighborhood, defaultState, defau
       }
 
       setCity(data.localidade)
-      setNeighborhood(data.bairro || "")
       setUf(data.uf)
+      // Automatic lookups must not clobber a neighborhood the user typed
+      // (common in edit forms, where the field comes prefilled).
+      setNeighborhood((prev) => (!opts?.auto || !prev ? data.bairro || "" : prev))
     } catch {
+      if (reqId !== reqSeq.current) return
+      // Allow the same CEP to be retried automatically after a network error.
+      lastLookup.current = ""
       setError("Erro ao buscar CEP. Tente novamente.")
     } finally {
-      setLoading(false)
+      if (reqId === reqSeq.current) setLoading(false)
     }
   }
 
@@ -76,13 +95,29 @@ export function CepInput({ defaultCity, defaultNeighborhood, defaultState, defau
           <Input
             id="cep"
             value={cep}
-            onChange={(e) => setCep(formatCep(e.target.value))}
+            onChange={(e) => {
+              const formatted = formatCep(e.target.value)
+              setCep(formatted)
+              // Look the CEP up as soon as the 8th digit lands: on mobile the
+              // keyboard's confirm key submits the form (Enter keydown is not
+              // reliable on Android/IME keyboards), so the lookup can't depend
+              // on any key press. Covers typing, paste and browser autofill.
+              if (onlyDigits(formatted).length === 8) {
+                lookupCep(formatted, { auto: true })
+              } else if (error) {
+                setError("")
+              }
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault()
-                lookupCep()
+                lookupCep(cep)
               }
             }}
+            type="text"
+            inputMode="numeric"
+            autoComplete="postal-code"
+            enterKeyHint="search"
             placeholder="00000-000"
             maxLength={9}
             className="flex-1"
@@ -90,7 +125,7 @@ export function CepInput({ defaultCity, defaultNeighborhood, defaultState, defau
           <Button
             type="button"
             variant="outline"
-            onClick={lookupCep}
+            onClick={() => lookupCep(cep)}
             disabled={loading}
             className="shrink-0"
           >

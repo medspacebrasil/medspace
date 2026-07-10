@@ -1,4 +1,5 @@
 import { z } from "zod/v4"
+import { whatsappSchema } from "./phone"
 
 export const EDUCATION_TYPES = [
   "MENTORIA",
@@ -51,9 +52,7 @@ export const createEducationSchema = z
     city: z.string().max(100, "Nome da cidade muito longo").optional().default(""),
     state: z.string().max(2).optional().default(""),
     investment: z.string().max(120, "Texto muito longo").optional(),
-    whatsapp: z
-      .string()
-      .regex(/^\d{10,11}$/, "WhatsApp deve ter 10 ou 11 dígitos"),
+    whatsapp: whatsappSchema,
     externalLink: z
       .url("Link inválido (inclua https://)")
       .max(300, "Link muito longo")
@@ -85,7 +84,7 @@ export const updateEducationSchema = z
     city: z.string().max(100).optional(),
     state: z.string().max(2).optional(),
     investment: z.string().max(120).optional(),
-    whatsapp: z.string().regex(/^\d{10,11}$/).optional(),
+    whatsapp: whatsappSchema.optional(),
     externalLink: z.url().max(300).optional(),
   })
   .superRefine((data, ctx) => {

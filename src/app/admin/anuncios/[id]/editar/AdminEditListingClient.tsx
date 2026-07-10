@@ -60,8 +60,10 @@ export function AdminEditListingClient({
   )
   const [modalOpen, setModalOpen] = useState(false)
 
-  // Open the success modal whenever a save succeeds. Validation errors are shown
-  // inline (per field) below, so the form keeps the values the admin typed.
+  // Open the success modal whenever a save succeeds. On validation errors,
+  // React 19 resets uncontrolled inputs after the action completes, so each
+  // field falls back to state.values (echoed back by the action) to keep
+  // what the admin typed.
   useEffect(() => {
     if (state.success) setModalOpen(true)
   }, [state])
@@ -113,7 +115,7 @@ export function AdminEditListingClient({
               <Input
                 id="title"
                 name="title"
-                defaultValue={listing.title}
+                defaultValue={state.values?.title ?? listing.title}
                 required
               />
               {state.errors?.title && (
@@ -126,7 +128,7 @@ export function AdminEditListingClient({
               <Textarea
                 id="description"
                 name="description"
-                defaultValue={listing.description}
+                defaultValue={state.values?.description ?? listing.description}
                 maxLength={300}
                 required
               />
@@ -140,9 +142,15 @@ export function AdminEditListingClient({
               <Textarea
                 id="fullDescription"
                 name="fullDescription"
-                defaultValue={listing.fullDescription ?? ""}
+                defaultValue={state.values?.fullDescription ?? listing.fullDescription ?? ""}
                 rows={6}
+                maxLength={5000}
               />
+              {state.errors?.fullDescription && (
+                <p className="text-sm text-destructive">
+                  {state.errors.fullDescription[0]}
+                </p>
+              )}
             </div>
 
             <CepInput
@@ -150,6 +158,12 @@ export function AdminEditListingClient({
               defaultNeighborhood={listing.neighborhood}
               defaultState={listing.state}
             />
+            {state.errors?.city && (
+              <p className="text-sm text-destructive">{state.errors.city[0]}</p>
+            )}
+            {state.errors?.neighborhood && (
+              <p className="text-sm text-destructive">{state.errors.neighborhood[0]}</p>
+            )}
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -157,7 +171,10 @@ export function AdminEditListingClient({
                 <Input
                   id="whatsapp"
                   name="whatsapp"
-                  defaultValue={listing.whatsapp}
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel-national"
+                  defaultValue={state.values?.whatsapp ?? listing.whatsapp}
                   required
                 />
                 {state.errors?.whatsapp && (
@@ -169,7 +186,7 @@ export function AdminEditListingClient({
                 <Select
                   id="roomTypeId"
                   name="roomTypeId"
-                  defaultValue={listing.roomTypeId ?? ""}
+                  defaultValue={state.values?.roomTypeId ?? listing.roomTypeId ?? ""}
                 >
                   <option value="">Selecione...</option>
                   {roomTypes.map((rt) => (
@@ -190,9 +207,11 @@ export function AdminEditListingClient({
                       type="checkbox"
                       name="specialtyIds"
                       value={s.id}
-                      defaultChecked={listing.specialties.some(
-                        (ls) => ls.specialtyId === s.id
-                      )}
+                      defaultChecked={
+                        state.values
+                          ? (state.values.specialtyIds?.split(",") ?? []).includes(s.id)
+                          : listing.specialties.some((ls) => ls.specialtyId === s.id)
+                      }
                       className="rounded"
                     />
                     {s.name}
@@ -208,7 +227,7 @@ export function AdminEditListingClient({
               <Input
                 id="customSpecialties"
                 name="customSpecialties"
-                defaultValue={listing.customSpecialties ?? ""}
+                defaultValue={state.values?.customSpecialties ?? listing.customSpecialties ?? ""}
                 placeholder="Separe por vírgula"
                 maxLength={500}
               />
@@ -226,9 +245,11 @@ export function AdminEditListingClient({
                       type="checkbox"
                       name="equipmentIds"
                       value={eq.id}
-                      defaultChecked={listing.equipment.some(
-                        (le) => le.equipmentId === eq.id
-                      )}
+                      defaultChecked={
+                        state.values
+                          ? (state.values.equipmentIds?.split(",") ?? []).includes(eq.id)
+                          : listing.equipment.some((le) => le.equipmentId === eq.id)
+                      }
                       className="rounded"
                     />
                     {eq.name}
@@ -244,7 +265,7 @@ export function AdminEditListingClient({
               <Input
                 id="customEquipment"
                 name="customEquipment"
-                defaultValue={listing.customEquipment ?? ""}
+                defaultValue={state.values?.customEquipment ?? listing.customEquipment ?? ""}
                 placeholder="Separe por vírgula"
                 maxLength={500}
               />
@@ -256,7 +277,9 @@ export function AdminEditListingClient({
                   type="checkbox"
                   name="requiresRqe"
                   value="true"
-                  defaultChecked={listing.requiresRqe}
+                  defaultChecked={
+                    state.values ? state.values.requiresRqe === "true" : listing.requiresRqe
+                  }
                   className="rounded"
                 />
                 Exige RQE (Registro de Qualificação de Especialista)

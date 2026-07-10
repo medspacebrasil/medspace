@@ -3,28 +3,27 @@
 import { hash } from "bcryptjs"
 import { signIn as nextAuthSignIn } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import { registerSchema, loginSchema, TERMS_VERSION, documentTypeFor } from "@/lib/validators"
+import { registerSchema, TERMS_VERSION, documentTypeFor } from "@/lib/validators"
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit"
+import { echoFormValues } from "@/lib/form-values"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 
 export type ActionState = {
   success: boolean
   errors?: Record<string, string[]>
+  /**
+   * Valores submetidos, ecoados de volta em falhas para repopular o form.
+   * O React 19 reseta inputs não-controlados após a action — sem isso o
+   * usuário perde tudo que digitou quando a validação falha (ex.: submissão
+   * implícita pelo Enter do teclado do celular). Nunca incluir senha.
+   */
+  values?: Record<string, string>
 }
 
 export async function registerClinic(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const ip = await getClientIp()
-  const limit = await rateLimit(RATE_LIMITS.register, ip)
-  if (!limit.success) {
-    return {
-      success: false,
-      errors: { _form: ["Muitas tentativas de cadastro. Tente novamente mais tarde."] },
-    }
-  }
-
   const raw = {
     email: formData.get("email"),
     password: formData.get("password"),
@@ -40,9 +39,28 @@ export async function registerClinic(
     marketingOptIn: formData.get("marketingOptIn") === "on",
   }
 
+  const values = echoFormValues(formData)
+
+  // Valida antes do rate limit: submissões implícitas (Enter do teclado no
+  // celular) com dados incompletos não devem consumir as poucas tentativas
+  // permitidas por hora. O limiter continua protegendo o caminho caro (DB).
   const parsed = registerSchema.safeParse(raw)
   if (!parsed.success) {
-    return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+    return {
+      success: false,
+      errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+      values,
+    }
+  }
+
+  const ip = await getClientIp()
+  const limit = await rateLimit(RATE_LIMITS.register, ip)
+  if (!limit.success) {
+    return {
+      success: false,
+      errors: { _form: ["Muitas tentativas de cadastro. Tente novamente mais tarde."] },
+      values,
+    }
   }
 
   const {
@@ -61,7 +79,11 @@ export async function registerClinic(
 
   const existing = await prisma.user.findUnique({ where: { email } })
   if (existing) {
-    return { success: false, errors: { email: ["Este email já está cadastrado"] } }
+    return {
+      success: false,
+      errors: { email: ["Este email já está cadastrado"] },
+      values,
+    }
   }
 
   const passwordHash = await hash(password, 12)
@@ -97,51 +119,10 @@ export async function registerClinic(
     })
   } catch (error) {
     if (isRedirectError(error)) throw error
-    return { success: false, errors: { _form: ["Conta criada! Faça login para continuar."] } }
-  }
-
-  return { success: true }
-}
-
-export async function signInAction(
-  _prevState: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  const ip = await getClientIp()
-  const limit = await rateLimit(RATE_LIMITS.login, ip)
-  if (!limit.success) {
     return {
       success: false,
-      errors: {
-        _form: [
-          `Muitas tentativas de login. Aguarde ${limit.retryAfter || 60}s e tente novamente.`,
-        ],
-      },
-    }
-  }
-
-  const raw = {
-    email: formData.get("email"),
-    password: formData.get("password"),
-  }
-
-  const parsed = loginSchema.safeParse(raw)
-  if (!parsed.success) {
-    return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
-  }
-
-  try {
-    await nextAuthSignIn("credentials", {
-      email: parsed.data.email,
-      password: parsed.data.password,
-      redirectTo: "/painel",
-    })
-  } catch (error) {
-    if (isRedirectError(error)) throw error
-    // Generic message only — never leak internal error details to the client.
-    return {
-      success: false,
-      errors: { _form: ["Email ou senha incorretos"] },
+      errors: { _form: ["Conta criada! Faça login para continuar."] },
+      values,
     }
   }
 

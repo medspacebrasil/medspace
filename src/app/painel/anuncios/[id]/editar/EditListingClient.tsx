@@ -7,6 +7,7 @@ import { ListingForm } from "@/components/forms/ListingForm"
 import { ImageUpload } from "@/components/anuncios/ImageUpload"
 import { SaveStatusModal } from "@/components/ui/SaveStatusModal"
 import { Button } from "@/components/ui/button"
+import { PendingButton } from "@/components/ui/pending-button"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Send, ExternalLink, CheckCircle2 } from "lucide-react"
 
@@ -116,10 +117,10 @@ export function EditListingClient({
             }}
           >
             <input type="hidden" name="id" value={listing.id} />
-            <Button type="submit" variant="destructive" className="gap-2">
+            <PendingButton variant="destructive" className="gap-2" pendingText="Excluindo...">
               <Trash2 className="h-4 w-4" />
               Excluir
-            </Button>
+            </PendingButton>
           </form>
         </div>
       </div>

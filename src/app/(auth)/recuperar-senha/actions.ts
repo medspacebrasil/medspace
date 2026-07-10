@@ -13,6 +13,12 @@ import { sendPasswordResetEmail } from "@/lib/email"
 export type ActionState = {
   success: boolean
   errors?: Record<string, string[]>
+  /**
+   * Valores submetidos, ecoados de volta em falhas para repopular o form.
+   * O React 19 reseta inputs não-controlados após a action — sem isso o
+   * usuário perde o que digitou quando a validação falha. Nunca incluir senha.
+   */
+  values?: Record<string, string>
 }
 
 const TOKEN_TTL_MS = 60 * 60 * 1000 // 1 hora
@@ -38,9 +44,15 @@ export async function requestPasswordReset(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const values = { email: String(formData.get("email") ?? "") }
+
   const parsed = forgotPasswordSchema.safeParse({ email: formData.get("email") })
   if (!parsed.success) {
-    return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+    return {
+      success: false,
+      errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+      values,
+    }
   }
   const email = parsed.data.email.toLowerCase()
 

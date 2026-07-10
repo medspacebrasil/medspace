@@ -9,6 +9,7 @@ import { compare, hash } from "bcryptjs"
 import { z } from "zod/v4"
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 import { whatsappSchema, optionalPhoneSchema } from "@/lib/validators/phone"
+import { echoFormValues } from "@/lib/form-values"
 
 function storagePathFromPublicUrl(url: string): string | null {
   const marker = "/storage/v1/object/public/listings/"
@@ -20,6 +21,12 @@ function storagePathFromPublicUrl(url: string): string | null {
 export type ActionState = {
   success: boolean
   errors?: Record<string, string[]>
+  /**
+   * Valores submetidos, ecoados de volta em falhas para repopular o form.
+   * O React 19 reseta inputs não-controlados após a action — sem isso o
+   * usuário perde tudo que digitou quando a validação falha. Nunca incluir senha.
+   */
+  values?: Record<string, string>
 }
 
 const profileSchema = z.object({
@@ -35,9 +42,13 @@ export async function updateProfile(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  // Ecoados em toda falha para repopular o form (React 19 reseta inputs
+  // não-controlados após a action).
+  const values = echoFormValues(formData)
+
   const session = await auth()
   if (!session?.user?.clinicId) {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   try {
@@ -52,7 +63,11 @@ export async function updateProfile(
 
     const parsed = profileSchema.safeParse(raw)
     if (!parsed.success) {
-      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
+      }
     }
 
     await prisma.clinic.update({
@@ -63,7 +78,7 @@ export async function updateProfile(
     revalidatePath("/painel/perfil")
     return { success: true }
   } catch {
-    return { success: false, errors: { _form: ["Erro ao atualizar perfil"] } }
+    return { success: false, errors: { _form: ["Erro ao atualizar perfil"] }, values }
   }
 }
 

@@ -1,4 +1,5 @@
 import { z } from "zod/v4"
+import { whatsappSchema } from "./phone"
 
 export const createEquipmentSchema = z.object({
   title: z
@@ -13,9 +14,7 @@ export const createEquipmentSchema = z.object({
   city: z.string().min(2, "Cidade é obrigatória").max(100, "Nome da cidade muito longo"),
   state: z.string().max(2).default(""),
   neighborhood: z.string().min(2, "Bairro é obrigatório").max(100, "Nome do bairro muito longo"),
-  whatsapp: z
-    .string()
-    .regex(/^\d{10,11}$/, "WhatsApp deve ter 10 ou 11 dígitos"),
+  whatsapp: whatsappSchema,
   equipmentCategoryId: z.string().min(1, "Selecione a categoria do aparelho"),
   brand: z.string().max(80, "Marca muito longa").optional(),
   model: z.string().max(80, "Modelo muito longo").optional(),

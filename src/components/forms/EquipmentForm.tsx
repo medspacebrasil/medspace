@@ -25,6 +25,8 @@ interface EquipmentFormProps {
     description: string
     fullDescription: string
     city: string
+    state?: string
+    cep?: string
     neighborhood: string
     whatsapp: string
     equipmentCategoryId: string
@@ -61,7 +63,7 @@ export function EquipmentForm({
             <Input
               id="title"
               name="title"
-              defaultValue={defaultValues?.title}
+              defaultValue={state.values?.title ?? defaultValues?.title}
               placeholder="Ex: Ultrassom portátil Mindray DP-10"
               required
             />
@@ -75,7 +77,10 @@ export function EquipmentForm({
             <Select
               id="equipmentCategoryId"
               name="equipmentCategoryId"
-              defaultValue={defaultValues?.equipmentCategoryId}
+              defaultValue={
+                state.values?.equipmentCategoryId ??
+                defaultValues?.equipmentCategoryId
+              }
               required
             >
               <option value="">Selecione...</option>
@@ -98,18 +103,30 @@ export function EquipmentForm({
               <Input
                 id="brand"
                 name="brand"
-                defaultValue={defaultValues?.brand}
+                defaultValue={state.values?.brand ?? defaultValues?.brand}
                 placeholder="Ex: Mindray"
+                maxLength={80}
               />
+              {state.errors?.brand && (
+                <p className="text-sm text-destructive">
+                  {state.errors.brand[0]}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="model">Modelo (opcional)</Label>
               <Input
                 id="model"
                 name="model"
-                defaultValue={defaultValues?.model}
+                defaultValue={state.values?.model ?? defaultValues?.model}
                 placeholder="Ex: DP-10"
+                maxLength={80}
               />
+              {state.errors?.model && (
+                <p className="text-sm text-destructive">
+                  {state.errors.model[0]}
+                </p>
+              )}
             </div>
           </div>
 
@@ -118,7 +135,7 @@ export function EquipmentForm({
             <Select
               id="condition"
               name="condition"
-              defaultValue={defaultValues?.condition}
+              defaultValue={state.values?.condition ?? defaultValues?.condition}
             >
               <option value="">Selecione...</option>
               <option value="NOVO">Novo</option>
@@ -132,7 +149,7 @@ export function EquipmentForm({
             <Textarea
               id="description"
               name="description"
-              defaultValue={defaultValues?.description}
+              defaultValue={state.values?.description ?? defaultValues?.description}
               placeholder="Descrição resumida do aparelho..."
               maxLength={300}
               required
@@ -149,15 +166,25 @@ export function EquipmentForm({
             <Textarea
               id="fullDescription"
               name="fullDescription"
-              defaultValue={defaultValues?.fullDescription}
+              defaultValue={
+                state.values?.fullDescription ?? defaultValues?.fullDescription
+              }
               placeholder="Detalhes completos: estado, acessórios inclusos, condições de locação..."
               rows={6}
+              maxLength={5000}
             />
+            {state.errors?.fullDescription && (
+              <p className="text-sm text-destructive">
+                {state.errors.fullDescription[0]}
+              </p>
+            )}
           </div>
 
           <CepInput
             defaultCity={defaultValues?.city}
             defaultNeighborhood={defaultValues?.neighborhood}
+            defaultState={defaultValues?.state}
+            defaultCep={defaultValues?.cep}
           />
           {state.errors?.city && (
             <p className="text-sm text-destructive">{state.errors.city[0]}</p>
@@ -173,7 +200,10 @@ export function EquipmentForm({
             <Input
               id="whatsapp"
               name="whatsapp"
-              defaultValue={defaultValues?.whatsapp}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel-national"
+              defaultValue={state.values?.whatsapp ?? defaultValues?.whatsapp}
               placeholder="11999998888"
               required
             />

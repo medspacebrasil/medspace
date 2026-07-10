@@ -65,7 +65,14 @@ export default function CadastroPage() {
 
           <div className="space-y-2">
             <Label htmlFor="name">Seu nome</Label>
-            <Input id="name" name="name" placeholder="João da Silva" autoComplete="name" required />
+            <Input
+              id="name"
+              name="name"
+              placeholder="João da Silva"
+              autoComplete="name"
+              defaultValue={state.values?.name}
+              required
+            />
             {state.errors?.name && (
               <p className="text-sm text-destructive">{state.errors.name[0]}</p>
             )}
@@ -79,6 +86,7 @@ export default function CadastroPage() {
               type="email"
               placeholder="seu@email.com"
               autoComplete="email"
+              defaultValue={state.values?.email}
               required
             />
             {state.errors?.email && (
@@ -144,6 +152,7 @@ export default function CadastroPage() {
                   ? "Dr. João Silva ou Consultório Silva"
                   : "Clínica Saúde Total"
               }
+              defaultValue={state.values?.clinicName}
               required
             />
             {state.errors?.clinicName && (
@@ -177,7 +186,11 @@ export default function CadastroPage() {
             <Input
               id="whatsapp"
               name="whatsapp"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel-national"
               placeholder="11999998888"
+              defaultValue={state.values?.whatsapp}
               required
             />
             {state.errors?.whatsapp && (
@@ -203,6 +216,7 @@ export default function CadastroPage() {
                 type="checkbox"
                 name="acceptTerms"
                 value="on"
+                defaultChecked={state.values?.acceptTerms === "on"}
                 required
                 className="mt-1 rounded"
               />
@@ -237,6 +251,7 @@ export default function CadastroPage() {
                 type="checkbox"
                 name="marketingOptIn"
                 value="on"
+                defaultChecked={state.values?.marketingOptIn === "on"}
                 className="mt-1 rounded"
               />
               <span>

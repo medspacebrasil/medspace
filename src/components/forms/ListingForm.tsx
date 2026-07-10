@@ -91,6 +91,17 @@ export function ListingForm({
     }
   }, [propSpecialties])
 
+  // Após falha da action, o React reseta inputs não-controlados; os valores
+  // ecoados em state.values (multi-valor juntado por vírgula) têm prioridade.
+  // Quando o eco existe mas a chave está ausente, o usuário desmarcou tudo —
+  // não voltar aos defaultValues nesse caso.
+  const selectedSpecialtyIds = state.values
+    ? (state.values.specialtyIds?.split(",") ?? [])
+    : defaultValues?.specialtyIds
+  const selectedEquipmentIds = state.values
+    ? (state.values.equipmentIds?.split(",") ?? [])
+    : defaultValues?.equipmentIds
+
   return (
     <form action={formAction}>
       {defaultValues?.id && (
@@ -110,7 +121,7 @@ export function ListingForm({
             <Input
               id="title"
               name="title"
-              defaultValue={defaultValues?.title}
+              defaultValue={state.values?.title ?? defaultValues?.title}
               placeholder="Ex: Consultório equipado no Centro de SP"
               required
             />
@@ -124,7 +135,7 @@ export function ListingForm({
             <Textarea
               id="description"
               name="description"
-              defaultValue={defaultValues?.description}
+              defaultValue={state.values?.description ?? defaultValues?.description}
               placeholder="Descrição resumida do espaço..."
               maxLength={300}
               required
@@ -141,10 +152,16 @@ export function ListingForm({
             <Textarea
               id="fullDescription"
               name="fullDescription"
-              defaultValue={defaultValues?.fullDescription}
+              defaultValue={state.values?.fullDescription ?? defaultValues?.fullDescription}
               placeholder="Detalhes completos sobre o espaço, horários, condições..."
               rows={6}
+              maxLength={5000}
             />
+            {state.errors?.fullDescription && (
+              <p className="text-sm text-destructive">
+                {state.errors.fullDescription[0]}
+              </p>
+            )}
           </div>
 
           <CepInput
@@ -165,7 +182,10 @@ export function ListingForm({
               <Input
                 id="whatsapp"
                 name="whatsapp"
-                defaultValue={defaultValues?.whatsapp}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel-national"
+                defaultValue={state.values?.whatsapp ?? defaultValues?.whatsapp}
                 placeholder="11999998888"
                 required
               />
@@ -180,7 +200,7 @@ export function ListingForm({
               <Select
                 id="roomTypeId"
                 name="roomTypeId"
-                defaultValue={defaultValues?.roomTypeId}
+                defaultValue={state.values?.roomTypeId ?? defaultValues?.roomTypeId}
               >
                 <option value="">Selecione...</option>
                 {roomTypes.map((rt) => (
@@ -201,7 +221,7 @@ export function ListingForm({
                     type="checkbox"
                     name="specialtyIds"
                     value={s.id}
-                    defaultChecked={defaultValues?.specialtyIds?.includes(s.id)}
+                    defaultChecked={selectedSpecialtyIds?.includes(s.id)}
                     className="rounded"
                   />
                   {s.name}
@@ -222,7 +242,7 @@ export function ListingForm({
             <Input
               id="customSpecialties"
               name="customSpecialties"
-              defaultValue={defaultValues?.customSpecialties}
+              defaultValue={state.values?.customSpecialties ?? defaultValues?.customSpecialties}
               placeholder="Separe por vírgula: Mastologia, Medicina Preventiva..."
               maxLength={500}
             />
@@ -242,7 +262,11 @@ export function ListingForm({
                 type="checkbox"
                 name="requiresRqe"
                 value="true"
-                defaultChecked={defaultValues?.requiresRqe ?? false}
+                defaultChecked={
+                  state.values
+                    ? state.values.requiresRqe === "true"
+                    : (defaultValues?.requiresRqe ?? false)
+                }
                 className="rounded"
               />
               Exige RQE (Registro de Qualificação de Especialista)
@@ -267,7 +291,7 @@ export function ListingForm({
                         type="checkbox"
                         name="equipmentIds"
                         value={eq.id}
-                        defaultChecked={defaultValues?.equipmentIds?.includes(eq.id)}
+                        defaultChecked={selectedEquipmentIds?.includes(eq.id)}
                         className="rounded"
                       />
                       {eq.name}
@@ -285,7 +309,7 @@ export function ListingForm({
             <Input
               id="customEquipment"
               name="customEquipment"
-              defaultValue={defaultValues?.customEquipment}
+              defaultValue={state.values?.customEquipment ?? defaultValues?.customEquipment}
               placeholder="Separe por vírgula: Ar condicionado, Cafeteria, Sala de espera..."
               maxLength={500}
             />

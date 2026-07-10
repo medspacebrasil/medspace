@@ -8,19 +8,27 @@ import { getActiveClinicSession } from "@/lib/auth/guards"
 import { prisma } from "@/lib/db"
 import { createListingSchema, updateListingSchema } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
+import { echoFormValues } from "@/lib/form-values"
 
 export type ActionState = {
   success: boolean
   errors?: Record<string, string[]>
+  /**
+   * Valores submetidos, ecoados de volta em falhas para repopular o form.
+   * O React 19 reseta inputs não-controlados após a action — sem isso o
+   * usuário perde tudo que digitou quando a validação falha.
+   */
+  values?: Record<string, string>
 }
 
 export async function createListing(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const values = echoFormValues(formData)
   const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   try {
@@ -42,7 +50,11 @@ export async function createListing(
 
     const parsed = createListingSchema.safeParse(raw)
     if (!parsed.success) {
-      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
+      }
     }
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
@@ -76,7 +88,7 @@ export async function createListing(
     redirect(`/painel/anuncios/${listing.id}/editar?created=1`)
   } catch (error) {
     if (isRedirectError(error)) throw error
-    return { success: false, errors: { _form: ["Erro ao criar anúncio"] } }
+    return { success: false, errors: { _form: ["Erro ao criar anúncio"] }, values }
   }
 }
 
@@ -84,9 +96,10 @@ export async function updateListing(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const values = echoFormValues(formData)
   const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   const id = formData.get("id") as string
@@ -96,7 +109,7 @@ export async function updateListing(
   })
 
   if (!listing || listing.clinicId !== session.user.clinicId) {
-    return { success: false, errors: { _form: ["Anúncio não encontrado"] } }
+    return { success: false, errors: { _form: ["Anúncio não encontrado"] }, values }
   }
 
   try {
@@ -122,7 +135,11 @@ export async function updateListing(
 
     const parsed = updateListingSchema.safeParse(raw)
     if (!parsed.success) {
-      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
+      }
     }
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
@@ -160,7 +177,7 @@ export async function updateListing(
     revalidateTag("listings", "max")
     return { success: true }
   } catch {
-    return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] } }
+    return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] }, values }
   }
 }
 

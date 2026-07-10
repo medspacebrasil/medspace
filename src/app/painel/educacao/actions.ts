@@ -8,10 +8,17 @@ import { getActiveClinicSession } from "@/lib/auth/guards"
 import { prisma } from "@/lib/db"
 import { createEducationSchema, updateEducationSchema } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
+import { echoFormValues } from "@/lib/form-values"
 
 export type ActionState = {
   success: boolean
   errors?: Record<string, string[]>
+  /**
+   * Valores submetidos, ecoados de volta em falhas para repopular o form.
+   * O React 19 reseta inputs não-controlados após a action — sem isso o
+   * usuário perde tudo que digitou quando a validação falha.
+   */
+  values?: Record<string, string>
 }
 
 /** Maps validated form fields to the Listing columns used by EDUCATION listings. */
@@ -72,15 +79,20 @@ export async function createEducation(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const values = echoFormValues(formData)
   const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   try {
     const parsed = createEducationSchema.safeParse(rawFromForm(formData))
     if (!parsed.success) {
-      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
+      }
     }
 
     const baseSlug = generateSlug(parsed.data.title)
@@ -103,7 +115,7 @@ export async function createEducation(
     redirect(`/painel/educacao/${listing.id}/editar?created=1`)
   } catch (error) {
     if (isRedirectError(error)) throw error
-    return { success: false, errors: { _form: ["Erro ao criar anúncio"] } }
+    return { success: false, errors: { _form: ["Erro ao criar anúncio"] }, values }
   }
 }
 
@@ -111,9 +123,10 @@ export async function updateEducation(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const values = echoFormValues(formData)
   const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   const id = formData.get("id") as string
@@ -122,13 +135,17 @@ export async function updateEducation(
     select: { clinicId: true, type: true, status: true },
   })
   if (!listing || listing.clinicId !== session.user.clinicId || listing.type !== "EDUCATION") {
-    return { success: false, errors: { _form: ["Anúncio não encontrado"] } }
+    return { success: false, errors: { _form: ["Anúncio não encontrado"] }, values }
   }
 
   try {
     const parsed = updateEducationSchema.safeParse(rawFromForm(formData))
     if (!parsed.success) {
-      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
+      }
     }
 
     const d = parsed.data
@@ -164,7 +181,7 @@ export async function updateEducation(
     revalidatePath("/educacao-medica")
     return { success: true }
   } catch {
-    return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] } }
+    return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] }, values }
   }
 }
 

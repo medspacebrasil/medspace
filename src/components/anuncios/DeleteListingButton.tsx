@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { PendingButton } from "@/components/ui/pending-button"
 import { Trash2 } from "lucide-react"
 import { deleteListingPermanent } from "@/app/admin/actions"
 
@@ -24,15 +24,14 @@ export function DeleteListingButton({ id, title }: DeleteListingButtonProps) {
       }}
     >
       <input type="hidden" name="id" value={id} />
-      <Button
-        type="submit"
+      <PendingButton
         size="sm"
         variant="destructive"
         className="gap-1"
         title="Excluir permanentemente"
       >
         <Trash2 className="h-3.5 w-3.5" />
-      </Button>
+      </PendingButton>
     </form>
   )
 }

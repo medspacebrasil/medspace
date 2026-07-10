@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import Link from "next/link"
 import { resetPassword, type ActionState } from "../recuperar-senha/actions"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,11 @@ export function RedefinirSenhaForm({ token }: { token: string }) {
     resetPassword,
     { success: false }
   )
+
+  // Campos controlados: o React 19 reseta inputs não-controlados após a
+  // action, e senha nunca deve ser ecoada pelo servidor via state.values.
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
 
   return (
     <form action={formAction}>
@@ -31,6 +36,9 @@ export function RedefinirSenhaForm({ token }: { token: string }) {
             name="password"
             placeholder="Mínimo 8 caracteres"
             autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            minLength={8}
             required
           />
           {state.errors?.password && (
@@ -45,6 +53,8 @@ export function RedefinirSenhaForm({ token }: { token: string }) {
             name="confirmPassword"
             placeholder="Repita a senha"
             autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
           {state.errors?.confirmPassword && (

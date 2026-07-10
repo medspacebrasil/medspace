@@ -8,19 +8,27 @@ import { getActiveClinicSession } from "@/lib/auth/guards"
 import { prisma } from "@/lib/db"
 import { createEquipmentSchema, updateEquipmentSchema } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
+import { echoFormValues } from "@/lib/form-values"
 
 export type ActionState = {
   success: boolean
   errors?: Record<string, string[]>
+  /**
+   * Valores submetidos, ecoados de volta em falhas para repopular o form.
+   * O React 19 reseta inputs não-controlados após a action — sem isso o
+   * usuário perde tudo que digitou quando a validação falha.
+   */
+  values?: Record<string, string>
 }
 
 export async function createEquipment(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const values = echoFormValues(formData)
   const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   try {
@@ -40,7 +48,11 @@ export async function createEquipment(
 
     const parsed = createEquipmentSchema.safeParse(raw)
     if (!parsed.success) {
-      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
+      }
     }
 
     const data = parsed.data
@@ -64,7 +76,7 @@ export async function createEquipment(
     redirect(`/painel/aparelhos/${listing.id}/editar`)
   } catch (error) {
     if (isRedirectError(error)) throw error
-    return { success: false, errors: { _form: ["Erro ao criar aparelho"] } }
+    return { success: false, errors: { _form: ["Erro ao criar aparelho"] }, values }
   }
 }
 
@@ -72,9 +84,10 @@ export async function updateEquipment(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const values = echoFormValues(formData)
   const session = await getActiveClinicSession()
   if (!session?.user?.clinicId) {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   const id = formData.get("id") as string
@@ -84,7 +97,7 @@ export async function updateEquipment(
   })
 
   if (!listing || listing.clinicId !== session.user.clinicId || listing.type !== "EQUIPMENT") {
-    return { success: false, errors: { _form: ["Aparelho não encontrado"] } }
+    return { success: false, errors: { _form: ["Aparelho não encontrado"] }, values }
   }
 
   try {
@@ -104,7 +117,11 @@ export async function updateEquipment(
 
     const parsed = updateEquipmentSchema.safeParse(raw)
     if (!parsed.success) {
-      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
+      }
     }
 
     // Anti bait-and-switch: editar um aparelho já PUBLICADO o devolve à revisão.
@@ -122,7 +139,7 @@ export async function updateEquipment(
     revalidatePath("/aparelhos")
     return { success: true }
   } catch {
-    return { success: false, errors: { _form: ["Erro ao atualizar aparelho"] } }
+    return { success: false, errors: { _form: ["Erro ao atualizar aparelho"] }, values }
   }
 }
 

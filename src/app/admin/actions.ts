@@ -14,15 +14,23 @@ import {
   updateEducationSchema,
 } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
+import { echoFormValues } from "@/lib/form-values"
 
 export type AdminCreateListingState = {
   success: boolean
   errors?: Record<string, string[]>
+  /**
+   * Valores submetidos, ecoados de volta em falhas para repopular o form.
+   * O React 19 reseta inputs não-controlados após a action — sem isso o
+   * usuário perde tudo que digitou quando a validação falha.
+   */
+  values?: Record<string, string>
 }
 
 export type AdminUpdateEquipmentState = {
   success: boolean
   errors?: Record<string, string[]>
+  values?: Record<string, string>
 }
 
 async function requireAdmin() {
@@ -263,14 +271,15 @@ export async function adminCreateListing(
   _prevState: AdminCreateListingState,
   formData: FormData
 ): Promise<AdminCreateListingState> {
+  const values = echoFormValues(formData)
   const session = await auth()
   if (session?.user?.role !== "ADMIN") {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   const clinicId = formData.get("clinicId") as string | null
   if (!clinicId) {
-    return { success: false, errors: { _form: ["Clínica não informada"] } }
+    return { success: false, errors: { _form: ["Clínica não informada"] }, values }
   }
 
   const clinic = await prisma.clinic.findUnique({
@@ -278,7 +287,7 @@ export async function adminCreateListing(
     select: { id: true },
   })
   if (!clinic) {
-    return { success: false, errors: { _form: ["Clínica não encontrada"] } }
+    return { success: false, errors: { _form: ["Clínica não encontrada"] }, values }
   }
 
   try {
@@ -303,6 +312,7 @@ export async function adminCreateListing(
       return {
         success: false,
         errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
       }
     }
 
@@ -337,7 +347,7 @@ export async function adminCreateListing(
     redirect(`/admin/anuncios/${listing.id}/editar`)
   } catch (error) {
     if (isRedirectError(error)) throw error
-    return { success: false, errors: { _form: ["Erro ao criar anúncio"] } }
+    return { success: false, errors: { _form: ["Erro ao criar anúncio"] }, values }
   }
 }
 
@@ -345,14 +355,15 @@ export async function adminUpdateEquipment(
   _prevState: AdminUpdateEquipmentState,
   formData: FormData
 ): Promise<AdminUpdateEquipmentState> {
+  const values = echoFormValues(formData)
   const session = await auth()
   if (session?.user?.role !== "ADMIN") {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   const id = formData.get("id") as string
   if (!id) {
-    return { success: false, errors: { _form: ["ID não fornecido"] } }
+    return { success: false, errors: { _form: ["ID não fornecido"] }, values }
   }
 
   const listing = await prisma.listing.findUnique({
@@ -360,7 +371,7 @@ export async function adminUpdateEquipment(
     select: { type: true },
   })
   if (!listing || listing.type !== "EQUIPMENT") {
-    return { success: false, errors: { _form: ["Aparelho não encontrado"] } }
+    return { success: false, errors: { _form: ["Aparelho não encontrado"] }, values }
   }
 
   try {
@@ -383,6 +394,7 @@ export async function adminUpdateEquipment(
       return {
         success: false,
         errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
       }
     }
 
@@ -396,26 +408,28 @@ export async function adminUpdateEquipment(
     revalidateTag("listings", "max")
     return { success: true }
   } catch {
-    return { success: false, errors: { _form: ["Erro ao atualizar aparelho"] } }
+    return { success: false, errors: { _form: ["Erro ao atualizar aparelho"] }, values }
   }
 }
 
 export type AdminUpdateListingState = {
   success: boolean
   errors?: Record<string, string[]>
+  values?: Record<string, string>
 }
 
 export async function adminUpdateListing(
   _prevState: AdminUpdateListingState,
   formData: FormData
 ): Promise<AdminUpdateListingState> {
+  const values = echoFormValues(formData)
   const session = await auth()
   if (session?.user?.role !== "ADMIN") {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   const id = formData.get("id") as string
-  if (!id) return { success: false, errors: { _form: ["ID não fornecido"] } }
+  if (!id) return { success: false, errors: { _form: ["ID não fornecido"] }, values }
 
   // Validate/normalize input even for admins — keeps malformed or oversized
   // data out of the DB and matches the validation used everywhere else.
@@ -436,6 +450,7 @@ export async function adminUpdateListing(
     return {
       success: false,
       errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+      values,
     }
   }
 
@@ -463,7 +478,7 @@ export async function adminUpdateListing(
     })
   } catch (error) {
     console.error("[adminUpdateListing] prisma update failed:", error)
-    return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] } }
+    return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] }, values }
   }
 
   revalidatePath("/admin/anuncios")
@@ -475,26 +490,28 @@ export async function adminUpdateListing(
 export type AdminUpdateEducationState = {
   success: boolean
   errors?: Record<string, string[]>
+  values?: Record<string, string>
 }
 
 export async function adminUpdateEducation(
   _prevState: AdminUpdateEducationState,
   formData: FormData
 ): Promise<AdminUpdateEducationState> {
+  const values = echoFormValues(formData)
   const session = await auth()
   if (session?.user?.role !== "ADMIN") {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   const id = formData.get("id") as string
-  if (!id) return { success: false, errors: { _form: ["ID não fornecido"] } }
+  if (!id) return { success: false, errors: { _form: ["ID não fornecido"] }, values }
 
   const listing = await prisma.listing.findUnique({
     where: { id },
     select: { type: true },
   })
   if (!listing || listing.type !== "EDUCATION") {
-    return { success: false, errors: { _form: ["Oportunidade não encontrada"] } }
+    return { success: false, errors: { _form: ["Oportunidade não encontrada"] }, values }
   }
 
   const parsed = updateEducationSchema.safeParse({
@@ -513,7 +530,11 @@ export async function adminUpdateEducation(
     externalLink: formData.get("externalLink") || undefined,
   })
   if (!parsed.success) {
-    return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+    return {
+      success: false,
+      errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+      values,
+    }
   }
 
   const d = parsed.data
@@ -543,7 +564,7 @@ export async function adminUpdateEducation(
     })
   } catch (error) {
     console.error("[adminUpdateEducation] prisma update failed:", error)
-    return { success: false, errors: { _form: ["Erro ao atualizar oportunidade"] } }
+    return { success: false, errors: { _form: ["Erro ao atualizar oportunidade"] }, values }
   }
 
   revalidatePath("/admin/anuncios")
@@ -556,18 +577,19 @@ export async function adminCreateEquipment(
   _prevState: AdminCreateListingState,
   formData: FormData
 ): Promise<AdminCreateListingState> {
+  const values = echoFormValues(formData)
   const session = await auth()
   if (session?.user?.role !== "ADMIN") {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   const clinicId = formData.get("clinicId") as string | null
   if (!clinicId) {
-    return { success: false, errors: { _form: ["Anunciante não informado"] } }
+    return { success: false, errors: { _form: ["Anunciante não informado"] }, values }
   }
   const clinic = await prisma.clinic.findUnique({ where: { id: clinicId }, select: { id: true } })
   if (!clinic) {
-    return { success: false, errors: { _form: ["Anunciante não encontrado"] } }
+    return { success: false, errors: { _form: ["Anunciante não encontrado"] }, values }
   }
 
   try {
@@ -585,7 +607,11 @@ export async function adminCreateEquipment(
       condition: formData.get("condition") || undefined,
     })
     if (!parsed.success) {
-      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
+      }
     }
 
     const data = parsed.data
@@ -611,7 +637,7 @@ export async function adminCreateEquipment(
     redirect(`/admin/aparelhos/${listing.id}/editar`)
   } catch (error) {
     if (isRedirectError(error)) throw error
-    return { success: false, errors: { _form: ["Erro ao criar aparelho"] } }
+    return { success: false, errors: { _form: ["Erro ao criar aparelho"] }, values }
   }
 }
 
@@ -619,18 +645,19 @@ export async function adminCreateEducation(
   _prevState: AdminCreateListingState,
   formData: FormData
 ): Promise<AdminCreateListingState> {
+  const values = echoFormValues(formData)
   const session = await auth()
   if (session?.user?.role !== "ADMIN") {
-    return { success: false, errors: { _form: ["Não autorizado"] } }
+    return { success: false, errors: { _form: ["Não autorizado"] }, values }
   }
 
   const clinicId = formData.get("clinicId") as string | null
   if (!clinicId) {
-    return { success: false, errors: { _form: ["Anunciante não informado"] } }
+    return { success: false, errors: { _form: ["Anunciante não informado"] }, values }
   }
   const clinic = await prisma.clinic.findUnique({ where: { id: clinicId }, select: { id: true } })
   if (!clinic) {
-    return { success: false, errors: { _form: ["Anunciante não encontrado"] } }
+    return { success: false, errors: { _form: ["Anunciante não encontrado"] }, values }
   }
 
   try {
@@ -650,7 +677,11 @@ export async function adminCreateEducation(
       externalLink: formData.get("externalLink") || undefined,
     })
     if (!parsed.success) {
-      return { success: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
+      return {
+        success: false,
+        errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+        values,
+      }
     }
 
     const d = parsed.data
@@ -690,6 +721,6 @@ export async function adminCreateEducation(
     redirect(`/admin/educacao/${listing.id}/editar`)
   } catch (error) {
     if (isRedirectError(error)) throw error
-    return { success: false, errors: { _form: ["Erro ao criar oportunidade"] } }
+    return { success: false, errors: { _form: ["Erro ao criar oportunidade"] }, values }
   }
 }

@@ -10,6 +10,7 @@ import {
 import { EducationForm } from "@/components/forms/EducationForm"
 import { ImageUpload } from "@/components/anuncios/ImageUpload"
 import { Button } from "@/components/ui/button"
+import { PendingButton } from "@/components/ui/pending-button"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Send } from "lucide-react"
 
@@ -78,10 +79,10 @@ export function EditEducacaoClient({ listing, justCreated }: Props) {
             }}
           >
             <input type="hidden" name="id" value={listing.id} />
-            <Button type="submit" variant="destructive" className="gap-2">
+            <PendingButton variant="destructive" className="gap-2" pendingText="Excluindo...">
               <Trash2 className="h-4 w-4" />
               Excluir
-            </Button>
+            </PendingButton>
           </form>
         </div>
       </div>

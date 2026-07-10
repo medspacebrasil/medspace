@@ -82,7 +82,9 @@ export function EducationForm({
             <Select
               id="educationType"
               name="educationType"
-              defaultValue={defaultValues?.educationType ?? ""}
+              defaultValue={
+                state.values?.educationType ?? defaultValues?.educationType ?? ""
+              }
               required
             >
               <option value="">Selecione...</option>
@@ -103,7 +105,7 @@ export function EducationForm({
             <Input
               id="title"
               name="title"
-              defaultValue={defaultValues?.title}
+              defaultValue={state.values?.title ?? defaultValues?.title}
               placeholder="Ex: Mentoria em Gestão de Consultório para Médicos"
               maxLength={100}
               required
@@ -119,7 +121,7 @@ export function EducationForm({
             <Textarea
               id="description"
               name="description"
-              defaultValue={defaultValues?.description}
+              defaultValue={state.values?.description ?? defaultValues?.description}
               placeholder="Descreva o conteúdo, metodologia, diferenciais e o que o participante vai aprender ou conquistar."
               rows={6}
               maxLength={2000}
@@ -136,7 +138,7 @@ export function EducationForm({
             <Select
               id="educationModality"
               name="educationModality"
-              defaultValue={defaultValues?.educationModality ?? ""}
+              value={modality}
               onChange={(e) => setModality(e.target.value)}
               required
             >
@@ -160,7 +162,7 @@ export function EducationForm({
                 <Input
                   id="city"
                   name="city"
-                  defaultValue={defaultValues?.city}
+                  defaultValue={state.values?.city ?? defaultValues?.city}
                   placeholder="Ex: Brasília"
                   maxLength={100}
                 />
@@ -173,7 +175,7 @@ export function EducationForm({
                 <Select
                   id="state"
                   name="state"
-                  defaultValue={defaultValues?.state ?? ""}
+                  defaultValue={state.values?.state ?? defaultValues?.state ?? ""}
                   className="w-24"
                 >
                   <option value="">UF</option>
@@ -183,6 +185,9 @@ export function EducationForm({
                     </option>
                   ))}
                 </Select>
+                {state.errors?.state && (
+                  <p className="text-sm text-destructive">{state.errors.state[0]}</p>
+                )}
               </div>
             </div>
           )}
@@ -193,7 +198,11 @@ export function EducationForm({
             <Input
               id="whatsapp"
               name="whatsapp"
-              defaultValue={defaultValues?.whatsapp}
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              maxLength={11}
+              defaultValue={state.values?.whatsapp ?? defaultValues?.whatsapp}
               placeholder="11999998888"
               required
             />
@@ -214,7 +223,7 @@ export function EducationForm({
                 <Input
                   id="area"
                   name="area"
-                  defaultValue={defaultValues?.area}
+                  defaultValue={state.values?.area ?? defaultValues?.area}
                   placeholder="Ex: Cardiologia, Gestão médica, Dermatologia"
                   maxLength={300}
                 />
@@ -228,11 +237,14 @@ export function EducationForm({
                 <Textarea
                   id="audience"
                   name="audience"
-                  defaultValue={defaultValues?.audience}
+                  defaultValue={state.values?.audience ?? defaultValues?.audience}
                   placeholder="Ex: Médicos em início de carreira, residentes, especialistas que querem abrir consultório..."
                   rows={2}
                   maxLength={300}
                 />
+                {state.errors?.audience && (
+                  <p className="text-sm text-destructive">{state.errors.audience[0]}</p>
+                )}
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -241,7 +253,9 @@ export function EducationForm({
                   <Select
                     id="workload"
                     name="workload"
-                    defaultValue={defaultValues?.workload ?? ""}
+                    defaultValue={
+                      state.values?.workload ?? defaultValues?.workload ?? ""
+                    }
                   >
                     <option value="">Selecione...</option>
                     {WORKLOAD_OPTIONS.map((w) => (
@@ -250,16 +264,22 @@ export function EducationForm({
                       </option>
                     ))}
                   </Select>
+                  {state.errors?.workload && (
+                    <p className="text-sm text-destructive">{state.errors.workload[0]}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="duration">Duração / Período</Label>
                   <Input
                     id="duration"
                     name="duration"
-                    defaultValue={defaultValues?.duration}
+                    defaultValue={state.values?.duration ?? defaultValues?.duration}
                     placeholder="Ex: 3 meses, encontros semanais por 8 semanas"
                     maxLength={120}
                   />
+                  {state.errors?.duration && (
+                    <p className="text-sm text-destructive">{state.errors.duration[0]}</p>
+                  )}
                 </div>
               </div>
 
@@ -268,10 +288,13 @@ export function EducationForm({
                 <Input
                   id="investment"
                   name="investment"
-                  defaultValue={defaultValues?.investment}
+                  defaultValue={state.values?.investment ?? defaultValues?.investment}
                   placeholder="Ex: Gratuito, A combinar, R$ 1.200"
                   maxLength={120}
                 />
+                {state.errors?.investment && (
+                  <p className="text-sm text-destructive">{state.errors.investment[0]}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -280,7 +303,9 @@ export function EducationForm({
                   id="externalLink"
                   name="externalLink"
                   type="url"
-                  defaultValue={defaultValues?.externalLink}
+                  defaultValue={
+                    state.values?.externalLink ?? defaultValues?.externalLink
+                  }
                   placeholder="https://site, página de inscrição ou Instagram"
                   maxLength={300}
                 />

@@ -6,6 +6,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { PendingButton } from "@/components/ui/pending-button"
 import { Badge } from "@/components/ui/badge"
 import { blockClinic, unblockClinic } from "../actions"
 import { DeleteClinicButton } from "@/components/anuncios/DeleteClinicButton"
@@ -69,30 +70,30 @@ export default async function AdminClinicasPage() {
                   {blocked ? (
                     <form action={unblockClinic}>
                       <input type="hidden" name="clinicId" value={clinic.id} />
-                      <Button
-                        type="submit"
+                      <PendingButton
                         size="sm"
                         variant="outline"
                         className="gap-1"
                         title="Desbloquear a conta desta clínica"
+                        pendingText="Desbloqueando..."
                       >
                         <Check className="h-3.5 w-3.5" />
                         Desbloquear
-                      </Button>
+                      </PendingButton>
                     </form>
                   ) : (
                     <form action={blockClinic}>
                       <input type="hidden" name="clinicId" value={clinic.id} />
-                      <Button
-                        type="submit"
+                      <PendingButton
                         size="sm"
                         variant="outline"
                         className="gap-1"
                         title="Bloquear a conta e arquivar todos os anúncios desta clínica"
+                        pendingText="Bloqueando..."
                       >
                         <Ban className="h-3.5 w-3.5" />
                         Bloquear
-                      </Button>
+                      </PendingButton>
                     </form>
                   )}
                   <DeleteClinicButton

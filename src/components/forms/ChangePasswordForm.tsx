@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import { changePassword } from "@/app/painel/perfil/actions"
 import type { ActionState } from "@/app/painel/perfil/actions"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,13 @@ export function ChangePasswordForm() {
     { success: false }
   )
 
+  // Campos controlados: o React 19 reseta inputs não-controlados após a
+  // action, e senha nunca deve ser ecoada pelo servidor via state.values.
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [localError, setLocalError] = useState("")
+
   return (
     <Card>
       <CardHeader>
@@ -24,7 +31,25 @@ export function ChangePasswordForm() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-4">
+        <form
+          action={formAction}
+          onSubmit={(e) => {
+            // Validação local: evita ida ao servidor quando as senhas não
+            // coincidem. Nos demais casos o submit segue para a action.
+            if (newPassword !== confirmPassword) {
+              e.preventDefault()
+              setLocalError("As senhas não coincidem")
+              return
+            }
+            setLocalError("")
+          }}
+          className="space-y-4"
+        >
+          {localError && (
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {localError}
+            </div>
+          )}
           {state.errors?._form && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
               {state.errors._form[0]}
@@ -42,6 +67,8 @@ export function ChangePasswordForm() {
               id="currentPassword"
               name="currentPassword"
               autoComplete="current-password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
               required
             />
             {state.errors?.currentPassword && (
@@ -56,6 +83,8 @@ export function ChangePasswordForm() {
               name="newPassword"
               placeholder="Mínimo 8 caracteres"
               autoComplete="new-password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
               required
             />
             {state.errors?.newPassword && (
@@ -69,6 +98,8 @@ export function ChangePasswordForm() {
               id="confirmPassword"
               name="confirmPassword"
               autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
             {state.errors?.confirmPassword && (
