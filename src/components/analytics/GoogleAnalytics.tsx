@@ -4,9 +4,10 @@ import Script from "next/script"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef } from "react"
 
-const GA_ID = "G-XMBZHGMXEH"
-// Google Ads — conversões (Clique WhatsApp, Cadastro) definidas em lib/analytics.
-const ADS_ID = "AW-18151653017"
+// IDs vivem em lib/analytics (fonte única) — as conversões do Ads dependem
+// deles, e manter duplicado já causou apontar para a conta errada.
+import { GA_MEASUREMENT_ID as GA_ID, GOOGLE_ADS_ID as ADS_ID } from "@/lib/analytics"
+
 const STORAGE_KEY = "medspace:cookie-consent:v1"
 
 declare global {

@@ -14,7 +14,8 @@
  * live in code like the GA measurement id.
  */
 
-const GOOGLE_ADS_ID = "AW-18151653017"
+export const GA_MEASUREMENT_ID = "G-XMBZHGMXEH"
+export const GOOGLE_ADS_ID = "AW-18151653017"
 
 const ADS_CONVERSIONS = {
   // "Clique WhatsApp" — lead de médico (demanda).
@@ -34,6 +35,13 @@ declare global {
 export function trackWhatsAppLead() {
   if (typeof window === "undefined") return
   window.gtag?.("event", "conversion", { send_to: ADS_CONVERSIONS.whatsappLead })
+  // Também para o GA4: a conversão do Ads acima só é visível na conta do Google
+  // Ads. O evento GA4 é o que permite atribuir o lead à origem do tráfego
+  // (google / meta / orgânico) e comparar os canais.
+  window.gtag?.("event", "generate_lead", {
+    send_to: GA_MEASUREMENT_ID,
+    method: "whatsapp",
+  })
   window.fbq?.("track", "Lead")
 }
 
@@ -41,5 +49,9 @@ export function trackWhatsAppLead() {
 export function trackRegistration() {
   if (typeof window === "undefined") return
   window.gtag?.("event", "conversion", { send_to: ADS_CONVERSIONS.registration })
+  window.gtag?.("event", "sign_up", {
+    send_to: GA_MEASUREMENT_ID,
+    method: "site",
+  })
   window.fbq?.("track", "CompleteRegistration")
 }
