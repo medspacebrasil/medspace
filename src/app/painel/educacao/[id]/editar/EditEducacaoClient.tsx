@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import {
   updateEducation,
   deleteEducation,
@@ -9,6 +9,7 @@ import {
 } from "../../actions"
 import { EducationForm } from "@/components/forms/EducationForm"
 import { ImageUpload } from "@/components/anuncios/ImageUpload"
+import { SaveStatusModal } from "@/components/ui/SaveStatusModal"
 import { Button } from "@/components/ui/button"
 import { PendingButton } from "@/components/ui/pending-button"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +47,15 @@ export function EditEducacaoClient({ listing, justCreated }: Props) {
     resubmitEducation,
     { success: false }
   )
+
+  const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null)
+  useEffect(() => {
+    if (updateState.success) {
+      setSaveStatus("success")
+    } else if (updateState.errors) {
+      setSaveStatus("error")
+    }
+  }, [updateState])
 
   return (
     <div>
@@ -100,11 +110,17 @@ export function EditEducacaoClient({ listing, justCreated }: Props) {
         </div>
       )}
 
-      {updateState.success && (
-        <div className="mt-4 rounded-md bg-green-50 p-3 text-sm text-green-800">
-          Anúncio atualizado com sucesso!
-        </div>
-      )}
+      <SaveStatusModal
+        open={saveStatus !== null}
+        status={saveStatus ?? "success"}
+        message={
+          saveStatus === "error"
+            ? updateState.errors?._form?.[0] ??
+              "Verifique os campos destacados no formulário."
+            : "Suas alterações foram salvas e já estão no ar."
+        }
+        onClose={() => setSaveStatus(null)}
+      />
 
       <div className="mt-6">
         <ImageUpload listingId={listing.id} initialImages={listing.images} />

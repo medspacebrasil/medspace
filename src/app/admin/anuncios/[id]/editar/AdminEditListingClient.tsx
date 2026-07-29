@@ -59,13 +59,26 @@ export function AdminEditListingClient({
     { success: false }
   )
   const [modalOpen, setModalOpen] = useState(false)
+  const [modalStatus, setModalStatus] = useState<"success" | "error">("success")
+  // Especialidades são controladas (checked + onChange), então sobrevivem ao
+  // reset de inputs não-controlados do React 19 — dispensa o eco via state.values.
+  const [selectedSpecialtyIds, setSelectedSpecialtyIds] = useState<string[]>(
+    listing.specialties.map((s) => s.specialtyId)
+  )
 
-  // Open the success modal whenever a save succeeds. On validation errors,
-  // React 19 resets uncontrolled inputs after the action completes, so each
-  // field falls back to state.values (echoed back by the action) to keep
-  // what the admin typed.
+  // Open the modal on every action return: success or validation failure.
+  // The initial state ({ success: false } without errors) must not open it.
+  // On validation errors, React 19 resets uncontrolled inputs after the action
+  // completes, so each field falls back to state.values (echoed back by the
+  // action) to keep what the admin typed.
   useEffect(() => {
-    if (state.success) setModalOpen(true)
+    if (state.success) {
+      setModalStatus("success")
+      setModalOpen(true)
+    } else if (state.errors) {
+      setModalStatus("error")
+      setModalOpen(true)
+    }
   }, [state])
 
   return (
@@ -90,8 +103,13 @@ export function AdminEditListingClient({
 
       <SaveStatusModal
         open={modalOpen}
-        status="success"
-        message="Suas alterações foram salvas e já estão no ar."
+        status={modalStatus}
+        message={
+          modalStatus === "success"
+            ? "Suas alterações foram salvas e já estão no ar."
+            : state.errors?._form?.[0] ??
+              "Verifique os campos destacados no formulário."
+        }
         onClose={() => setModalOpen(false)}
       />
 
@@ -200,6 +218,29 @@ export function AdminEditListingClient({
 
             <div className="space-y-2">
               <Label>Especialidades</Label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={
+                    specialties.length > 0 &&
+                    selectedSpecialtyIds.length === specialties.length
+                  }
+                  ref={(el) => {
+                    if (el) {
+                      el.indeterminate =
+                        selectedSpecialtyIds.length > 0 &&
+                        selectedSpecialtyIds.length < specialties.length
+                    }
+                  }}
+                  onChange={(e) =>
+                    setSelectedSpecialtyIds(
+                      e.target.checked ? specialties.map((s) => s.id) : []
+                    )
+                  }
+                  className="rounded"
+                />
+                Selecionar todas
+              </label>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {specialties.map((s) => (
                   <label key={s.id} className="flex items-center gap-2 text-sm">
@@ -207,10 +248,13 @@ export function AdminEditListingClient({
                       type="checkbox"
                       name="specialtyIds"
                       value={s.id}
-                      defaultChecked={
-                        state.values
-                          ? (state.values.specialtyIds?.split(",") ?? []).includes(s.id)
-                          : listing.specialties.some((ls) => ls.specialtyId === s.id)
+                      checked={selectedSpecialtyIds.includes(s.id)}
+                      onChange={(e) =>
+                        setSelectedSpecialtyIds((prev) =>
+                          e.target.checked
+                            ? [...prev, s.id]
+                            : prev.filter((id) => id !== s.id)
+                        )
                       }
                       className="rounded"
                     />

@@ -1,8 +1,9 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import { createEquipment, type ActionState } from "../actions"
 import { EquipmentForm } from "@/components/forms/EquipmentForm"
+import { SaveStatusModal } from "@/components/ui/SaveStatusModal"
 
 interface Props {
   categories: { id: string; name: string; slug: string }[]
@@ -14,12 +15,29 @@ export function NovoAparelhoClient({ categories }: Props) {
     { success: false }
   )
 
+  // Criação redireciona no sucesso, então só o caminho de erro chega aqui.
+  const [saveStatus, setSaveStatus] = useState<"error" | null>(null)
+  useEffect(() => {
+    if (!state.success && state.errors) setSaveStatus("error")
+  }, [state])
+
   return (
-    <EquipmentForm
-      formAction={formAction}
-      state={state}
-      isPending={isPending}
-      categories={categories}
-    />
+    <>
+      <SaveStatusModal
+        open={saveStatus !== null}
+        status="error"
+        message={
+          state.errors?._form?.[0] ??
+          "Verifique os campos destacados no formulário."
+        }
+        onClose={() => setSaveStatus(null)}
+      />
+      <EquipmentForm
+        formAction={formAction}
+        state={state}
+        isPending={isPending}
+        categories={categories}
+      />
+    </>
   )
 }

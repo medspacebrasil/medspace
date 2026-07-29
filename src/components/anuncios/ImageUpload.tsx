@@ -147,7 +147,7 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
           </p>
           {images.length > 0 && (
             <p className="text-xs text-muted-foreground">
-              Clique na estrela para definir a foto de capa
+              Toque na estrela para definir a foto de capa
             </p>
           )}
         </div>
@@ -199,7 +199,7 @@ export function ImageUpload({ listingId, initialImages }: ImageUploadProps) {
                   Capa
                 </div>
               )}
-              <div className="absolute inset-0 flex items-end justify-center gap-1 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="absolute inset-0 flex items-end justify-center gap-1 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 pointer-coarse:opacity-100">
                 <button
                   type="button"
                   onClick={() => handleSetCover(img.id)}

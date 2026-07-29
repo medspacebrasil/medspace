@@ -9,6 +9,7 @@ import { prisma } from "@/lib/db"
 import { createListingSchema, updateListingSchema } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
 import { echoFormValues } from "@/lib/form-values"
+import { validSpecialtyIds, validEquipmentIds } from "@/lib/listing-taxonomy"
 
 export type ActionState = {
   success: boolean
@@ -58,6 +59,8 @@ export async function createListing(
     }
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
+    const specIds = await validSpecialtyIds(specialtyIds)
+    const eqIds = await validEquipmentIds(equipmentIds)
 
     const baseSlug = generateSlug(data.title)
     let slug = baseSlug
@@ -74,10 +77,10 @@ export async function createListing(
         status: "PENDING",
         clinicId: session.user.clinicId,
         specialties: {
-          create: specialtyIds.map((id) => ({ specialtyId: id })),
+          create: specIds.map((id) => ({ specialtyId: id })),
         },
         equipment: {
-          create: equipmentIds.map((id) => ({ equipmentId: id })),
+          create: eqIds.map((id) => ({ equipmentId: id })),
         },
       },
     })
@@ -143,6 +146,8 @@ export async function updateListing(
     }
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
+    const specIds = specialtyIds ? await validSpecialtyIds(specialtyIds) : undefined
+    const eqIds = equipmentIds ? await validEquipmentIds(equipmentIds) : undefined
 
     // Anti bait-and-switch: editar um anúncio já PUBLICADO o devolve para a
     // fila de revisão (PENDING) — o conteúdo aprovado não pode ser trocado
@@ -157,16 +162,16 @@ export async function updateListing(
       data: {
         ...data,
         ...reReview,
-        ...(specialtyIds && {
+        ...(specIds && {
           specialties: {
             deleteMany: {},
-            create: specialtyIds.map((sid) => ({ specialtyId: sid })),
+            create: specIds.map((sid) => ({ specialtyId: sid })),
           },
         }),
-        ...(equipmentIds && {
+        ...(eqIds && {
           equipment: {
             deleteMany: {},
-            create: equipmentIds.map((eid) => ({ equipmentId: eid })),
+            create: eqIds.map((eid) => ({ equipmentId: eid })),
           },
         }),
       },
@@ -176,7 +181,8 @@ export async function updateListing(
     revalidatePath(`/anuncios`)
     revalidateTag("listings", "max")
     return { success: true }
-  } catch {
+  } catch (error) {
+    console.error("[updateListing] falhou:", error)
     return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] }, values }
   }
 }

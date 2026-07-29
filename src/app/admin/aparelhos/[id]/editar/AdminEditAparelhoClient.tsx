@@ -42,8 +42,9 @@ export function AdminEditAparelhoClient({
 
   const [modalOpen, setModalOpen] = useState(false)
   useEffect(() => {
-    if (updateState.success) setModalOpen(true)
-  }, [updateState.success])
+    // Não abre no estado inicial ({ success: false } sem errors)
+    if (updateState.success || updateState.errors) setModalOpen(true)
+  }, [updateState])
 
   return (
     <div>
@@ -64,8 +65,13 @@ export function AdminEditAparelhoClient({
 
       <SaveStatusModal
         open={modalOpen}
-        status="success"
-        message="Suas alterações foram salvas e já estão no ar."
+        status={updateState.success ? "success" : "error"}
+        message={
+          updateState.success
+            ? "Suas alterações foram salvas e já estão no ar."
+            : updateState.errors?._form?.[0] ??
+              "Verifique os campos destacados no formulário."
+        }
         onClose={() => setModalOpen(false)}
       />
 

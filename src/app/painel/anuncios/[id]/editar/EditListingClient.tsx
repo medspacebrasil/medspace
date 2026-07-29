@@ -63,10 +63,14 @@ export function EditListingClient({
     { success: false }
   )
 
-  const [updateModalOpen, setUpdateModalOpen] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(null)
   useEffect(() => {
-    if (updateState.success) setUpdateModalOpen(true)
-  }, [updateState.success])
+    if (updateState.success) {
+      setSaveStatus("success")
+    } else if (updateState.errors) {
+      setSaveStatus("error")
+    }
+  }, [updateState])
 
   const cfg = statusLabel[listing.status] ?? statusLabel.DRAFT
   const isPublished = listing.status === "PUBLISHED"
@@ -151,10 +155,15 @@ export function EditListingClient({
       )}
 
       <SaveStatusModal
-        open={updateModalOpen}
-        status="success"
-        message="Suas alterações foram salvas e já estão no ar."
-        onClose={() => setUpdateModalOpen(false)}
+        open={saveStatus !== null}
+        status={saveStatus ?? "success"}
+        message={
+          saveStatus === "error"
+            ? updateState.errors?._form?.[0] ??
+              "Verifique os campos destacados no formulário."
+            : "Suas alterações foram salvas e já estão no ar."
+        }
+        onClose={() => setSaveStatus(null)}
       />
 
       <div className="mt-6">

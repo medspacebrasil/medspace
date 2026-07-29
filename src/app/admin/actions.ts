@@ -15,6 +15,7 @@ import {
 } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
 import { echoFormValues } from "@/lib/form-values"
+import { validSpecialtyIds, validEquipmentIds } from "@/lib/listing-taxonomy"
 
 export type AdminCreateListingState = {
   success: boolean
@@ -317,6 +318,8 @@ export async function adminCreateListing(
     }
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
+    const specIds = await validSpecialtyIds(specialtyIds)
+    const eqIds = await validEquipmentIds(equipmentIds)
 
     const baseSlug = generateSlug(data.title)
     let slug = baseSlug
@@ -333,10 +336,10 @@ export async function adminCreateListing(
         reviewedAt: new Date(),
         clinicId,
         specialties: {
-          create: specialtyIds.map((id) => ({ specialtyId: id })),
+          create: specIds.map((id) => ({ specialtyId: id })),
         },
         equipment: {
-          create: equipmentIds.map((id) => ({ equipmentId: id })),
+          create: eqIds.map((id) => ({ equipmentId: id })),
         },
       },
     })
@@ -454,8 +457,8 @@ export async function adminUpdateListing(
     }
   }
 
-  const specialtyIds = formData.getAll("specialtyIds").map(String).filter(Boolean)
-  const equipmentIds = formData.getAll("equipmentIds").map(String).filter(Boolean)
+  const specIds = await validSpecialtyIds(formData.getAll("specialtyIds"))
+  const eqIds = await validEquipmentIds(formData.getAll("equipmentIds"))
 
   const { roomTypeId, ...data } = parsed.data
 
@@ -468,11 +471,11 @@ export async function adminUpdateListing(
         reviewedAt: new Date(),
         specialties: {
           deleteMany: {},
-          create: specialtyIds.map((sid) => ({ specialtyId: sid })),
+          create: specIds.map((sid) => ({ specialtyId: sid })),
         },
         equipment: {
           deleteMany: {},
-          create: equipmentIds.map((eid) => ({ equipmentId: eid })),
+          create: eqIds.map((eid) => ({ equipmentId: eid })),
         },
       },
     })

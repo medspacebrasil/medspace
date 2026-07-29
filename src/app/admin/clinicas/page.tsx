@@ -10,7 +10,16 @@ import { PendingButton } from "@/components/ui/pending-button"
 import { Badge } from "@/components/ui/badge"
 import { blockClinic, unblockClinic } from "../actions"
 import { DeleteClinicButton } from "@/components/anuncios/DeleteClinicButton"
+import { formatDocument } from "@/lib/validators/document"
 import { Ban, Check, PlusCircle } from "lucide-react"
+
+const advertiserTypeLabels: Record<string, string> = {
+  MEDICO: "Médico",
+  CLINICA: "Clínica ou consultório",
+  COWORKING: "Coworking médico",
+  EMPRESA: "Empresa",
+  INSTITUICAO: "Instituição de ensino",
+}
 
 export default async function AdminClinicasPage() {
   const session = await auth()
@@ -54,6 +63,18 @@ export default async function AdminClinicasPage() {
                       <Badge variant="warning">{pending} pendente(s)</Badge>
                     )}
                   </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {advertiserTypeLabels[clinic.advertiserType] ?? clinic.advertiserType}{" "}
+                    &middot;{" "}
+                    {clinic.document && clinic.documentType ? (
+                      <>
+                        {clinic.documentType}:{" "}
+                        {formatDocument(clinic.document, clinic.documentType)}
+                      </>
+                    ) : (
+                      "Documento não informado"
+                    )}
+                  </p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {clinic.user.name} ({clinic.user.email}) &middot; {clinic.city},{" "}
                     {clinic.neighborhood} &middot; WhatsApp: {clinic.whatsapp} &middot;{" "}

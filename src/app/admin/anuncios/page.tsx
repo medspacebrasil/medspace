@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { approveListing, rejectListing, archiveListing, toggleFeatured, markReviewed } from "../actions"
 import { DeleteListingButton } from "@/components/anuncios/DeleteListingButton"
 import { AdminListingsSearch } from "@/components/anuncios/AdminListingsSearch"
+import { formatDocument } from "@/lib/validators/document"
 import { CheckCircle, XCircle, Archive, RotateCcw, Pencil, Star, Eye } from "lucide-react"
 
 const PAGE_SIZE = 20
@@ -66,7 +67,7 @@ export default async function AdminAnunciosPage({
     prisma.listing.findMany({
       where,
       include: {
-        clinic: { select: { name: true } },
+        clinic: { select: { name: true, document: true, documentType: true } },
         images: { orderBy: [{ isCover: "desc" }, { order: "asc" }], take: 1 },
         _count: { select: { specialties: true, images: true } },
       },
@@ -215,7 +216,15 @@ export default async function AdminAnunciosPage({
                     )}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {listing.clinic.name} &middot; {listing.city},{" "}
+                    {listing.clinic.name}
+                    {listing.clinic.document && listing.clinic.documentType && (
+                      <span className="text-xs">
+                        {" "}
+                        ({listing.clinic.documentType}{" "}
+                        {formatDocument(listing.clinic.document, listing.clinic.documentType)})
+                      </span>
+                    )}{" "}
+                    &middot; {listing.city},{" "}
                     {listing.neighborhood} &middot; {listing._count.images}{" "}
                     fotos
                   </p>

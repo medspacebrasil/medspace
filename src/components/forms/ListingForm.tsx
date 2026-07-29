@@ -77,6 +77,11 @@ export function ListingForm({
   const [specialties, setSpecialties] = useState<FilterOption[]>(propSpecialties ?? [])
   const [roomTypes, setRoomTypes] = useState<FilterOption[]>(propRoomTypes ?? [])
   const [equipment, setEquipment] = useState<EquipmentOption[]>(propEquipment ?? [])
+  // Especialidades são controladas (checked + onChange), então sobrevivem ao
+  // reset de inputs não-controlados do React 19 — dispensa o eco via state.values.
+  const [selectedSpecialtyIds, setSelectedSpecialtyIds] = useState<string[]>(
+    defaultValues?.specialtyIds ?? []
+  )
 
   useEffect(() => {
     if (!propSpecialties) {
@@ -95,9 +100,6 @@ export function ListingForm({
   // ecoados em state.values (multi-valor juntado por vírgula) têm prioridade.
   // Quando o eco existe mas a chave está ausente, o usuário desmarcou tudo —
   // não voltar aos defaultValues nesse caso.
-  const selectedSpecialtyIds = state.values
-    ? (state.values.specialtyIds?.split(",") ?? [])
-    : defaultValues?.specialtyIds
   const selectedEquipmentIds = state.values
     ? (state.values.equipmentIds?.split(",") ?? [])
     : defaultValues?.equipmentIds
@@ -214,6 +216,29 @@ export function ListingForm({
 
           <div className="space-y-2">
             <Label>Especialidades disponíveis</Label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={
+                  specialties.length > 0 &&
+                  selectedSpecialtyIds.length === specialties.length
+                }
+                ref={(el) => {
+                  if (el) {
+                    el.indeterminate =
+                      selectedSpecialtyIds.length > 0 &&
+                      selectedSpecialtyIds.length < specialties.length
+                  }
+                }}
+                onChange={(e) =>
+                  setSelectedSpecialtyIds(
+                    e.target.checked ? specialties.map((s) => s.id) : []
+                  )
+                }
+                className="rounded"
+              />
+              Selecionar todas
+            </label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {specialties.map((s) => (
                 <label key={s.id} className="flex items-center gap-2 text-sm">
@@ -221,7 +246,14 @@ export function ListingForm({
                     type="checkbox"
                     name="specialtyIds"
                     value={s.id}
-                    defaultChecked={selectedSpecialtyIds?.includes(s.id)}
+                    checked={selectedSpecialtyIds.includes(s.id)}
+                    onChange={(e) =>
+                      setSelectedSpecialtyIds((prev) =>
+                        e.target.checked
+                          ? [...prev, s.id]
+                          : prev.filter((id) => id !== s.id)
+                      )
+                    }
                     className="rounded"
                   />
                   {s.name}
