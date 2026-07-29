@@ -46,6 +46,12 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // Turbopack was inferring d:\Projects as workspace root, breaking
+  // resolution of `@import "tailwindcss"` in globals.css. Pin the root
+  // to this package (dev/build always run from the package dir).
+  turbopack: {
+    root: process.cwd(),
+  },
   images: {
     remotePatterns: [
       {
