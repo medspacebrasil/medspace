@@ -13,6 +13,7 @@ interface ListingCardProps {
     city: string
     neighborhood: string
     roomType?: { name: string } | null
+    allSpecialties?: boolean
     specialties: { specialty: { name: string } }[]
     images: { url: string; order: number }[]
     clinic: { name: string }
@@ -66,15 +67,23 @@ export function ListingCard({ listing }: ListingCardProps) {
                 {listing.roomType.name}
               </Badge>
             )}
-            {listing.specialties.slice(0, 2).map((ls) => (
-              <Badge key={ls.specialty.name} variant="outline" className="text-xs">
-                {ls.specialty.name}
+            {listing.allSpecialties ? (
+              <Badge className="border-gold/40 bg-gold/10 text-gold-dark text-xs">
+                Todas as especialidades
               </Badge>
-            ))}
-            {listing.specialties.length > 2 && (
-              <Badge variant="outline" className="text-xs">
-                +{listing.specialties.length - 2}
-              </Badge>
+            ) : (
+              <>
+                {listing.specialties.slice(0, 2).map((ls) => (
+                  <Badge key={ls.specialty.name} variant="outline" className="text-xs">
+                    {ls.specialty.name}
+                  </Badge>
+                ))}
+                {listing.specialties.length > 2 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{listing.specialties.length - 2}
+                  </Badge>
+                )}
+              </>
             )}
           </div>
           <p className="mt-3 text-xs text-muted-foreground">

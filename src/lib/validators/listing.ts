@@ -1,7 +1,9 @@
 import { z } from "zod/v4"
 import { whatsappSchema } from "./phone"
 
-export const createListingSchema = z.object({
+// Base sem refinements: updateListingSchema precisa de .partial(), que não
+// existe em ZodEffects (resultado do superRefine).
+const baseListingSchema = z.object({
   title: z
     .string()
     .min(5, "Título deve ter no mínimo 5 caracteres")
@@ -16,7 +18,10 @@ export const createListingSchema = z.object({
   neighborhood: z.string().min(2, "Bairro é obrigatório").max(100, "Nome do bairro muito longo"),
   whatsapp: whatsappSchema,
   roomTypeId: z.string().optional(),
-  specialtyIds: z.array(z.string()).min(1, "Selecione ao menos 1 especialidade"),
+  // "Atende todas as especialidades": quando true, dispensa a seleção
+  // individual (ver superRefine do create).
+  allSpecialties: z.boolean().optional().default(false),
+  specialtyIds: z.array(z.string()).default([]),
   equipmentIds: z.array(z.string()).default([]),
   customSpecialties: z
     .string()
@@ -29,7 +34,18 @@ export const createListingSchema = z.object({
   requiresRqe: z.coerce.boolean().optional().default(false),
 })
 
-export const updateListingSchema = createListingSchema.partial()
+export const createListingSchema = baseListingSchema.superRefine((data, ctx) => {
+  if (!data.allSpecialties && data.specialtyIds.length === 0) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["specialtyIds"],
+      message:
+        "Selecione ao menos 1 especialidade ou marque “Atende todas as especialidades”",
+    })
+  }
+})
+
+export const updateListingSchema = baseListingSchema.partial()
 
 export type CreateListingInput = z.infer<typeof createListingSchema>
 export type UpdateListingInput = z.infer<typeof updateListingSchema>

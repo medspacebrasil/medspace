@@ -49,9 +49,11 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
   if (params.state) where.state = params.state
   if (params.city) where.city = params.city
   if (params.specialty) {
-    where.specialties = {
-      some: { specialty: { slug: params.specialty } },
-    }
+    // Anúncios com "todas as especialidades" casam com qualquer filtro.
+    where.OR = [
+      { specialties: { some: { specialty: { slug: params.specialty } } } },
+      { allSpecialties: true },
+    ]
   }
   if (params.roomType) {
     where.roomType = { slug: params.roomType }

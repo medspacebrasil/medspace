@@ -177,7 +177,9 @@ export default async function PainelPage({
                         <p className="mt-1 text-sm text-muted-foreground">
                           {listing.city}, {listing.neighborhood} &middot;{" "}
                           {listing._count.images} {listing._count.images === 1 ? "foto" : "fotos"} &middot;{" "}
-                          {listing._count.specialties} {listing._count.specialties === 1 ? "especialidade" : "especialidades"}
+                          {listing.allSpecialties
+                            ? "Todas as especialidades"
+                            : `${listing._count.specialties} ${listing._count.specialties === 1 ? "especialidade" : "especialidades"}`}
                         </p>
                       </div>
                       <Link href={`/painel/anuncios/${listing.id}/editar`}>

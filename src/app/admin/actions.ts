@@ -309,6 +309,7 @@ export async function adminCreateListing(
       neighborhood: formData.get("neighborhood"),
       whatsapp: formData.get("whatsapp"),
       roomTypeId: formData.get("roomTypeId") || undefined,
+      allSpecialties: formData.get("allSpecialties") === "true",
       specialtyIds: formData.getAll("specialtyIds"),
       equipmentIds: formData.getAll("equipmentIds"),
       customSpecialties: formData.get("customSpecialties") || undefined,
@@ -326,7 +327,7 @@ export async function adminCreateListing(
     }
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
-    const specIds = await validSpecialtyIds(specialtyIds)
+    const specIds = data.allSpecialties ? [] : await validSpecialtyIds(specialtyIds)
     const eqIds = await validEquipmentIds(equipmentIds)
 
     const baseSlug = generateSlug(data.title)
@@ -453,6 +454,7 @@ export async function adminUpdateListing(
     neighborhood: formData.get("neighborhood") || undefined,
     whatsapp: formData.get("whatsapp") || undefined,
     roomTypeId: formData.get("roomTypeId") || undefined,
+    allSpecialties: formData.get("allSpecialties") === "true",
     customSpecialties: formData.get("customSpecialties") || undefined,
     customEquipment: formData.get("customEquipment") || undefined,
     requiresRqe: formData.get("requiresRqe") === "true",
@@ -465,10 +467,18 @@ export async function adminUpdateListing(
     }
   }
 
-  const specIds = await validSpecialtyIds(formData.getAll("specialtyIds"))
+  // "Todas as especialidades" dispensa (e limpa) a marcação individual.
+  const specIds =
+    parsed.data.allSpecialties === true
+      ? []
+      : await validSpecialtyIds(formData.getAll("specialtyIds"))
   const eqIds = await validEquipmentIds(formData.getAll("equipmentIds"))
 
-  const { roomTypeId, ...data } = parsed.data
+  // specialtyIds/equipmentIds saem do spread: não são colunas de Listing — o
+  // default([]) do schema os injeta em parsed.data mesmo sem chave no input, e
+  // o Prisma rejeita argumento desconhecido (era o "Erro ao atualizar anúncio"
+  // em TODO salvar do admin). As relações são gravadas via specIds/eqIds.
+  const { roomTypeId, specialtyIds: _spec, equipmentIds: _eq, ...data } = parsed.data
 
   try {
     await prisma.listing.update({

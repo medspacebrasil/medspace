@@ -104,20 +104,30 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 Exige RQE
               </Badge>
             )}
-            {listing.specialties.map((ls) => (
-              <Badge key={ls.specialtyId} variant="outline">
-                {ls.specialty.name}
+            {listing.allSpecialties ? (
+              // Etiqueta única no lugar da lista — pedido da cliente: mais
+              // limpo e cobre especialidades que não estão na taxonomia.
+              <Badge className="border-gold/40 bg-gold/10 text-gold-dark">
+                Todas as especialidades
               </Badge>
-            ))}
-            {listing.customSpecialties
-              ?.split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
-              .map((s) => (
-                <Badge key={s} variant="outline">
-                  {s}
-                </Badge>
-              ))}
+            ) : (
+              <>
+                {listing.specialties.map((ls) => (
+                  <Badge key={ls.specialtyId} variant="outline">
+                    {ls.specialty.name}
+                  </Badge>
+                ))}
+                {listing.customSpecialties
+                  ?.split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+                  .map((s) => (
+                    <Badge key={s} variant="outline">
+                      {s}
+                    </Badge>
+                  ))}
+              </>
+            )}
           </div>
 
           {/* Description */}

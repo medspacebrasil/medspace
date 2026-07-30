@@ -231,4 +231,18 @@ describe("updateListingSchema", () => {
     const result = updateListingSchema.safeParse({ title: "AB" })
     expect(result.success).toBe(false)
   })
+
+  // Regressão do "Erro ao atualizar anúncio" no admin: mesmo com .partial(),
+  // campos com .default() (equipmentIds) SÃO injetados no output quando a
+  // chave está ausente. Toda action que espalha parsed.data num
+  // prisma.listing.update PRECISA desestruturar specialtyIds/equipmentIds
+  // fora do spread — senão o Prisma rejeita o argumento desconhecido.
+  it("injeta defaults no output mesmo sem a chave no input (contrato das actions)", () => {
+    const result = updateListingSchema.safeParse({ title: "Título válido" })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.equipmentIds).toEqual([])
+      // se este teste falhar num upgrade do zod, revisar os spreads das actions
+    }
+  })
 })

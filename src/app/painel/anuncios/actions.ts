@@ -47,6 +47,7 @@ export async function createListing(
       neighborhood: formData.get("neighborhood"),
       whatsapp: formData.get("whatsapp"),
       roomTypeId: formData.get("roomTypeId") || undefined,
+      allSpecialties: formData.get("allSpecialties") === "true",
       specialtyIds: formData.getAll("specialtyIds"),
       equipmentIds: formData.getAll("equipmentIds"),
       customSpecialties: formData.get("customSpecialties") || undefined,
@@ -64,7 +65,8 @@ export async function createListing(
     }
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
-    const specIds = await validSpecialtyIds(specialtyIds)
+    // "Todas as especialidades" dispensa (e limpa) a marcação individual.
+    const specIds = data.allSpecialties ? [] : await validSpecialtyIds(specialtyIds)
     const eqIds = await validEquipmentIds(equipmentIds)
 
     const baseSlug = generateSlug(data.title)
@@ -130,6 +132,7 @@ export async function updateListing(
       neighborhood: formData.get("neighborhood") || undefined,
       whatsapp: formData.get("whatsapp") || undefined,
       roomTypeId: formData.get("roomTypeId") || undefined,
+      allSpecialties: formData.get("allSpecialties") === "true",
       specialtyIds: formData.getAll("specialtyIds").length > 0
         ? formData.getAll("specialtyIds")
         : undefined,
@@ -151,7 +154,13 @@ export async function updateListing(
     }
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
-    const specIds = specialtyIds ? await validSpecialtyIds(specialtyIds) : undefined
+    // Com "todas as especialidades" a marcação individual é limpa; sem a flag,
+    // undefined preserva as especialidades existentes (comportamento atual).
+    const specIds = data.allSpecialties
+      ? []
+      : specialtyIds
+        ? await validSpecialtyIds(specialtyIds)
+        : undefined
     const eqIds = equipmentIds ? await validEquipmentIds(equipmentIds) : undefined
 
     // Anti bait-and-switch: editar um anúncio já PUBLICADO o devolve para a
@@ -264,10 +273,10 @@ export async function publishListing(
     }
   }
 
-  if (listing.specialties.length === 0) {
+  if (!listing.allSpecialties && listing.specialties.length === 0) {
     return {
       success: false,
-      errors: { _form: ["Selecione pelo menos 1 especialidade"] },
+      errors: { _form: ["Selecione pelo menos 1 especialidade ou marque “Atende todas as especialidades”"] },
     }
   }
 

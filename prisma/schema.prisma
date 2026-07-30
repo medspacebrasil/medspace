@@ -150,6 +150,9 @@ model Listing {
   featured        Boolean            @default(false)
   reviewedAt      DateTime?          @map("reviewed_at")
   requiresRqe     Boolean            @default(false) @map("requires_rqe")
+  // "Atende todas as especialidades": substitui a marcação individual — o
+  // anúncio exibe uma badge única e casa com qualquer filtro de especialidade.
+  allSpecialties  Boolean            @default(false) @map("all_specialties")
   // Motivo informado pelo admin ao rejeitar — exibido ao anunciante no painel.
   // Limpo quando o anúncio é aprovado/republicado.
   rejectionReason String?            @map("rejection_reason")

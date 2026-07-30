@@ -24,6 +24,7 @@ interface Props {
     roomTypeId: string | null
     status: string
     rejectionReason: string | null
+    allSpecialties: boolean
     customSpecialties: string | null
     customEquipment: string | null
     requiresRqe: boolean
@@ -268,6 +269,7 @@ export function EditListingClient({
             neighborhood: listing.neighborhood,
             whatsapp: listing.whatsapp,
             roomTypeId: listing.roomTypeId ?? "",
+            allSpecialties: listing.allSpecialties,
             specialtyIds: listing.specialties.map((s) => s.specialtyId),
             equipmentIds: listing.equipment.map((e) => e.equipmentId),
             customSpecialties: listing.customSpecialties ?? "",

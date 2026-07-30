@@ -56,6 +56,7 @@ interface ListingFormProps {
     neighborhood: string
     whatsapp: string
     roomTypeId: string
+    allSpecialties?: boolean
     specialtyIds: string[]
     equipmentIds: string[]
     customSpecialties?: string
@@ -85,6 +86,11 @@ export function ListingForm({
   // reset de inputs não-controlados do React 19 — dispensa o eco via state.values.
   const [selectedSpecialtyIds, setSelectedSpecialtyIds] = useState<string[]>(
     defaultValues?.specialtyIds ?? []
+  )
+  // "Atende todas as especialidades": o anúncio exibe uma etiqueta única em
+  // vez da lista — mais limpo e cobre especialidades que não estão na lista.
+  const [allSpecialties, setAllSpecialties] = useState<boolean>(
+    defaultValues?.allSpecialties ?? false
   )
 
   useEffect(() => {
@@ -228,50 +234,52 @@ export function ListingForm({
 
           <div className="space-y-2">
             <Label>Especialidades disponíveis</Label>
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-start gap-2 rounded-md border border-gold/40 bg-gold/5 p-3 text-sm font-medium">
               <input
                 type="checkbox"
-                checked={
-                  specialties.length > 0 &&
-                  selectedSpecialtyIds.length === specialties.length
-                }
-                ref={(el) => {
-                  if (el) {
-                    el.indeterminate =
-                      selectedSpecialtyIds.length > 0 &&
-                      selectedSpecialtyIds.length < specialties.length
-                  }
-                }}
-                onChange={(e) =>
-                  setSelectedSpecialtyIds(
-                    e.target.checked ? specialties.map((s) => s.id) : []
-                  )
-                }
-                className="rounded"
+                name="allSpecialties"
+                value="true"
+                checked={allSpecialties}
+                onChange={(e) => setAllSpecialties(e.target.checked)}
+                className="mt-0.5 rounded"
               />
-              Selecionar todas
+              <span>
+                Atende todas as especialidades
+                <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                  O anúncio exibirá a etiqueta “Todas as especialidades” em vez
+                  da lista — fica mais limpo e cobre especialidades que não
+                  estão abaixo.
+                </span>
+              </span>
             </label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {specialties.map((s) => (
-                <label key={s.id} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    name="specialtyIds"
-                    value={s.id}
-                    checked={selectedSpecialtyIds.includes(s.id)}
-                    onChange={(e) =>
-                      setSelectedSpecialtyIds((prev) =>
-                        e.target.checked
-                          ? [...prev, s.id]
-                          : prev.filter((id) => id !== s.id)
-                      )
-                    }
-                    className="rounded"
-                  />
-                  {s.name}
-                </label>
-              ))}
-            </div>
+            {allSpecialties ? (
+              <p className="rounded-md bg-muted/40 p-3 text-xs text-muted-foreground">
+                A seleção individual fica desativada enquanto esta opção
+                estiver marcada.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {specialties.map((s) => (
+                  <label key={s.id} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      name="specialtyIds"
+                      value={s.id}
+                      checked={selectedSpecialtyIds.includes(s.id)}
+                      onChange={(e) =>
+                        setSelectedSpecialtyIds((prev) =>
+                          e.target.checked
+                            ? [...prev, s.id]
+                            : prev.filter((id) => id !== s.id)
+                        )
+                      }
+                      className="rounded"
+                    />
+                    {s.name}
+                  </label>
+                ))}
+              </div>
+            )}
             {state.errors?.specialtyIds && (
               <p className="text-sm text-destructive">
                 {state.errors.specialtyIds[0]}
