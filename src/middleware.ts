@@ -23,7 +23,11 @@ export function middleware(req: NextRequest) {
   // Protected: /painel/* and /admin/* require login
   if (pathname.startsWith("/painel") || pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
     if (!loggedIn) {
-      return NextResponse.redirect(new URL("/login", req.url))
+      // Preserva o destino: após o login o usuário volta para onde tentava ir
+      // (o LoginForm lê callbackUrl e só aceita caminhos relativos).
+      const loginUrl = new URL("/login", req.url)
+      loginUrl.searchParams.set("callbackUrl", pathname + req.nextUrl.search)
+      return NextResponse.redirect(loginUrl)
     }
   }
 

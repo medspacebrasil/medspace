@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   const isAdmin = session?.user?.role === "ADMIN"
 
   if (!session?.user || (!isAdmin && !session.user.clinicId)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Sessão expirada. Faça login novamente." }, { status: 401 })
   }
 
   const limit = await rateLimit(RATE_LIMITS.upload, session.user.id)
@@ -88,11 +88,11 @@ export async function POST(request: Request) {
       })
 
       if (!listing) {
-        return NextResponse.json({ error: "Listing not found" }, { status: 404 })
+        return NextResponse.json({ error: "Anúncio não encontrado" }, { status: 404 })
       }
 
       if (!isAdmin && listing.clinicId !== session.user.clinicId) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+        return NextResponse.json({ error: "Você não tem permissão para alterar este anúncio" }, { status: 403 })
       }
 
       if (listing._count.images >= MAX_IMAGES_PER_LISTING) {
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
 
     if (!storageClinicId) {
       return NextResponse.json(
-        { error: "Listing is required for admin uploads" },
+        { error: "Selecione o anúncio antes de enviar fotos" },
         { status: 400 }
       )
     }
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
 
     if (uploadError) {
       return NextResponse.json(
-        { error: "Upload failed" },
+        { error: "Falha ao enviar a foto. Tente novamente." },
         { status: 500 }
       )
     }
@@ -177,6 +177,6 @@ export async function POST(request: Request) {
       { status: 201 }
     )
   } catch {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ error: "Erro no servidor ao enviar a foto. Tente novamente." }, { status: 500 })
   }
 }

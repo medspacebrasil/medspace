@@ -47,3 +47,6 @@ prisma/migrations/*.sql.bak
 .vscode/settings.json
 .idea/
 backups/
+
+# Artefatos do Playwright MCP (testes de browser locais)
+.playwright-mcp/

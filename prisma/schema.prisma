@@ -150,6 +150,9 @@ model Listing {
   featured        Boolean            @default(false)
   reviewedAt      DateTime?          @map("reviewed_at")
   requiresRqe     Boolean            @default(false) @map("requires_rqe")
+  // Motivo informado pelo admin ao rejeitar — exibido ao anunciante no painel.
+  // Limpo quando o anúncio é aprovado/republicado.
+  rejectionReason String?            @map("rejection_reason")
 
   // Free-text extra specialties that aren't in the taxonomy (clinic listings)
   customSpecialties String? @map("custom_specialties")

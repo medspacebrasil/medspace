@@ -18,10 +18,12 @@ import {
   Zap,
   GraduationCap,
 } from "lucide-react"
+import { AccountDeletedBanner } from "@/components/AccountDeletedBanner"
 
 export default function HomePage() {
   return (
     <>
+      <AccountDeletedBanner />
       {/* Hero */}
       <section className="relative overflow-hidden bg-navy px-4 py-20 md:py-32">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(201,168,76,0.15),_transparent_60%)]" />

@@ -9,7 +9,7 @@ import { SaveStatusModal } from "@/components/ui/SaveStatusModal"
 import { Button } from "@/components/ui/button"
 import { PendingButton } from "@/components/ui/pending-button"
 import { Badge } from "@/components/ui/badge"
-import { Trash2, Send, ExternalLink, CheckCircle2 } from "lucide-react"
+import { Trash2, Send, ExternalLink, CheckCircle2, Clock, ImageIcon, X } from "lucide-react"
 
 interface Props {
   listing: {
@@ -23,6 +23,7 @@ interface Props {
     whatsapp: string
     roomTypeId: string | null
     status: string
+    rejectionReason: string | null
     customSpecialties: string | null
     customEquipment: string | null
     requiresRqe: boolean
@@ -39,7 +40,7 @@ interface Props {
 
 const statusLabel: Record<string, { label: string; variant: "default" | "secondary" | "success" | "warning" | "destructive" | "outline" }> = {
   DRAFT: { label: "Rascunho", variant: "secondary" },
-  PENDING: { label: "Pendente", variant: "warning" },
+  PENDING: { label: "Em análise", variant: "warning" },
   PUBLISHED: { label: "Publicado", variant: "success" },
   REJECTED: { label: "Rejeitado", variant: "destructive" },
   ARCHIVED: { label: "Arquivado", variant: "outline" },
@@ -72,9 +73,26 @@ export function EditListingClient({
     }
   }, [updateState])
 
+  const [publishErrorDismissed, setPublishErrorDismissed] = useState(false)
+  useEffect(() => {
+    setPublishErrorDismissed(false)
+  }, [publishState])
+
+  // Remove ?created=1 da URL para o banner de criação não reaparecer em
+  // reload/back-nav (mesmo padrão do WelcomeModal com ?welcome=1).
+  useEffect(() => {
+    if (justCreated && typeof window !== "undefined") {
+      window.history.replaceState(null, "", window.location.pathname)
+    }
+  }, [justCreated])
+
   const cfg = statusLabel[listing.status] ?? statusLabel.DRAFT
   const isPublished = listing.status === "PUBLISHED"
-  const showPublishedBanner = justCreated || publishState.success
+  // O dono só pode "enviar para revisão" rascunhos e rejeitados — a action
+  // rejeita os demais estados, então o botão não deve nem aparecer.
+  const canSubmitForReview =
+    listing.status === "DRAFT" || listing.status === "REJECTED"
+  const hasPhotos = listing.images.length > 0
 
   return (
     <div>
@@ -94,7 +112,7 @@ export function EditListingClient({
               </Button>
             </Link>
           )}
-          {!isPublished && (
+          {canSubmitForReview && (
             <form action={publishAction}>
               <input type="hidden" name="id" value={listing.id} />
               <Button
@@ -104,7 +122,7 @@ export function EditListingClient({
                 disabled={isPublishing}
               >
                 <Send className="h-4 w-4" />
-                {isPublishing ? "Publicando..." : "Publicar"}
+                {isPublishing ? "Enviando..." : "Enviar para revisão"}
               </Button>
             </form>
           )}
@@ -129,7 +147,27 @@ export function EditListingClient({
         </div>
       </div>
 
-      {showPublishedBanner && (
+      {/* Banner pós-criação/envio: só afirma "publicado" quando realmente está
+          PUBLISHED — anúncio recém-criado entra em análise e ainda NÃO está no ar. */}
+      {(justCreated || publishState.success) && !isPublished && (
+        <div className="mt-4 flex items-start gap-3 rounded-md border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+          <Clock className="h-5 w-5 shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium">
+              {justCreated
+                ? "Anúncio criado com sucesso!"
+                : "Anúncio enviado para revisão!"}
+            </p>
+            <p className="mt-1 text-blue-800">
+              Ele está <strong>em análise pela nossa equipe</strong> e será
+              publicado após a aprovação. Você receberá o status aqui no painel.
+              {!hasPhotos && " Aproveite para adicionar fotos abaixo — anúncios sem foto não são aprovados."}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {(justCreated || publishState.success) && isPublished && (
         <div className="mt-4 flex items-start gap-3 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">
           <CheckCircle2 className="h-5 w-5 shrink-0" />
           <div className="flex-1">
@@ -148,9 +186,45 @@ export function EditListingClient({
         </div>
       )}
 
-      {publishState.errors?._form && (
-        <div className="mt-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {publishState.errors._form[0]}
+      {/* Motivo da rejeição vindo da moderação — sem isso o anunciante não
+          sabe o que corrigir antes de reenviar. */}
+      {listing.status === "REJECTED" && listing.rejectionReason && (
+        <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+          <p className="font-medium">Anúncio rejeitado pela moderação</p>
+          <p className="mt-1">
+            <strong>Motivo:</strong> {listing.rejectionReason}
+          </p>
+          <p className="mt-1 text-red-800">
+            Corrija o que foi apontado e clique em{" "}
+            <strong>Enviar para revisão</strong> para uma nova análise.
+          </p>
+        </div>
+      )}
+
+      {/* Anúncio sem foto não é aprovado nem aparece no marketplace — avisa
+          antes do anunciante descobrir na rejeição. */}
+      {!hasPhotos && !justCreated && !publishState.success && !isPublished && (
+        <div className="mt-4 flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <ImageIcon className="h-5 w-5 shrink-0" />
+          <p>
+            <strong>Seu anúncio ainda não tem fotos.</strong> Adicione pelo
+            menos 1 foto — anúncios sem foto não são aprovados e não aparecem
+            para os médicos.
+          </p>
+        </div>
+      )}
+
+      {publishState.errors?._form && !publishErrorDismissed && (
+        <div className="mt-4 flex items-start justify-between gap-3 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          <span>{publishState.errors._form[0]}</span>
+          <button
+            type="button"
+            onClick={() => setPublishErrorDismissed(true)}
+            className="shrink-0 rounded p-0.5 hover:bg-destructive/10"
+            aria-label="Fechar aviso"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 
@@ -161,7 +235,11 @@ export function EditListingClient({
           saveStatus === "error"
             ? updateState.errors?._form?.[0] ??
               "Verifique os campos destacados no formulário."
-            : "Suas alterações foram salvas e já estão no ar."
+            : updateState.demoted
+              ? "Suas alterações foram salvas. Como o anúncio estava publicado, ele voltou para análise e ficará fora do ar até ser aprovado novamente."
+              : isPublished
+                ? "Suas alterações foram salvas e já estão no ar."
+                : "Suas alterações foram salvas. O anúncio será publicado após a aprovação da nossa equipe."
         }
         onClose={() => setSaveStatus(null)}
       />
@@ -175,6 +253,11 @@ export function EditListingClient({
           formAction={updateAction}
           state={updateState}
           isPending={isUpdating}
+          submitNote={
+            isPublished
+              ? "Ao salvar, o anúncio voltará para análise e ficará fora do ar até ser aprovado novamente pela nossa equipe."
+              : undefined
+          }
           defaultValues={{
             id: listing.id,
             title: listing.title,

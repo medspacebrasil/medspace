@@ -42,7 +42,14 @@ export function LoginForm({ justReset }: { justReset: boolean }) {
       } else if (result?.ok) {
         // Mantém loading=true durante a navegação: reabilitar o botão aqui
         // permitiria re-submits que consomem o rate limit à toa.
-        window.location.href = "/painel"
+        // Volta para a página que o usuário tentava acessar (callbackUrl do
+        // middleware); só aceita caminho relativo para evitar open redirect.
+        const callbackUrl = new URLSearchParams(window.location.search).get("callbackUrl")
+        const safeTarget =
+          callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+            ? callbackUrl
+            : "/painel"
+        window.location.href = safeTarget
       } else {
         setError("Resposta inesperada do servidor")
         setLoading(false)
@@ -97,6 +104,7 @@ export function LoginForm({ justReset }: { justReset: boolean }) {
               name="password"
               placeholder="Mínimo 8 caracteres"
               autoComplete="current-password"
+              minLength={8}
               required
             />
           </div>
@@ -112,7 +120,7 @@ export function LoginForm({ justReset }: { justReset: boolean }) {
           <p className="text-sm text-muted-foreground">
             Não tem conta?{" "}
             <Link href="/cadastro" className="font-medium text-gold-dark hover:underline">
-              Cadastre sua clínica
+              Cadastre-se
             </Link>
           </p>
         </CardFooter>

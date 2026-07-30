@@ -1,5 +1,6 @@
 "use client"
 
+import { listingStatusLabel } from "@/lib/listing-status"
 import Link from "next/link"
 import { useActionState, useEffect, useState } from "react"
 import { adminUpdateEquipment, type AdminUpdateEquipmentState } from "@/app/admin/actions"
@@ -59,7 +60,7 @@ export function AdminEditAparelhoClient({
         <h1 className="text-2xl font-bold">Editar Aparelho (Admin)</h1>
         <p className="text-sm text-muted-foreground">
           Clínica: {clinicName} &middot;{" "}
-          <Badge variant="secondary">{listing.status}</Badge>
+          <Badge variant="secondary">{listingStatusLabel(listing.status)}</Badge>
         </p>
       </div>
 

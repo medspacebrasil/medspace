@@ -27,6 +27,9 @@ interface PageProps {
 
 export default async function AparelhosMarketplace({ searchParams }: PageProps) {
   const params = await searchParams
+  const hasActiveFilters = Boolean(
+    params.category || params.state || params.city || params.condition
+  )
   const page = Math.max(1, Number(params.page) || 1)
   const limit = 20
 
@@ -200,14 +203,22 @@ export default async function AparelhosMarketplace({ searchParams }: PageProps) 
         </>
       ) : (
         <div className="mt-16 text-center">
-          <p className="text-lg text-muted-foreground">
-            Nenhum aparelho encontrado com esses filtros.
-          </p>
-          <Link href="/aparelhos">
-            <Button variant="outline" className="mt-4">
-              Limpar filtros
-            </Button>
-          </Link>
+          {hasActiveFilters ? (
+            <>
+              <p className="text-lg text-muted-foreground">
+                Nenhum aparelho encontrado com esses filtros.
+              </p>
+              <Link href="/aparelhos">
+                <Button variant="outline" className="mt-4">
+                  Limpar filtros
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <p className="text-lg text-muted-foreground">
+              Ainda não há aparelhos anunciados. Volte em breve!
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -8,12 +8,12 @@ export async function POST(request: Request) {
   const isAdmin = session?.user?.role === "ADMIN"
 
   if (!session?.user || (!isAdmin && !session.user.clinicId)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Sessão expirada. Faça login novamente." }, { status: 401 })
   }
 
   const { imageId } = (await request.json()) as { imageId?: string }
   if (!imageId) {
-    return NextResponse.json({ error: "imageId required" }, { status: 400 })
+    return NextResponse.json({ error: "Imagem não informada" }, { status: 400 })
   }
 
   const image = await prisma.listingImage.findUnique({
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   })
 
   if (!image || (!isAdmin && image.listing.clinicId !== session.user.clinicId)) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 })
+    return NextResponse.json({ error: "Imagem não encontrada" }, { status: 404 })
   }
 
   await prisma.$transaction([

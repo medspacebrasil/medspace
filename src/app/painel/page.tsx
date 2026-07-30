@@ -28,7 +28,7 @@ const statusLabels: Record<
   }
 > = {
   DRAFT: { label: "Rascunho", variant: "secondary" },
-  PENDING: { label: "Pendente", variant: "warning" },
+  PENDING: { label: "Em análise", variant: "warning" },
   PUBLISHED: { label: "Publicado", variant: "success" },
   REJECTED: { label: "Rejeitado", variant: "destructive" },
   ARCHIVED: { label: "Arquivado", variant: "outline" },
@@ -65,9 +65,14 @@ export default async function PainelPage({
   const equipmentListings = listings.filter((l) => l.type === "EQUIPMENT")
   const educationListings = listings.filter((l) => l.type === "EDUCATION")
 
-  // Show migration notice only to clinics that have at least one CLINIC listing.
-  // Equipment listings don't use the "Recursos disponíveis" taxonomy.
-  const showMigrationNotice = clinicListings.length > 0
+  // Show migration notice only to clinics with CLINIC listings created BEFORE
+  // the taxonomy migration (2026-05-10, same date as the notice storage key) —
+  // accounts created after never saw the old resource list, so the blocking
+  // modal is pure noise for them. Equipment listings don't use this taxonomy.
+  const EQUIPMENT_TAXONOMY_MIGRATION = new Date("2026-05-10")
+  const showMigrationNotice = clinicListings.some(
+    (l) => l.createdAt < EQUIPMENT_TAXONOMY_MIGRATION
+  )
 
   const counts = {
     total: listings.length,
@@ -118,7 +123,7 @@ export default async function PainelPage({
             <Clock className="h-8 w-8 text-yellow-600" />
             <div>
               <p className="text-2xl font-bold">{counts.pending}</p>
-              <p className="text-sm text-muted-foreground">Pendentes</p>
+              <p className="text-sm text-muted-foreground">Em análise</p>
             </div>
           </CardContent>
         </Card>
@@ -171,8 +176,8 @@ export default async function PainelPage({
                         </div>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {listing.city}, {listing.neighborhood} &middot;{" "}
-                          {listing._count.images} fotos &middot;{" "}
-                          {listing._count.specialties} especialidades
+                          {listing._count.images} {listing._count.images === 1 ? "foto" : "fotos"} &middot;{" "}
+                          {listing._count.specialties} {listing._count.specialties === 1 ? "especialidade" : "especialidades"}
                         </p>
                       </div>
                       <Link href={`/painel/anuncios/${listing.id}/editar`}>
@@ -227,7 +232,7 @@ export default async function PainelPage({
                         </div>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {listing.city}, {listing.neighborhood} &middot;{" "}
-                          {listing._count.images} fotos
+                          {listing._count.images} {listing._count.images === 1 ? "foto" : "fotos"}
                         </p>
                       </div>
                       <Link href={`/painel/aparelhos/${listing.id}/editar`}>
@@ -282,7 +287,7 @@ export default async function PainelPage({
                         </div>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {listing.city || "Online"} &middot;{" "}
-                          {listing._count.images} fotos
+                          {listing._count.images} {listing._count.images === 1 ? "foto" : "fotos"}
                         </p>
                       </div>
                       <Link href={`/painel/educacao/${listing.id}/editar`}>

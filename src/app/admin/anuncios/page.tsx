@@ -8,11 +8,12 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { PendingButton } from "@/components/ui/pending-button"
 import { Card, CardContent } from "@/components/ui/card"
-import { approveListing, rejectListing, archiveListing, toggleFeatured, markReviewed } from "../actions"
+import { approveListing, archiveListing, toggleFeatured, markReviewed } from "../actions"
 import { DeleteListingButton } from "@/components/anuncios/DeleteListingButton"
+import { RejectListingButton } from "@/components/anuncios/RejectListingButton"
 import { AdminListingsSearch } from "@/components/anuncios/AdminListingsSearch"
 import { formatDocument } from "@/lib/validators/document"
-import { CheckCircle, XCircle, Archive, RotateCcw, Pencil, Star, Eye } from "lucide-react"
+import { CheckCircle, Archive, RotateCcw, Pencil, Star, Eye } from "lucide-react"
 
 const PAGE_SIZE = 20
 
@@ -106,12 +107,25 @@ export default async function AdminAnunciosPage({
     return `/admin/anuncios?${sp.toString()}`
   }
 
-  // Build a type-filter href preserving the active status filter.
+  // Build a type-filter href preserving the other active filters (status,
+  // review, busca) — antes as tabs descartavam a busca sem aviso.
   function typeHref(t: string): string {
     const sp = new URLSearchParams()
     if (params.status) sp.set("status", params.status)
+    if (params.review) sp.set("review", params.review)
+    if (q) sp.set("q", q)
     if (t) sp.set("type", t)
     return `/admin/anuncios?${sp.toString()}`
+  }
+
+  // Status-filter href preserving type and busca.
+  function statusHref(s: string): string {
+    const sp = new URLSearchParams()
+    if (s) sp.set("status", s)
+    if (params.type) sp.set("type", params.type)
+    if (q) sp.set("q", q)
+    const qs = sp.toString()
+    return qs ? `/admin/anuncios?${qs}` : "/admin/anuncios"
   }
 
   return (
@@ -130,9 +144,9 @@ export default async function AdminAnunciosPage({
       <div className="mt-4 flex flex-wrap gap-2">
         {["", "PENDING", "PUBLISHED", "REJECTED", "DRAFT", "ARCHIVED"].map(
           (s) => (
-            <a
+            <Link
               key={s}
-              href={s ? `/admin/anuncios?status=${s}` : "/admin/anuncios"}
+              href={statusHref(s)}
               className={`rounded-md px-3 py-1 text-sm ${
                 (params.status ?? "") === s && !params.review
                   ? "bg-primary text-primary-foreground"
@@ -140,7 +154,7 @@ export default async function AdminAnunciosPage({
               }`}
             >
               {s ? statusConfig[s]?.label || s : "Todos"}
-            </a>
+            </Link>
           )
         )}
         <a
@@ -165,7 +179,7 @@ export default async function AdminAnunciosPage({
         ].map((t) => {
           const active = (params.type ?? "") === t.value
           return (
-            <a
+            <Link
               key={t.value}
               href={typeHref(t.value)}
               className={`inline-flex items-center gap-2 rounded-md px-3 py-1 text-sm ${
@@ -183,7 +197,7 @@ export default async function AdminAnunciosPage({
                   {t.pending}
                 </span>
               )}
-            </a>
+            </Link>
           )
         })}
       </div>
@@ -298,18 +312,7 @@ export default async function AdminAnunciosPage({
                           </PendingButton>
                         </form>
                       )}
-                      <form action={rejectListing}>
-                        <input type="hidden" name="id" value={listing.id} />
-                        <PendingButton
-                          size="sm"
-                          variant="destructive"
-                          className="gap-1"
-                          pendingText="Rejeitando..."
-                        >
-                          <XCircle className="h-3.5 w-3.5" />
-                          Rejeitar
-                        </PendingButton>
-                      </form>
+                      <RejectListingButton id={listing.id} title={listing.title} />
                     </>
                   )}
                   {listing.status === "PUBLISHED" && (

@@ -20,6 +20,11 @@ export type ActionState = {
    * usuário perde tudo que digitou quando a validação falha.
    */
   values?: Record<string, string>
+  /**
+   * true quando a edição devolveu um anúncio PUBLICADO para a fila de revisão
+   * (re-moderação) — o cliente usa isso para avisar que o anúncio saiu do ar.
+   */
+  demoted?: boolean
 }
 
 export async function createListing(
@@ -108,7 +113,7 @@ export async function updateListing(
   const id = formData.get("id") as string
   const listing = await prisma.listing.findUnique({
     where: { id },
-    select: { clinicId: true, status: true },
+    select: { clinicId: true, status: true, slug: true },
   })
 
   if (!listing || listing.clinicId !== session.user.clinicId) {
@@ -178,9 +183,10 @@ export async function updateListing(
     })
 
     revalidatePath("/painel")
-    revalidatePath(`/anuncios`)
+    revalidatePath("/anuncios")
+    revalidatePath(`/anuncios/${listing.slug}`)
     revalidateTag("listings", "max")
-    return { success: true }
+    return { success: true, demoted: listing.status === "PUBLISHED" }
   } catch (error) {
     console.error("[updateListing] falhou:", error)
     return { success: false, errors: { _form: ["Erro ao atualizar anúncio"] }, values }
@@ -198,7 +204,7 @@ export async function deleteListing(formData: FormData): Promise<void> {
 
   const listing = await prisma.listing.findUnique({
     where: { id },
-    select: { clinicId: true },
+    select: { clinicId: true, slug: true },
   })
 
   if (!listing || listing.clinicId !== session.user.clinicId) {
@@ -208,6 +214,7 @@ export async function deleteListing(formData: FormData): Promise<void> {
   await prisma.listing.delete({ where: { id } })
   revalidatePath("/painel")
   revalidatePath("/anuncios")
+  revalidatePath(`/anuncios/${listing.slug}`)
   revalidateTag("listings", "max")
   // Leave the now-deleted listing's edit page back to the panel with a success
   // flag — otherwise the edit route 404s (the listing no longer exists).
@@ -240,14 +247,20 @@ export async function publishListing(
   if (listing.status !== "DRAFT" && listing.status !== "REJECTED") {
     return {
       success: false,
-      errors: { _form: ["Apenas rascunhos ou anúncios rejeitados podem ser enviados para revisão"] },
+      errors: {
+        _form: [
+          listing.status === "PENDING"
+            ? "Este anúncio já está em análise — não é preciso enviá-lo de novo."
+            : "Este anúncio já está publicado.",
+        ],
+      },
     }
   }
 
   if (listing.images.length === 0) {
     return {
       success: false,
-      errors: { _form: ["Adicione pelo menos 1 foto para publicar"] },
+      errors: { _form: ["Adicione pelo menos 1 foto antes de enviar para revisão — anúncios sem foto não são aprovados."] },
     }
   }
 
@@ -265,6 +278,7 @@ export async function publishListing(
 
   revalidatePath("/painel")
   revalidatePath("/anuncios")
+  revalidatePath(`/anuncios/${listing.slug}`)
   revalidateTag("listings", "max")
   return { success: true }
 }

@@ -142,7 +142,10 @@ export default async function AparelhoDetailPage({ params }: PageProps) {
                 {formatPhone(listing.clinic.phone)}
               </div>
             )}
-            <WhatsAppButton phone={listing.whatsapp} />
+            <WhatsAppButton
+              phone={listing.whatsapp}
+              message={`Olá! Vi o anúncio "${listing.title}" no MedSpace e tenho interesse.`}
+            />
             <p className="text-center text-xs text-muted-foreground">
               Contato direto via WhatsApp
             </p>

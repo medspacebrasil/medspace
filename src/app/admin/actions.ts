@@ -65,13 +65,15 @@ export async function approveListing(formData: FormData) {
 
   await assertCanPublish(id)
 
-  await prisma.listing.update({
+  const listing = await prisma.listing.update({
     where: { id },
-    data: { status: "PUBLISHED" },
+    data: { status: "PUBLISHED", rejectionReason: null },
+    select: { slug: true },
   })
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
+  revalidatePath(`/anuncios/${listing.slug}`)
   revalidateTag("listings", "max")
 }
 
@@ -80,13 +82,19 @@ export async function rejectListing(formData: FormData) {
   const id = formData.get("id") as string
   if (!id) throw new Error("ID não fornecido")
 
-  await prisma.listing.update({
+  // Motivo obrigatório: é a única forma de o anunciante saber o que corrigir.
+  const reason = ((formData.get("reason") as string) ?? "").trim()
+  if (!reason) throw new Error("Informe o motivo da rejeição")
+
+  const listing = await prisma.listing.update({
     where: { id },
-    data: { status: "REJECTED" },
+    data: { status: "REJECTED", rejectionReason: reason.slice(0, 1000) },
+    select: { slug: true },
   })
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
+  revalidatePath(`/anuncios/${listing.slug}`)
   revalidateTag("listings", "max")
 }
 
@@ -114,7 +122,7 @@ export async function unarchiveListing(formData: FormData) {
 
   await prisma.listing.update({
     where: { id },
-    data: { status: "PUBLISHED" },
+    data: { status: "PUBLISHED", rejectionReason: null },
   })
 
   revalidatePath("/admin/anuncios")

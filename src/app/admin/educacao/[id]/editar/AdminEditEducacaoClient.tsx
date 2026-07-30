@@ -1,5 +1,6 @@
 "use client"
 
+import { listingStatusLabel } from "@/lib/listing-status"
 import Link from "next/link"
 import { useActionState, useEffect, useState } from "react"
 import {
@@ -61,7 +62,7 @@ export function AdminEditEducacaoClient({ listing, clinicName }: Props) {
         <h1 className="text-2xl font-bold">Editar Oportunidade Educacional (Admin)</h1>
         <p className="text-sm text-muted-foreground">
           Anunciante: {clinicName} &middot;{" "}
-          <Badge variant="secondary">{listing.status}</Badge>
+          <Badge variant="secondary">{listingStatusLabel(listing.status)}</Badge>
         </p>
       </div>
 

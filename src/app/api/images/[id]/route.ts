@@ -21,12 +21,12 @@ export async function DELETE(_request: Request, context: RouteContext) {
   const isAdmin = session?.user?.role === "ADMIN"
 
   if (!session?.user || (!isAdmin && !session.user.clinicId)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Sessão expirada. Faça login novamente." }, { status: 401 })
   }
 
   const { id } = await context.params
   if (!id) {
-    return NextResponse.json({ error: "imageId required" }, { status: 400 })
+    return NextResponse.json({ error: "Imagem não informada" }, { status: 400 })
   }
 
   const image = await prisma.listingImage.findUnique({
@@ -35,7 +35,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
   })
 
   if (!image || (!isAdmin && image.listing.clinicId !== session.user.clinicId)) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 })
+    return NextResponse.json({ error: "Imagem não encontrada" }, { status: 404 })
   }
 
   // Try to remove the file from Supabase Storage; don't fail the request if it doesn't exist anymore

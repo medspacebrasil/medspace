@@ -73,19 +73,32 @@ export const createEducationSchema = z
 
 export const updateEducationSchema = z
   .object({
-    title: z.string().min(5).max(100).optional(),
-    educationType: z.enum(EDUCATION_TYPES).optional(),
-    area: z.string().max(300).optional(),
-    description: z.string().min(10).max(2000).optional(),
-    audience: z.string().max(300).optional(),
-    educationModality: z.enum(EDUCATION_MODALITIES).optional(),
-    workload: z.string().max(60).optional(),
-    duration: z.string().max(120).optional(),
-    city: z.string().max(100).optional(),
-    state: z.string().max(2).optional(),
-    investment: z.string().max(120).optional(),
+    title: z
+      .string()
+      .min(5, "Título deve ter no mínimo 5 caracteres")
+      .max(100, "Título muito longo")
+      .optional(),
+    educationType: z.enum(EDUCATION_TYPES, "Selecione um tipo válido").optional(),
+    area: z.string().max(300, "Área muito longa").optional(),
+    description: z
+      .string()
+      .min(10, "Descrição deve ter no mínimo 10 caracteres")
+      .max(2000, "Descrição muito longa")
+      .optional(),
+    audience: z.string().max(300, "Texto muito longo").optional(),
+    educationModality: z
+      .enum(EDUCATION_MODALITIES, "Selecione um formato válido")
+      .optional(),
+    workload: z.string().max(60, "Carga horária muito longa").optional(),
+    duration: z.string().max(120, "Duração muito longa").optional(),
+    city: z.string().max(100, "Nome da cidade muito longo").optional(),
+    state: z.string().max(2, "UF inválida").optional(),
+    investment: z.string().max(120, "Texto muito longo").optional(),
     whatsapp: whatsappSchema.optional(),
-    externalLink: z.url().max(300).optional(),
+    externalLink: z
+      .url("Link inválido — use o endereço completo, começando com https://")
+      .max(300, "Link muito longo")
+      .optional(),
   })
   .superRefine((data, ctx) => {
     const needsCity =

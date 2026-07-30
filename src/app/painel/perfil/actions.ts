@@ -212,10 +212,21 @@ export async function deleteAccount(
     console.error("[deleteAccount] storage cleanup failed:", error)
   }
 
+  // Coleta os slugs antes do delete para invalidar as páginas de detalhe —
+  // sem isso um anúncio excluído (LGPD!) continua servido do cache por um tempo.
+  const listingSlugs = await prisma.listing.findMany({
+    where: { clinicId: session.user.clinicId },
+    select: { slug: true, type: true },
+  })
+
   // Cascade: User -> Clinic -> Listing -> (images, specialties, equipment)
   await prisma.user.delete({ where: { id: session.user.id } })
 
   revalidatePath("/anuncios")
+  revalidatePath("/aparelhos")
+  for (const l of listingSlugs) {
+    revalidatePath(l.type === "EQUIPMENT" ? `/aparelhos/${l.slug}` : `/anuncios/${l.slug}`)
+  }
 
   try {
     await signOut({ redirectTo: "/?conta-excluida=1" })

@@ -33,6 +33,9 @@ interface PageProps {
 
 export default async function MarketplacePage({ searchParams }: PageProps) {
   const params = await searchParams
+  const hasActiveFilters = Boolean(
+    params.state || params.city || params.specialty || params.roomType || params.equipment
+  )
   const page = Math.max(1, Number(params.page) || 1)
   const limit = 20
 
@@ -146,14 +149,22 @@ export default async function MarketplacePage({ searchParams }: PageProps) {
         </>
       ) : (
         <div className="mt-16 text-center">
-          <p className="text-lg text-muted-foreground">
-            Nenhum espaço encontrado com esses filtros.
-          </p>
-          <Link href="/anuncios">
-            <Button variant="outline" className="mt-4">
-              Limpar filtros
-            </Button>
-          </Link>
+          {hasActiveFilters ? (
+            <>
+              <p className="text-lg text-muted-foreground">
+                Nenhum espaço encontrado com esses filtros.
+              </p>
+              <Link href="/anuncios">
+                <Button variant="outline" className="mt-4">
+                  Limpar filtros
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <p className="text-lg text-muted-foreground">
+              Ainda não há espaços publicados. Volte em breve!
+            </p>
+          )}
         </div>
       )}
     </div>

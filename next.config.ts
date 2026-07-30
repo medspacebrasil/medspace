@@ -16,12 +16,14 @@ const isDev = process.env.NODE_ENV !== "production"
  */
 const csp = [
   `default-src 'self'`,
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://www.google-analytics.com`,
+  // googleadservices/doubleclick/googlesyndication: pings de conversão do
+  // Google Ads (AW-*) — sem eles o gtag carrega mas a conversão é bloqueada.
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net`,
   `style-src 'self' 'unsafe-inline'`,
-  `img-src 'self' data: blob: https://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com`,
+  `img-src 'self' data: blob: https://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.googlesyndication.com https://*.doubleclick.net https://www.googleadservices.com https://www.google.com https://www.google.com.br`,
   `font-src 'self' data:`,
-  `connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://viacep.com.br`,
-  `frame-src 'self'`,
+  `connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://viacep.com.br https://*.googlesyndication.com https://*.doubleclick.net https://www.googleadservices.com https://www.google.com https://www.google.com.br`,
+  `frame-src 'self' https://td.doubleclick.net https://www.googletagmanager.com`,
   `frame-ancestors 'none'`,
   `form-action 'self'`,
   `base-uri 'self'`,

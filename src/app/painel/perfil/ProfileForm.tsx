@@ -12,6 +12,7 @@ interface ProfileFormProps {
   clinic: {
     id: string
     name: string
+    advertiserType: string
     phone: string | null
     whatsapp: string
     city: string
@@ -26,6 +27,15 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
     updateProfile,
     { success: false }
   )
+
+  // Labels adaptadas ao tipo de anunciante — médico PF não tem "clínica".
+  const isMedico = clinic.advertiserType === "MEDICO"
+  const nameLabel = isMedico
+    ? "Nome profissional ou do consultório"
+    : "Nome da clínica ou empresa"
+  const descriptionLabel = isMedico
+    ? "Descrição (sobre você ou seu consultório)"
+    : "Descrição da clínica ou empresa"
 
   return (
     <form action={formAction}>
@@ -48,7 +58,7 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Nome da Clínica</Label>
+            <Label htmlFor="name">{nameLabel}</Label>
             <Input
               id="name"
               name="name"
@@ -123,7 +133,7 @@ export function ProfileForm({ clinic }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição da clínica</Label>
+            <Label htmlFor="description">{descriptionLabel}</Label>
             <Textarea
               id="description"
               name="description"

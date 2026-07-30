@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -44,6 +44,8 @@ interface ListingFormProps {
   formAction: (payload: FormData) => void
   state: ActionState
   isPending: boolean
+  /** Aviso exibido junto ao botão de submit (ex.: anúncio publicado voltará para análise). */
+  submitNote?: string
   defaultValues?: {
     id?: string
     title: string
@@ -69,11 +71,13 @@ export function ListingForm({
   formAction,
   state,
   isPending,
+  submitNote,
   defaultValues,
   specialties: propSpecialties,
   roomTypes: propRoomTypes,
   equipment: propEquipment,
 }: ListingFormProps) {
+  const formRef = useRef<HTMLFormElement>(null)
   const [specialties, setSpecialties] = useState<FilterOption[]>(propSpecialties ?? [])
   const [roomTypes, setRoomTypes] = useState<FilterOption[]>(propRoomTypes ?? [])
   const [equipment, setEquipment] = useState<EquipmentOption[]>(propEquipment ?? [])
@@ -96,6 +100,14 @@ export function ListingForm({
     }
   }, [propSpecialties])
 
+  // Em forms longos o erro de validação pode ficar fora da viewport (o botão
+  // de submit fica no fim da página) — leva o usuário até o primeiro erro.
+  useEffect(() => {
+    if (!state.errors) return
+    const el = formRef.current?.querySelector(".text-destructive")
+    el?.scrollIntoView({ behavior: "smooth", block: "center" })
+  }, [state])
+
   // Após falha da action, o React reseta inputs não-controlados; os valores
   // ecoados em state.values (multi-valor juntado por vírgula) têm prioridade.
   // Quando o eco existe mas a chave está ausente, o usuário desmarcou tudo —
@@ -105,7 +117,7 @@ export function ListingForm({
     : defaultValues?.equipmentIds
 
   return (
-    <form action={formAction}>
+    <form ref={formRef} action={formAction}>
       {defaultValues?.id && (
         <input type="hidden" name="id" value={defaultValues.id} />
       )}
@@ -354,6 +366,12 @@ export function ListingForm({
               </p>
             )}
           </div>
+
+          {submitNote && (
+            <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-900">
+              {submitNote}
+            </p>
+          )}
 
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending

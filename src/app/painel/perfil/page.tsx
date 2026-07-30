@@ -26,7 +26,7 @@ export default async function PerfilPage() {
     <div>
       <h1 className="text-2xl font-bold">Meu Perfil</h1>
       <p className="text-muted-foreground">
-        Atualize os dados da sua clínica
+        Atualize os dados do seu perfil de anunciante
       </p>
       <div className="mt-6 space-y-6">
         <ProfileForm clinic={clinic} />

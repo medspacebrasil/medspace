@@ -8,10 +8,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PendingButton } from "@/components/ui/pending-button"
 import { Badge } from "@/components/ui/badge"
-import { blockClinic, unblockClinic } from "../actions"
+import { unblockClinic } from "../actions"
 import { DeleteClinicButton } from "@/components/anuncios/DeleteClinicButton"
+import { BlockClinicButton } from "@/components/anuncios/BlockClinicButton"
 import { formatDocument } from "@/lib/validators/document"
-import { Ban, Check, PlusCircle } from "lucide-react"
+import { Check, PlusCircle } from "lucide-react"
 
 const advertiserTypeLabels: Record<string, string> = {
   MEDICO: "Médico",
@@ -103,19 +104,11 @@ export default async function AdminClinicasPage() {
                       </PendingButton>
                     </form>
                   ) : (
-                    <form action={blockClinic}>
-                      <input type="hidden" name="clinicId" value={clinic.id} />
-                      <PendingButton
-                        size="sm"
-                        variant="outline"
-                        className="gap-1"
-                        title="Bloquear a conta e arquivar todos os anúncios desta clínica"
-                        pendingText="Bloqueando..."
-                      >
-                        <Ban className="h-3.5 w-3.5" />
-                        Bloquear
-                      </PendingButton>
-                    </form>
+                    <BlockClinicButton
+                      clinicId={clinic.id}
+                      clinicName={clinic.name}
+                      publishedCount={published}
+                    />
                   )}
                   <DeleteClinicButton
                     clinicId={clinic.id}

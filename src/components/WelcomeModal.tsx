@@ -1,12 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, X, ArrowRight } from "lucide-react"
 import { trackRegistration } from "@/lib/analytics"
 
 export function WelcomeModal() {
   const [open, setOpen] = useState(true)
+  const router = useRouter()
 
   // This modal renders right after a successful sign-up (/painel?welcome=1),
   // so it's the reliable "cadastro concluído" moment. Fire the conversion once
@@ -74,7 +76,10 @@ export function WelcomeModal() {
         <div className="mt-6">
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false)
+              router.push("/painel/anuncios/novo")
+            }}
             className="flex w-full items-center justify-center gap-2 rounded-md bg-gold px-4 py-2.5 text-sm font-semibold text-navy hover:bg-gold/90"
           >
             Criar anúncio

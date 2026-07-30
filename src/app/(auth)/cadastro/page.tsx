@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import Link from "next/link"
 import { registerClinic, type ActionState } from "../actions"
 import { Button } from "@/components/ui/button"
@@ -46,6 +46,16 @@ export default function CadastroPage() {
   const docType = isMedico ? "CPF" : "CNPJ"
   const [document, setDocument] = useState("")
 
+  // Form longo: após falha de validação, leva o usuário até o primeiro erro
+  // (ou até a mensagem de info) — do fim da página ele não veria nada mudar.
+  // globalThis.document porque o state `document` (CPF/CNPJ) sombreia o global.
+  useEffect(() => {
+    if (!state.errors && !state.info) return
+    globalThis.document
+      .querySelector("form .text-destructive, form .text-green-800")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" })
+  }, [state])
+
   return (
     <Card className="border-border/50 shadow-lg">
       <CardHeader className="text-center">
@@ -57,6 +67,14 @@ export default function CadastroPage() {
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
+          {state.info && (
+            <div className="rounded-lg bg-green-50 p-3 text-sm text-green-800">
+              {state.info}{" "}
+              <Link href="/login" className="font-semibold underline">
+                Ir para o login
+              </Link>
+            </div>
+          )}
           {state.errors?._form && (
             <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
               {state.errors._form[0]}
@@ -101,6 +119,7 @@ export default function CadastroPage() {
               name="password"
               placeholder="Mínimo 8 caracteres"
               autoComplete="new-password"
+              minLength={8}
               required
             />
             {state.errors?.password && (

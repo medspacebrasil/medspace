@@ -1,5 +1,6 @@
 "use client"
 
+import { listingStatusLabel } from "@/lib/listing-status"
 import { useActionState, useEffect, useState } from "react"
 import {
   updateEquipment,
@@ -60,7 +61,7 @@ export function EditAparelhoClient({ listing, categories }: Props) {
         <div>
           <h1 className="text-2xl font-bold">Editar Aparelho</h1>
           <Badge variant="secondary" className="mt-1">
-            {listing.status}
+            {listingStatusLabel(listing.status)}
           </Badge>
         </div>
         <div className="flex gap-2">

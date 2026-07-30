@@ -1,5 +1,6 @@
 "use client"
 
+import { listingStatusLabel } from "@/lib/listing-status"
 import { useActionState, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { adminUpdateListing, type AdminUpdateListingState } from "@/app/admin/actions"
@@ -96,7 +97,7 @@ export function AdminEditListingClient({
           <h1 className="text-2xl font-bold">Editar Anúncio (Admin)</h1>
           <p className="text-sm text-muted-foreground">
             Clínica: {clinicName} &middot;{" "}
-            <Badge variant="secondary">{listing.status}</Badge>
+            <Badge variant="secondary">{listingStatusLabel(listing.status)}</Badge>
           </p>
         </div>
       </div>

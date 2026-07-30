@@ -18,6 +18,11 @@ export type ActionState = {
    * implícita pelo Enter do teclado do celular). Nunca incluir senha.
    */
   values?: Record<string, string>
+  /**
+   * Mensagem informativa de resultado positivo que NÃO é erro (ex.: conta
+   * criada mas auto-login falhou) — renderizada em verde, não em vermelho.
+   */
+  info?: string
 }
 
 export async function registerClinic(
@@ -119,9 +124,11 @@ export async function registerClinic(
     })
   } catch (error) {
     if (isRedirectError(error)) throw error
+    // A conta FOI criada; só o auto-login falhou — não é um erro do usuário,
+    // então vai em `info` (verde, com link para o login) e não em errors._form.
     return {
       success: false,
-      errors: { _form: ["Conta criada! Faça login para continuar."] },
+      info: "Sua conta foi criada com sucesso! Só não conseguimos entrar automaticamente — faça login para continuar.",
       values,
     }
   }
