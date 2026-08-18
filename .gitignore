@@ -50,3 +50,6 @@ backups/
 
 # Artefatos do Playwright MCP (testes de browser locais)
 .playwright-mcp/
+
+# Documentos privados da cliente (contratos, politicas, dados cadastrais)
+docsprivados/
