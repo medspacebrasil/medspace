@@ -182,6 +182,8 @@ model Listing {
   images          ListingImage[]
   specialties     ListingSpecialty[]
   equipment       ListingEquipment[]
+  events          ListingEvent[]
+  dailyStats      ListingDailyStat[]
   createdAt       DateTime           @default(now()) @map("created_at")
   updatedAt       DateTime           @updatedAt @map("updated_at")
 
@@ -269,4 +271,52 @@ model ListingEquipment {
 
   @@id([listingId, equipmentId])
   @@map("listing_equipment")
+}
+
+// ============================================
+// METRICAS POR ANUNCIO
+// ============================================
+
+enum ListingEventType {
+  VIEW
+  CONTACT
+}
+
+// Evento bruto de interesse em um anuncio. Existe por dois motivos: permitir a
+// deduplicacao (o mesmo visitante recarregando a pagina nao infla o numero) e
+// guardar o detalhe recente para auditoria. O historico longo vive no agregado
+// diario, entao estas linhas podem ser podadas sem perder o numero.
+//
+// LGPD: `visitorHash` e um hash com sal de IP + user-agent + dia. Nao guardamos
+// IP nem user-agent em texto, e o hash muda a cada dia, entao nao permite
+// acompanhar a mesma pessoa ao longo do tempo.
+model ListingEvent {
+  id          String           @id @default(cuid())
+  listingId   String           @map("listing_id")
+  listing     Listing          @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  type        ListingEventType
+  visitorHash String           @map("visitor_hash")
+  // listingId:type:visitorHash:AAAA-MM-DD — a unicidade e o que faz a deduplicacao.
+  dedupeKey   String           @unique @map("dedupe_key")
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  @@index([listingId, createdAt])
+  @@index([createdAt])
+  @@map("listing_events")
+}
+
+// Consolidacao por anuncio e por dia. E daqui que o painel do anunciante le,
+// para nao varrer eventos brutos a cada consulta e para manter o historico
+// mes a mes mesmo depois da poda dos eventos.
+model ListingDailyStat {
+  listingId String   @map("listing_id")
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  // Meia-noite no fuso de Brasilia, normalizada em UTC no momento da gravacao.
+  day       DateTime @db.Date
+  views     Int      @default(0)
+  contacts  Int      @default(0)
+
+  @@id([listingId, day])
+  @@index([day])
+  @@map("listing_daily_stats")
 }

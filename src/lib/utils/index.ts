@@ -27,6 +27,15 @@ export function formatWhatsAppUrl(
   return `https://wa.me/${fullPhone}?text=${encodedMessage}`
 }
 
+/**
+ * Mensagem padrão do contato por WhatsApp. Abre dizendo que veio da plataforma
+ * para que a clínica reconheça a origem do lead sem precisar perguntar — é o
+ * que permite atribuir o contato ao MedSpace do lado de quem recebe.
+ */
+export function listingWhatsAppMessage(title: string): string {
+  return `Olá! Vim pela plataforma MedSpace e tenho interesse no anúncio "${title}".`
+}
+
 export function formatPhone(phone: string): string {
   const clean = phone.replace(/\D/g, "")
   if (clean.length === 11) {

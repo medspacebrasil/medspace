@@ -31,8 +31,36 @@ declare global {
   }
 }
 
+/**
+ * Identificação do anúncio que originou o contato. Sem isso o `generate_lead`
+ * diz que houve um lead, mas não de quem — e a conversa comercial com a clínica
+ * ("seu anúncio recebeu X contatos") depende justamente desse recorte.
+ *
+ * Os campos viram parâmetros de evento no GA4 e precisam estar registrados como
+ * dimensões personalizadas (escopo de evento) para aparecerem nos relatórios.
+ */
+export interface LeadSource {
+  listingId: string
+  listingTitle: string
+  /** CLINIC | EQUIPMENT | EDUCATION */
+  listingType: string
+  clinicName: string
+  city?: string
+}
+
+function leadParams(source?: LeadSource) {
+  if (!source) return {}
+  return {
+    listing_id: source.listingId,
+    listing_title: source.listingTitle,
+    listing_type: source.listingType,
+    clinic_name: source.clinicName,
+    ...(source.city ? { listing_city: source.city } : {}),
+  }
+}
+
 /** Lead de médico — disparado no clique do botão de WhatsApp de um anúncio. */
-export function trackWhatsAppLead() {
+export function trackWhatsAppLead(source?: LeadSource) {
   if (typeof window === "undefined") return
   window.gtag?.("event", "conversion", { send_to: ADS_CONVERSIONS.whatsappLead })
   // Também para o GA4: a conversão do Ads acima só é visível na conta do Google
@@ -41,6 +69,7 @@ export function trackWhatsAppLead() {
   window.gtag?.("event", "generate_lead", {
     send_to: GA_MEASUREMENT_ID,
     method: "whatsapp",
+    ...leadParams(source),
   })
   window.fbq?.("track", "Lead")
 }

@@ -7,8 +7,10 @@ import { prisma } from "@/lib/db"
 import { getCachedClinicListingBySlug } from "@/lib/cache"
 import { Badge } from "@/components/ui/badge"
 import { WhatsAppButton } from "@/components/anuncios/WhatsAppButton"
+import { StickyWhatsAppBar } from "@/components/anuncios/StickyWhatsAppBar"
+import { ListingViewTracker } from "@/components/anuncios/ListingViewTracker"
 import { MapPin, Building2, Phone } from "lucide-react"
-import { formatPhone } from "@/lib/utils"
+import { formatPhone, listingWhatsAppMessage } from "@/lib/utils"
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -43,8 +45,18 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
   if (!listing) notFound()
 
+  const leadSource = {
+    listingId: listing.id,
+    listingTitle: listing.title,
+    listingType: listing.type,
+    clinicName: listing.clinic.name,
+    city: listing.city,
+  }
+  const whatsappMessage = listingWhatsAppMessage(listing.title)
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    // pb no mobile abre espaço para a barra fixa de contato não cobrir o conteúdo
+    <div className="container mx-auto px-4 py-8 pb-28 lg:pb-8">
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Main content */}
         <div className="lg:col-span-2">
@@ -177,7 +189,8 @@ export default async function ListingDetailPage({ params }: PageProps) {
             )}
             <WhatsAppButton
               phone={listing.whatsapp}
-              message={`Olá! Vi o anúncio "${listing.title}" no MedSpace e tenho interesse.`}
+              message={whatsappMessage}
+              source={leadSource}
             />
             <p className="text-center text-xs text-muted-foreground">
               Contato direto com a clínica via WhatsApp
@@ -185,6 +198,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      <StickyWhatsAppBar
+        phone={listing.whatsapp}
+        message={whatsappMessage}
+        clinicName={listing.clinic.name}
+        source={leadSource}
+      />
+      <ListingViewTracker listingId={listing.id} />
     </div>
   )
 }

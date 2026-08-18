@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { WelcomeModal } from "@/components/WelcomeModal"
 import { EquipmentMigrationNotice } from "@/components/EquipmentMigrationNotice"
 import { PlanStatusBanner } from "@/components/PlanStatusBanner"
+import { ListingInterest } from "@/components/anuncios/ListingInterest"
+import { listingMetricsSince } from "@/lib/metrics"
 import {
   PlusCircle,
   FileText,
@@ -80,6 +82,14 @@ export default async function PainelPage({
     pending: listings.filter((l) => l.status === "PENDING").length,
     draft: listings.filter((l) => l.status === "DRAFT").length,
   }
+
+  // Interesse dos últimos 30 dias por anúncio. Vale para todos os planos,
+  // inclusive o gratuito: é o número que mostra ao anunciante o que ele já
+  // recebe da plataforma.
+  const metrics = await listingMetricsSince(
+    listings.map((l) => l.id),
+    30
+  )
 
   return (
     <div>
@@ -181,6 +191,10 @@ export default async function PainelPage({
                             ? "Todas as especialidades"
                             : `${listing._count.specialties} ${listing._count.specialties === 1 ? "especialidade" : "especialidades"}`}
                         </p>
+                        <ListingInterest
+                          metrics={metrics.get(listing.id)}
+                          published={listing.status === "PUBLISHED"}
+                        />
                       </div>
                       <Link href={`/painel/anuncios/${listing.id}/editar`}>
                         <Button variant="outline" size="sm">
@@ -236,6 +250,10 @@ export default async function PainelPage({
                           {listing.city}, {listing.neighborhood} &middot;{" "}
                           {listing._count.images} {listing._count.images === 1 ? "foto" : "fotos"}
                         </p>
+                        <ListingInterest
+                          metrics={metrics.get(listing.id)}
+                          published={listing.status === "PUBLISHED"}
+                        />
                       </div>
                       <Link href={`/painel/aparelhos/${listing.id}/editar`}>
                         <Button variant="outline" size="sm">
@@ -291,6 +309,10 @@ export default async function PainelPage({
                           {listing.city || "Online"} &middot;{" "}
                           {listing._count.images} {listing._count.images === 1 ? "foto" : "fotos"}
                         </p>
+                        <ListingInterest
+                          metrics={metrics.get(listing.id)}
+                          published={listing.status === "PUBLISHED"}
+                        />
                       </div>
                       <Link href={`/painel/educacao/${listing.id}/editar`}>
                         <Button variant="outline" size="sm">

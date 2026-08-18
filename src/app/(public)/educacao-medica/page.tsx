@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { WhatsAppButton } from "@/components/anuncios/WhatsAppButton"
+import { listingWhatsAppMessage } from "@/lib/utils"
 import { LaunchBanner } from "@/components/layout/LaunchBanner"
 import {
   EDUCATION_TYPES,
@@ -413,8 +414,15 @@ export default async function EducacaoMedicaPage({ searchParams }: PageProps) {
                       )}
                       <WhatsAppButton
                         phone={listing.whatsapp}
-                        message={`Olá! Vi seu anúncio "${listing.title}" na MedSpace e tenho interesse.`}
+                        message={listingWhatsAppMessage(listing.title)}
                         className="mt-3 block"
+                        source={{
+                          listingId: listing.id,
+                          listingTitle: listing.title,
+                          listingType: listing.type,
+                          clinicName: listing.clinic.name,
+                          city: listing.city,
+                        }}
                       />
                     </CardContent>
                   </Card>

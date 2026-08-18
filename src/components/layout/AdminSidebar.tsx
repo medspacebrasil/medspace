@@ -10,6 +10,7 @@ import {
   Building2,
   FileText,
   Settings,
+  BarChart3,
   LogOut,
   ExternalLink,
   Menu,
@@ -24,6 +25,7 @@ export function AdminSidebar({ pendingCount = 0 }: { pendingCount?: number }) {
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard, badge: 0 },
     { href: "/admin/clinicas", label: "Cadastros", icon: Building2, badge: 0 },
     { href: "/admin/anuncios", label: "Anúncios", icon: FileText, badge: pendingCount },
+    { href: "/admin/interesse", label: "Interesse", icon: BarChart3, badge: 0 },
     { href: "/admin/config", label: "Configurações", icon: Settings, badge: 0 },
   ]
 

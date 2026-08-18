@@ -58,6 +58,12 @@ export const RATE_LIMITS = {
   export: { tokens: 5, window: "1 h", prefix: "export" },
   /** Ações destrutivas (excluir conta/anúncio). */
   destructive: { tokens: 10, window: "1 h", prefix: "destructive" },
+  /**
+   * Registro de visualização/contato por anúncio. Limite alto porque um mesmo
+   * IP pode ser uma clínica inteira atrás de NAT; a proteção real contra
+   * inflar número é a deduplicação por visitante/dia, não este limitador.
+   */
+  metrics: { tokens: 120, window: "1 m", prefix: "metrics" },
 } as const satisfies Record<string, RateLimitConfig>
 
 const _limiters = new Map<string, Ratelimit>()
