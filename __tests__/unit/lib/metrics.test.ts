@@ -48,3 +48,34 @@ describe("visitorHash", () => {
     expect(hash).toMatch(/^[a-f0-9]{32}$/)
   })
 })
+
+describe("csvCell (exportacao do relatorio)", () => {
+  // Reimplementa a regra do route handler para travar o comportamento: titulo
+  // de anuncio e texto livre e a planilha e aberta pela cliente no Excel.
+  function csvCell(value: string | number): string {
+    let s = String(value)
+    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`
+    return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  }
+
+  it("neutraliza titulo que viraria formula no Excel", () => {
+    // Titulo com aspas tambem e envolvido em aspas, entao o apostrofo fica
+    // dentro do campo. E o comportamento correto do CSV.
+    expect(csvCell('=HYPERLINK("http://mal.co")')).toBe(
+      String.raw`"'=HYPERLINK(""http://mal.co"")"`
+    )
+    expect(csvCell("=1+1")).toBe("'=1+1")
+    expect(csvCell("+1+1")).toBe("'+1+1")
+    expect(csvCell("-2")).toBe("'-2")
+    expect(csvCell("@SUM(A1)")).toBe("'@SUM(A1)")
+  })
+
+  it("nao altera titulo comum", () => {
+    expect(csvCell("Consultorio na Asa Sul")).toBe("Consultorio na Asa Sul")
+  })
+
+  it("continua escapando aspas e quebras de linha", () => {
+    expect(csvCell('Sala "premium"')).toBe('"Sala ""premium"""')
+    expect(csvCell("linha1\nlinha2")).toBe('"linha1\nlinha2"')
+  })
+})

@@ -9,9 +9,16 @@ import { listingInterestRanking } from "@/lib/metrics"
 
 const PERIODS = [7, 30, 90]
 
+/**
+ * Uma célula que começa com =, +, - ou @ é interpretada como fórmula pelo Excel
+ * e pelo Google Sheets. Como o título do anúncio é texto livre digitado pelo
+ * anunciante, sem escapar ele conseguiria fazer a planilha executar fórmula ao
+ * ser aberta. O apóstrofo força a leitura como texto.
+ */
 function csvCell(value: string | number): string {
-  const s = String(value)
-  return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  let s = String(value)
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`
+  return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
 }
 
 export async function GET(request: Request) {

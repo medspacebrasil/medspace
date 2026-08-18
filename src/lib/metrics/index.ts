@@ -18,6 +18,16 @@ import { prisma } from "@/lib/db"
 const HASH_SALT =
   process.env.METRICS_HASH_SALT ?? process.env.AUTH_SECRET ?? "medspace-metrics"
 
+// O sal precisa ser estavel: se mudar, todo visitante vira "novo" e o mesmo
+// acesso passa a contar de novo. Por isso nao deve ficar amarrado ao
+// AUTH_SECRET, que e rotacionado por outro motivo (sessoes).
+if (!process.env.METRICS_HASH_SALT && process.env.NODE_ENV === "production") {
+  console.warn(
+    "[metricas] METRICS_HASH_SALT nao definido: a deduplicacao esta usando o AUTH_SECRET. " +
+      "Rotacionar o AUTH_SECRET zeraria a deduplicacao e inflaria a contagem."
+  )
+}
+
 const BRASILIA = "America/Sao_Paulo"
 const dayFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: BRASILIA,
@@ -96,7 +106,8 @@ export async function recordListingEvent({
     // dia. É o caminho esperado, não um erro.
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
+      error.code === "P2002" &&
+      String(error.meta?.target ?? "").includes("dedupe_key")
     ) {
       return false
     }
