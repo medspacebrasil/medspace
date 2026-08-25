@@ -29,6 +29,23 @@ export function createMockPrisma() {
       delete: vi.fn(),
       count: vi.fn(),
     },
+    asaasWebhookEvent: {
+      create: vi.fn(),
+      update: vi.fn(),
+      findMany: vi.fn(),
+    },
+    asaasCharge: {
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    publicationOrder: {
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+      findMany: vi.fn(),
+    },
     listingImage: {
       create: vi.fn(),
       aggregate: vi.fn(),

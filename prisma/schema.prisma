@@ -85,7 +85,11 @@ model Clinic {
   state        String   @default("")
   neighborhood String
   description  String?
+  // Cliente correspondente no Asaas. Criado na primeira cobranca e reusado
+  // nas seguintes, como a documentacao do gateway recomenda.
+  asaasCustomerId String? @unique @map("asaas_customer_id")
   listings     Listing[]
+  orders       PublicationOrder[]
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
@@ -102,6 +106,10 @@ enum ListingStatus {
   PUBLISHED
   REJECTED
   ARCHIVED
+  // Aprovado na moderacao, aguardando o pagamento da taxa de publicacao.
+  AWAITING_PAYMENT
+  // Vigencia paga terminou. Volta para PUBLISHED com um novo pedido pago.
+  EXPIRED
 }
 
 enum ListingType {
@@ -179,11 +187,17 @@ model Listing {
   investment        String?            // Investimento (texto livre: Gratuito / A combinar / valor)
   externalLink      String?            @map("external_link")
 
+  // Fim da vigencia paga. Denormalizado do pedido vigente para o sweep de
+  // expiracao e o painel serem uma consulta so; o pedido continua sendo a
+  // fonte de verdade.
+  paidUntil       DateTime?          @map("paid_until")
+
   images          ListingImage[]
   specialties     ListingSpecialty[]
   equipment       ListingEquipment[]
   events          ListingEvent[]
   dailyStats      ListingDailyStat[]
+  orders          PublicationOrder[]
   createdAt       DateTime           @default(now()) @map("created_at")
   updatedAt       DateTime           @updatedAt @map("updated_at")
 
@@ -319,4 +333,142 @@ model ListingDailyStat {
   @@id([listingId, day])
   @@index([day])
   @@map("listing_daily_stats")
+}
+
+// ============================================
+// COBRANCA POR PUBLICACAO
+// ============================================
+
+enum PublicationOrigin {
+  // Anunciante pagou a taxa de publicacao.
+  PAID_CHARGE
+  // Vigencia concedida no periodo de lancamento, sem cobranca.
+  LAUNCH_COURTESY
+  // Cortesia concedida manualmente pelo admin (negociacao, suporte).
+  ADMIN_GRANT
+}
+
+enum PublicationOrderStatus {
+  PENDING_PAYMENT
+  PAID
+  // Venceu sem pagamento. NAO e terminal: pagar depois do vencimento e fluxo
+  // normal no Asaas (PAYMENT_OVERDUE -> PAYMENT_RECEIVED), entao a ativacao
+  // precisa aceitar a volta deste estado.
+  EXPIRED_UNPAID
+  // Chargeback aberto. Tambem reversivel: disputa ganha devolve a cobranca
+  // para confirmada e o anuncio precisa voltar ao ar.
+  CHARGEBACK_OPEN
+  REFUNDED
+  CANCELED
+}
+
+enum AsaasBillingType {
+  PIX
+  CREDIT_CARD
+}
+
+// Pedido de publicacao: o que autoriza um anuncio a ficar no ar e por quanto
+// tempo. Separado da cobranca porque um mesmo pedido pode ter varias tentativas
+// (gera Pix, abandona, volta e paga no cartao) e porque quem libera a
+// publicacao e o pedido, nao a transacao.
+model PublicationOrder {
+  id        String @id @default(cuid())
+  // Nulaveis de proposito: excluir anuncio ou clinica nao pode apagar historico
+  // financeiro. Os snapshots abaixo mantem o registro legivel depois disso.
+  listingId String?  @map("listing_id")
+  listing   Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  clinicId  String?  @map("clinic_id")
+  clinic    Clinic?  @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+
+  listingTitle String @map("listing_title")
+  clinicName   String @map("clinic_name")
+
+  origin PublicationOrigin      @default(PAID_CHARGE)
+  status PublicationOrderStatus @default(PENDING_PAYMENT)
+
+  // Snapshot do preco no momento da criacao. E o que permite a cliente mudar
+  // o valor da taxa depois sem reescrever historico nem afetar pedidos ja
+  // emitidos.
+  amountCents  Int    @map("amount_cents")
+  durationDays Int    @map("duration_days")
+  priceVersion String @map("price_version")
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  // Primeiro evento entre PAYMENT_CONFIRMED e PAYMENT_RECEIVED. Pix pula o
+  // CONFIRMED e vai direto para RECEIVED, entao esperar so pelo CONFIRMED
+  // deixaria todo pagador de Pix fora do ar.
+  paidAt     DateTime? @map("paid_at")
+  // Liquidacao financeira (PAYMENT_RECEIVED). So para conciliacao: no cartao
+  // isso chega ate 32 dias depois da confirmacao.
+  settledAt  DateTime? @map("settled_at")
+  startsAt   DateTime? @map("starts_at")
+  expiresAt  DateTime? @map("expires_at")
+  canceledAt DateTime? @map("canceled_at")
+  refundedAt DateTime? @map("refunded_at")
+  // Ultimo aviso de vencimento enviado, para nao reenviar o mesmo lembrete.
+  expiryWarnedAt DateTime? @map("expiry_warned_at")
+
+  charges AsaasCharge[]
+
+  @@index([listingId])
+  @@index([clinicId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("publication_orders")
+}
+
+// Tentativa de cobranca no Asaas. Espelha o estado do lado do gateway.
+model AsaasCharge {
+  id      String           @id @default(cuid())
+  orderId String           @map("order_id")
+  order   PublicationOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  asaasPaymentId String           @unique @map("asaas_payment_id")
+  billingType    AsaasBillingType @map("billing_type")
+  valueCents     Int              @map("value_cents")
+  // Status cru do Asaas (PENDING, CONFIRMED, RECEIVED, OVERDUE, REFUNDED,
+  // RECEIVED_IN_CASH, AWAITING_RISK_ANALYSIS...). Guardado como texto para nao
+  // quebrar quando o gateway introduzir um valor novo.
+  status         String
+
+  invoiceUrl String? @map("invoice_url")
+  // Copia e cola do Pix e validade vinda do proprio endpoint de QR Code. A
+  // validade nao e calculada aqui de proposito: sem chave Pix cadastrada o QR
+  // expira as 23:59 do mesmo dia, com chave dura 12 meses, e esse
+  // comportamento muda conforme a conta.
+  pixPayload   String?   @map("pix_payload") @db.Text
+  pixExpiresAt DateTime? @map("pix_expires_at")
+
+  dueDate   DateTime @map("due_date")
+  raw       Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([orderId])
+  @@map("asaas_charges")
+}
+
+// Evento bruto recebido do webhook do Asaas.
+//
+// A entrega e "pelo menos uma vez" e o payload NAO e assinado, entao o id do
+// evento e a unica chave de deduplicacao que o gateway oferece. Guardar o
+// evento tambem permite reprocessar o que falhou: 15 falhas consecutivas
+// interrompem a fila inteira do Asaas e os eventos so ficam 14 dias la.
+model AsaasWebhookEvent {
+  id      String @id @default(cuid())
+  eventId String @unique @map("event_id")
+  event   String
+  // Cobranca referenciada, quando houver. A conta recebe evento de qualquer
+  // entrada de valor, inclusive Pix e transferencias que nao vieram da
+  // plataforma, entao nem todo evento tem cobranca nossa correspondente.
+  paymentId String? @map("payment_id")
+  payload   Json
+
+  receivedAt  DateTime  @default(now()) @map("received_at")
+  processedAt DateTime? @map("processed_at")
+  error       String?
+
+  @@index([processedAt])
+  @@index([paymentId])
+  @@map("asaas_webhook_events")
 }

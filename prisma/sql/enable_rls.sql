@@ -28,3 +28,9 @@ ALTER TABLE public.listing_equipment    ENABLE ROW LEVEL SECURITY;
 -- Tabelas de metricas por anuncio.
 ALTER TABLE public.listing_events      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.listing_daily_stats ENABLE ROW LEVEL SECURITY;
+
+-- Tabelas financeiras da cobranca por publicacao. RLS aqui vale ainda mais:
+-- guardam valor, historico de pagamento e payload bruto do gateway.
+ALTER TABLE public.publication_orders    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.asaas_charges         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.asaas_webhook_events  ENABLE ROW LEVEL SECURITY;

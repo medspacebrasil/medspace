@@ -9,6 +9,8 @@ export const LISTING_STATUS_LABEL: Record<string, string> = {
   PUBLISHED: "Publicado",
   REJECTED: "Rejeitado",
   ARCHIVED: "Arquivado",
+  AWAITING_PAYMENT: "Aguardando pagamento",
+  EXPIRED: "Expirado",
 }
 
 export function listingStatusLabel(status: string): string {

@@ -34,6 +34,8 @@ const statusLabels: Record<
   PUBLISHED: { label: "Publicado", variant: "success" },
   REJECTED: { label: "Rejeitado", variant: "destructive" },
   ARCHIVED: { label: "Arquivado", variant: "outline" },
+  AWAITING_PAYMENT: { label: "Aguardando pagamento", variant: "secondary" },
+  EXPIRED: { label: "Expirado", variant: "outline" },
 }
 
 export default async function PainelPage({

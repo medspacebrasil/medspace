@@ -23,6 +23,8 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
   PUBLISHED: { label: "Publicado", variant: "success" },
   REJECTED: { label: "Rejeitado", variant: "destructive" },
   ARCHIVED: { label: "Arquivado", variant: "outline" },
+  AWAITING_PAYMENT: { label: "Aguardando pagamento", variant: "secondary" },
+  EXPIRED: { label: "Expirado", variant: "outline" },
 }
 
 const typeConfig: Record<string, { label: string }> = {
@@ -45,7 +47,7 @@ export default async function AdminAnunciosPage({
   const session = await auth()
   if (session?.user?.role !== "ADMIN") notFound()
 
-  const VALID_STATUSES = ["DRAFT", "PENDING", "PUBLISHED", "REJECTED", "ARCHIVED"]
+  const VALID_STATUSES = ["DRAFT", "PENDING", "PUBLISHED", "REJECTED", "ARCHIVED", "AWAITING_PAYMENT", "EXPIRED"]
   const VALID_TYPES = ["CLINIC", "EQUIPMENT", "EDUCATION"]
   const params = await searchParams
   const page = Math.max(1, Number(params.page) || 1)
@@ -142,7 +144,7 @@ export default async function AdminAnunciosPage({
 
       {/* Status filter tabs */}
       <div className="mt-4 flex flex-wrap gap-2">
-        {["", "PENDING", "PUBLISHED", "REJECTED", "DRAFT", "ARCHIVED"].map(
+        {["", "PENDING", "AWAITING_PAYMENT", "PUBLISHED", "EXPIRED", "REJECTED", "DRAFT", "ARCHIVED"].map(
           (s) => (
             <Link
               key={s}
