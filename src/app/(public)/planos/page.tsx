@@ -67,9 +67,11 @@ export default function PlanosPage() {
             <p>
               Durante o período de lançamento todos os anúncios são{" "}
               <strong className="text-foreground">gratuitos</strong>. Em breve
-              os planos pagos estarão disponíveis — anunciantes já cadastrados
-              terão condições especiais. Ao cancelar, seu anúncio permanece
-              ativo até o fim do período contratado.
+              os planos pagos estarão disponíveis, e todo anunciante já cadastrado
+              será avisado com <strong className="text-foreground">30 dias de
+              antecedência</strong> antes de qualquer cobrança começar. Ao
+              cancelar, seu anúncio permanece ativo até o fim do período
+              contratado.
             </p>
           </div>
         </div>
@@ -94,8 +96,8 @@ export default function PlanosPage() {
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   Ainda não. Durante o período de lançamento, todos os anúncios
-                  na MedSpace são gratuitos. Em breve os planos pagos serão
-                  ativados e você será avisado com antecedência.
+                  na MedSpace são gratuitos. Quando os planos pagos forem ativados,
+                  você será avisado com 30 dias de antecedência.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2" className="border-border/50">

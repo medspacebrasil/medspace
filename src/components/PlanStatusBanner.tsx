@@ -15,8 +15,8 @@ export function PlanStatusBanner() {
         </div>
         <p className="text-sm text-foreground/80">
           Você está no <strong className="font-semibold text-foreground">período gratuito de lançamento</strong>{" "}
-          da MedSpace. Publique seus anúncios sem custo. Em breve os planos
-          pagos estarão disponíveis e você receberá um aviso com antecedência.
+          da MedSpace. Publique seus anúncios sem custo. Quando os planos pagos
+          forem ativados, você será avisado com 30 dias de antecedência.
         </p>
       </div>
       <Link

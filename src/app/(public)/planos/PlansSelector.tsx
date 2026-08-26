@@ -150,7 +150,7 @@ function buildSections(category: CategoryConfig, plan: PlanCard["key"]): PlanSec
           { state: "on", text: "1 foto" },
           { state: "on", text: "Cidade de localização" },
           { state: "on", text: "Número do WhatsApp (sem link direto)" },
-          { state: "clock", text: "Expira em 15 dias" },
+          { state: "on", text: "Sem prazo para expirar durante o lançamento" },
         ],
       },
       { title: "Detalhes do anúncio", items: detailsFor() },
