@@ -45,6 +45,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
   if (!listing) notFound()
 
+  // Guarda defensiva: a varredura de expiracao roda uma vez por dia, entao um
+  // anuncio pode ficar ate algumas horas vencido e ainda PUBLISHED. Aqui ele
+  // some na hora, sem esperar o cron.
+  if (listing.paidUntil && listing.paidUntil < new Date()) notFound()
+
   const leadSource = {
     listingId: listing.id,
     listingTitle: listing.title,
