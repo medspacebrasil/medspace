@@ -64,6 +64,9 @@ export const RATE_LIMITS = {
    * inflar número é a deduplicação por visitante/dia, não este limitador.
    */
   metrics: { tokens: 120, window: "1 m", prefix: "metrics" },
+  /** Geracao de cobranca. Baixo de proposito: cada tentativa cria cobranca
+   * no gateway, e repeticao rapida costuma ser erro de clique ou abuso. */
+  checkout: { tokens: 10, window: "10 m", prefix: "checkout" },
 } as const satisfies Record<string, RateLimitConfig>
 
 const _limiters = new Map<string, Ratelimit>()

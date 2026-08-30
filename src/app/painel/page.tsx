@@ -11,6 +11,7 @@ import { WelcomeModal } from "@/components/WelcomeModal"
 import { EquipmentMigrationNotice } from "@/components/EquipmentMigrationNotice"
 import { PlanStatusBanner } from "@/components/PlanStatusBanner"
 import { ListingInterest } from "@/components/anuncios/ListingInterest"
+import { PaymentCta } from "@/components/anuncios/PaymentCta"
 import { listingMetricsSince } from "@/lib/metrics"
 import {
   PlusCircle,
@@ -198,6 +199,7 @@ export default async function PainelPage({
                           published={listing.status === "PUBLISHED"}
                         />
                       </div>
+                      <PaymentCta listingId={listing.id} status={listing.status} />
                       <Link href={`/painel/anuncios/${listing.id}/editar`}>
                         <Button variant="outline" size="sm">
                           Editar
@@ -257,6 +259,7 @@ export default async function PainelPage({
                           published={listing.status === "PUBLISHED"}
                         />
                       </div>
+                      <PaymentCta listingId={listing.id} status={listing.status} />
                       <Link href={`/painel/aparelhos/${listing.id}/editar`}>
                         <Button variant="outline" size="sm">
                           Editar
@@ -316,6 +319,7 @@ export default async function PainelPage({
                           published={listing.status === "PUBLISHED"}
                         />
                       </div>
+                      <PaymentCta listingId={listing.id} status={listing.status} />
                       <Link href={`/painel/educacao/${listing.id}/editar`}>
                         <Button variant="outline" size="sm">
                           Editar
