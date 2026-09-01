@@ -10,6 +10,7 @@ import { createListingSchema, updateListingSchema } from "@/lib/validators"
 import { generateSlug } from "@/lib/utils"
 import { echoFormValues } from "@/lib/form-values"
 import { validSpecialtyIds, validEquipmentIds } from "@/lib/listing-taxonomy"
+import { cancelarPedidosPendentes } from "@/lib/billing/orders"
 
 export type ActionState = {
   success: boolean
@@ -220,6 +221,9 @@ export async function deleteListing(formData: FormData): Promise<void> {
     throw new Error("Anúncio não encontrado")
   }
 
+  // Antes do delete: depois dele o pedido perde o vínculo (SetNull) e a
+  // cobrança continuaria pagável no Asaas para um anúncio que não existe mais.
+  await cancelarPedidosPendentes({ listingId: id })
   await prisma.listing.delete({ where: { id } })
   revalidatePath("/painel")
   revalidatePath("/anuncios")

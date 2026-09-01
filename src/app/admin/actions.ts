@@ -16,6 +16,7 @@ import {
 import { generateSlug } from "@/lib/utils"
 import { echoFormValues } from "@/lib/form-values"
 import { validSpecialtyIds, validEquipmentIds } from "@/lib/listing-taxonomy"
+import { cancelarPedidosPendentes } from "@/lib/billing/orders"
 
 export type AdminCreateListingState = {
   success: boolean
@@ -171,6 +172,7 @@ export async function deleteClinicPermanent(formData: FormData) {
   })
   if (!clinic) throw new Error("Clínica não encontrada")
 
+  await cancelarPedidosPendentes({ clinicId })
   await prisma.user.delete({ where: { id: clinic.userId } })
 
   revalidatePath("/admin/clinicas")
@@ -249,6 +251,7 @@ export async function deleteListingPermanent(formData: FormData) {
   const id = formData.get("id") as string
   if (!id) throw new Error("ID não fornecido")
 
+  await cancelarPedidosPendentes({ listingId: id })
   // Cascading delete handles images, listing_specialties, listing_equipment
   await prisma.listing.delete({ where: { id } })
 

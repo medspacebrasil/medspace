@@ -49,7 +49,7 @@ interface AsaasErrorBody {
 
 async function request<T>(
   path: string,
-  init: { method: "GET" | "POST"; body?: unknown } = { method: "GET" }
+  init: { method: "GET" | "POST" | "DELETE"; body?: unknown } = { method: "GET" }
 ): Promise<T> {
   const { baseUrl, apiKey } = config()
 
@@ -169,6 +169,20 @@ export function refundPayment(paymentId: string, valueCents?: number) {
   return request<{ id: string; status: string }>(`/payments/${paymentId}/refund`, {
     method: "POST",
     body: valueCents ? { value: valueCents / 100 } : {},
+  })
+}
+
+/**
+ * Cancela uma cobrança ainda não paga.
+ *
+ * Usado quando o anunciante gera uma segunda cobrança para o mesmo pedido
+ * (trocou Pix por cartão) e quando o anúncio é excluído com cobrança aberta.
+ * Sem isso ficam duas cobranças vivas e as duas podem ser pagas. Cobrança já
+ * recebida não pode ser excluída: o Asaas recusa, e quem chama trata.
+ */
+export function deletePayment(paymentId: string) {
+  return request<{ deleted: boolean; id: string }>(`/payments/${paymentId}`, {
+    method: "DELETE",
   })
 }
 

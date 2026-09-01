@@ -49,6 +49,14 @@ interface AsaasEvent {
 /** Status do Asaas que significam dinheiro entrando. */
 const PAGO = new Set(["CONFIRMED", "RECEIVED", "RECEIVED_IN_CASH"])
 
+/** Existe outra cobrança paga no mesmo pedido além desta? */
+async function outraCobrancaPaga(charge: { id: string; orderId: string }) {
+  const n = await prisma.asaasCharge.count({
+    where: { orderId: charge.orderId, id: { not: charge.id }, status: { in: [...PAGO] } },
+  })
+  return n > 0
+}
+
 export async function POST(request: Request) {
   // Lido do proprio Request, e nao de next/headers: o webhook nao precisa do
   // escopo de requisicao do Next, e assim a rota fica testavel isoladamente.
@@ -144,10 +152,24 @@ async function processar(evento: string, paymentId?: string) {
 
     case "PAYMENT_CHARGEBACK_REQUESTED":
     case "PAYMENT_AWAITING_CHARGEBACK_REVERSAL":
+      await prisma.asaasCharge.update({
+        where: { id: charge.id },
+        data: { status: evento.replace("PAYMENT_", "") },
+      })
+      // Disputa sobre uma cobrança duplicada não derruba o pedido: a que
+      // sustenta a publicação continua paga.
+      if (await outraCobrancaPaga(charge)) return
       await openChargeback(charge.orderId)
       return
 
     case "PAYMENT_REFUNDED":
+      await prisma.asaasCharge.update({
+        where: { id: charge.id },
+        data: { status: "REFUNDED" },
+      })
+      // Estorno de duplicata (anunciante pagou Pix e cartão do mesmo pedido)
+      // devolve o excedente sem tirar o anúncio do ar.
+      if (await outraCobrancaPaga(charge)) return
       await refundOrder(charge.orderId)
       return
 

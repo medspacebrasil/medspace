@@ -3,13 +3,15 @@ import { prisma } from "@/lib/db"
 import {
   createCustomer,
   createPayment,
+  deletePayment,
+  getPayment,
   getPixQrCode,
   toAsaasDate,
   AsaasError,
   type AsaasBilling,
 } from "@/lib/asaas/client"
-import { createPublicationOrder } from "./orders"
-import { priceFor } from "./pricing"
+import { activatePublication, createPublicationOrder } from "./orders"
+import { COBRANCA_TERMINAL, PAGO_STATUS } from "./status"
 
 /**
  * Checkout da taxa de publicação.
@@ -78,6 +80,40 @@ export interface StartCheckoutInput {
   billingType: AsaasBilling
 }
 
+/**
+ * Fecha as cobranças abertas de um pedido antes de gerar outra.
+ *
+ * Duas cobranças vivas para o mesmo pedido podem ser pagas as duas, e aí o
+ * relatório mostra um pagamento onde entraram dois. Cobrança que a API diz
+ * estar paga muda tudo: ativa o pedido e interrompe o checkout, porque não
+ * existe mais nada a cobrar.
+ */
+async function encerrarCobrancasAbertas(order: {
+  id: string
+  charges: { id: string; asaasPaymentId: string }[]
+}) {
+  for (const c of order.charges) {
+    const atual = await getPayment(c.asaasPaymentId)
+    if (PAGO_STATUS.has(atual.status)) {
+      await prisma.asaasCharge.update({ where: { id: c.id }, data: { status: atual.status } })
+      await activatePublication(order.id, { settled: atual.status !== "CONFIRMED" })
+      throw new AsaasError(
+        "Encontramos um pagamento já confirmado para este anúncio. Ele será publicado em instantes, sem nova cobrança.",
+        "ALREADY_PAID",
+        409
+      )
+    }
+    try {
+      await deletePayment(c.asaasPaymentId)
+      await prisma.asaasCharge.update({ where: { id: c.id }, data: { status: "DELETED" } })
+    } catch (error) {
+      // Não impede a nova cobrança: fica registrado e a varredura diária
+      // reconfere as vencidas.
+      console.error("[checkout] falha ao cancelar cobranca anterior", c.asaasPaymentId, error)
+    }
+  }
+}
+
 export async function startCheckout({
   listing,
   clinic,
@@ -86,19 +122,30 @@ export async function startCheckout({
 }: StartCheckoutInput): Promise<CheckoutResult> {
   const customerId = await ensureCustomer(clinic, email)
 
-  // Reaproveita pedido pendente em vez de criar um novo a cada tentativa: o
-  // anunciante que gera um Pix, desiste e volta no cartão precisa continuar no
-  // mesmo pedido, senão a vigência e o histórico ficam duplicados.
+  // Reaproveita pedido sem pagamento em vez de criar um novo a cada tentativa:
+  // o anunciante que gera um Pix, desiste e volta no cartão precisa continuar
+  // no mesmo pedido, senão a vigência e o histórico ficam duplicados. Vale
+  // também para o pedido cuja cobrança venceu: pagar atrasado é fluxo normal.
   const existente = await prisma.publicationOrder.findFirst({
-    where: { listingId: listing.id, status: "PENDING_PAYMENT" },
+    where: {
+      listingId: listing.id,
+      status: { in: ["PENDING_PAYMENT", "EXPIRED_UNPAID"] },
+      paidAt: null,
+    },
     orderBy: { createdAt: "desc" },
+    include: {
+      charges: {
+        where: { status: { notIn: [...COBRANCA_TERMINAL] } },
+        select: { id: true, asaasPaymentId: true },
+      },
+    },
   })
+  if (existente) await encerrarCobrancasAbertas(existente)
 
   const order =
     existente ??
     (await createPublicationOrder({ listing, clinicName: clinic.name }))
 
-  const preco = priceFor(listing.type)
   const vencimento = new Date()
   // Pix sem chave cadastrada expira às 23:59 do mesmo dia, então o vencimento
   // no mesmo dia evita prometer prazo que o gateway não sustenta.
@@ -111,7 +158,7 @@ export async function startCheckout({
     billingType,
     value: order.amountCents / 100,
     dueDate: toAsaasDate(vencimento),
-    description: `Publicação do anúncio "${listing.title}" por ${preco.durationDays} dias`,
+    description: `Publicação do anúncio "${listing.title}" por ${order.durationDays} dias`,
     // Reconciliação pelo painel do Asaas sem depender do mapeamento interno.
     externalReference: order.id,
   })

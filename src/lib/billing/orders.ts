@@ -1,6 +1,8 @@
 import type { Listing, ListingType, PublicationOrigin } from "@prisma/client"
 import { prisma } from "@/lib/db"
+import { deletePayment, getPayment } from "@/lib/asaas/client"
 import { priceFor, publicationExpiry, PRICE_VERSION } from "./pricing"
+import { COBRANCA_TERMINAL, PAGO_STATUS } from "./status"
 
 /**
  * Regra de publicação paga.
@@ -63,6 +65,8 @@ export interface ActivationResult {
   activated: boolean
   reason?: string
   expiresAt?: Date
+  /** false quando o pedido foi pago mas o anúncio não estava em estado publicável. */
+  published?: boolean
 }
 
 /**
@@ -120,14 +124,31 @@ export async function activatePublication(
     // escrita. Sair sem publicar de novo é o comportamento correto.
     if (count !== 1) return { activated: false, reason: "corrida: ja processado" }
 
+    let published = false
     if (order.listingId) {
+      // A vigência é registrada sempre: o dinheiro entrou e o prazo corre.
       await tx.listing.update({
         where: { id: order.listingId },
-        data: { status: "PUBLISHED", paidUntil: expiresAt },
+        data: { paidUntil: expiresAt },
       })
+      // Publicar, só se o anúncio está esperando por isso. Pagamento não passa
+      // por cima de arquivamento, rejeição ou edição que voltou para análise:
+      // nesses casos o anúncio volta ao ar pela moderação, já com a vigência
+      // gravada, sem cobrar de novo.
+      const { count } = await tx.listing.updateMany({
+        where: {
+          id: order.listingId,
+          status: { in: ["AWAITING_PAYMENT", "EXPIRED", "PUBLISHED"] },
+        },
+        data: { status: "PUBLISHED" },
+      })
+      published = count === 1
+      if (!published) {
+        console.warn("[billing] pedido pago sem publicar: anuncio fora do estado esperado", orderId)
+      }
     }
 
-    return { activated: true, expiresAt }
+    return { activated: true, expiresAt, published }
   })
 }
 
@@ -146,16 +167,15 @@ export async function expirePublications(now = new Date()) {
   if (vencidos.length === 0) return { expirados: 0 }
 
   const ids = vencidos.map((l) => l.id)
-  await prisma.$transaction([
-    prisma.listing.updateMany({
-      where: { id: { in: ids } },
-      data: { status: "EXPIRED" },
-    }),
-    prisma.publicationOrder.updateMany({
-      where: { listingId: { in: ids }, status: "PAID", expiresAt: { lt: now } },
-      data: { status: "EXPIRED_UNPAID" },
-    }),
-  ])
+  // O pedido continua PAID de propósito. Ele foi pago; o que terminou foi a
+  // vigência, e isso o próprio expiresAt já diz. Rebaixar para EXPIRED_UNPAID
+  // o tornaria ativável de novo, e o evento de liquidação do cartão
+  // (PAYMENT_RECEIVED chega até 32 dias depois da confirmação) republicaria o
+  // anúncio por mais um período inteiro sem cobrança.
+  await prisma.listing.updateMany({
+    where: { id: { in: ids }, status: "PUBLISHED" },
+    data: { status: "EXPIRED" },
+  })
 
   return { expirados: ids.length }
 }
@@ -169,12 +189,18 @@ export async function markOrderOverdue(orderId: string) {
   return count === 1
 }
 
-/** Chargeback aberto. Tira do ar mas mantém o pedido reversível. */
+/**
+ * Chargeback aberto. Tira do ar mas mantém o pedido reversível.
+ *
+ * Só derruba o anúncio se a vigência corrente é a deste pedido: a igualdade
+ * entre `paidUntil` e `expiresAt` diz isso. Um pedido antigo contestado depois
+ * de uma renovação não pode derrubar a vigência que o pedido novo pagou.
+ */
 export async function openChargeback(orderId: string) {
   return prisma.$transaction(async (tx) => {
     const order = await tx.publicationOrder.findUnique({
       where: { id: orderId },
-      select: { listingId: true, status: true },
+      select: { listingId: true, status: true, expiresAt: true },
     })
     if (!order || order.status === "REFUNDED") return false
 
@@ -182,9 +208,9 @@ export async function openChargeback(orderId: string) {
       where: { id: orderId },
       data: { status: "CHARGEBACK_OPEN" },
     })
-    if (order.listingId) {
+    if (order.listingId && order.expiresAt) {
       await tx.listing.updateMany({
-        where: { id: order.listingId, status: "PUBLISHED" },
+        where: { id: order.listingId, status: "PUBLISHED", paidUntil: order.expiresAt },
         data: { status: "EXPIRED" },
       })
     }
@@ -192,25 +218,86 @@ export async function openChargeback(orderId: string) {
   })
 }
 
-/** Estorno efetivado. Terminal: despublica e encerra a vigência. */
+/** Estorno efetivado. Terminal: despublica (se a vigência era deste pedido) e encerra. */
 export async function refundOrder(orderId: string, now = new Date()) {
   return prisma.$transaction(async (tx) => {
     const order = await tx.publicationOrder.findUnique({
       where: { id: orderId },
-      select: { listingId: true },
+      select: { listingId: true, expiresAt: true },
     })
     if (!order) return false
+
+    // Lido antes de sobrescrever: é a chave que liga a vigência ao anúncio.
+    const vigenciaOriginal = order.expiresAt
 
     await tx.publicationOrder.update({
       where: { id: orderId },
       data: { status: "REFUNDED", refundedAt: now, expiresAt: now },
     })
-    if (order.listingId) {
+    if (order.listingId && vigenciaOriginal) {
       await tx.listing.updateMany({
-        where: { id: order.listingId, status: "PUBLISHED" },
+        where: { id: order.listingId, status: "PUBLISHED", paidUntil: vigenciaOriginal },
         data: { status: "EXPIRED", paidUntil: now },
       })
     }
     return true
   })
+}
+
+/**
+ * Cancela pedidos sem pagamento de um anúncio ou de uma clínica, e exclui no
+ * Asaas as cobranças ainda abertas.
+ *
+ * Chamado antes de excluir anúncio ou conta. Sem isso a cobrança continua
+ * pagável no Asaas depois de o anúncio sumir, e o pedido fica "aguardando"
+ * para sempre no painel.
+ *
+ * Cobrança que a API diz estar paga não é cancelada: o webhook ou a varredura
+ * vai ativar o pedido, e o admin enxerga um pedido pago de anúncio excluído,
+ * que é o caso de estorno manual. Falha de consulta também não cancela: na
+ * dúvida, deixa para a varredura diária.
+ */
+export async function cancelarPedidosPendentes(
+  alvo: { listingId: string } | { clinicId: string },
+  now = new Date()
+) {
+  const pedidos = await prisma.publicationOrder.findMany({
+    where: { ...alvo, status: { in: ["PENDING_PAYMENT", "EXPIRED_UNPAID"] }, paidAt: null },
+    select: {
+      id: true,
+      charges: {
+        where: { status: { notIn: [...COBRANCA_TERMINAL] } },
+        select: { id: true, asaasPaymentId: true },
+      },
+    },
+  })
+
+  const cancelaveis: string[] = []
+  for (const pedido of pedidos) {
+    let manter = false
+    for (const c of pedido.charges) {
+      try {
+        const atual = await getPayment(c.asaasPaymentId)
+        if (PAGO_STATUS.has(atual.status)) {
+          manter = true
+          await prisma.asaasCharge.update({ where: { id: c.id }, data: { status: atual.status } })
+          continue
+        }
+        await deletePayment(c.asaasPaymentId)
+        await prisma.asaasCharge.update({ where: { id: c.id }, data: { status: "DELETED" } })
+      } catch (error) {
+        manter = true
+        console.error("[billing] falha ao cancelar cobranca", c.asaasPaymentId, error)
+      }
+    }
+    if (!manter) cancelaveis.push(pedido.id)
+  }
+
+  if (cancelaveis.length > 0) {
+    await prisma.publicationOrder.updateMany({
+      where: { id: { in: cancelaveis }, paidAt: null },
+      data: { status: "CANCELED", canceledAt: now },
+    })
+  }
+  return { cancelados: cancelaveis.length }
 }

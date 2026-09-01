@@ -2,7 +2,12 @@ import { NextResponse } from "next/server"
 import { timingSafeEqual } from "node:crypto"
 import { revalidateTag } from "next/cache"
 import { prisma } from "@/lib/db"
-import { expirePublications, activatePublication } from "@/lib/billing/orders"
+import {
+  expirePublications,
+  activatePublication,
+  markOrderOverdue,
+} from "@/lib/billing/orders"
+import { COBRANCA_TERMINAL, PAGO_STATUS } from "@/lib/billing/status"
 import { getPayment } from "@/lib/asaas/client"
 import { sendEmail } from "@/lib/email"
 import { brasiliaDay } from "@/lib/metrics"
@@ -155,22 +160,76 @@ async function reconciliar() {
   return recuperados
 }
 
+/**
+ * Dá escoamento ao que ficou "aguardando pagamento" sem caminho de saída.
+ *
+ * Dois casos. Pedido que nasceu e o gateway falhou antes de criar a cobrança:
+ * não existe nada a pagar, e sem isso ele somaria em "a receber" para sempre.
+ * E cobrança vencida cujo evento de vencimento nunca chegou: a fonte de
+ * verdade é a API, então confere lá e aplica o que o webhook aplicaria.
+ */
+async function escoarPendentes(now: Date) {
+  const umDiaAtras = new Date(now.getTime() - 24 * 3_600_000)
+
+  const semCobranca = await prisma.publicationOrder.updateMany({
+    where: { status: "PENDING_PAYMENT", createdAt: { lt: umDiaAtras }, charges: { none: {} } },
+    data: { status: "CANCELED", canceledAt: now },
+  })
+
+  const vencidas = await prisma.asaasCharge.findMany({
+    where: {
+      dueDate: { lt: umDiaAtras },
+      status: { notIn: [...COBRANCA_TERMINAL, "OVERDUE"] },
+      order: { status: "PENDING_PAYMENT" },
+    },
+    take: 30,
+    select: { id: true, asaasPaymentId: true, orderId: true },
+  })
+
+  let conferidas = 0
+  for (const c of vencidas) {
+    try {
+      const atual = await getPayment(c.asaasPaymentId)
+      await prisma.asaasCharge.update({ where: { id: c.id }, data: { status: atual.status } })
+      if (PAGO_STATUS.has(atual.status)) {
+        await activatePublication(c.orderId, { settled: atual.status !== "CONFIRMED" })
+      } else if (atual.status === "OVERDUE") {
+        await markOrderOverdue(c.orderId)
+      }
+      conferidas++
+    } catch (error) {
+      console.error("[cron] falha ao conferir cobranca vencida", c.asaasPaymentId, error)
+    }
+  }
+
+  return { cancelados: semCobranca.count, conferidas }
+}
+
 export async function GET(request: Request) {
   if (!autorizado(request.headers.get("authorization"))) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
   }
 
   const inicio = Date.now()
-  const { expirados } = await expirePublications()
+  const agora = new Date()
+  const { expirados } = await expirePublications(agora)
   if (expirados > 0) {
     // Sem isso o anúncio expirado continuaria aparecendo na listagem cacheada.
     revalidateTag("listings", "max")
   }
 
   const recuperados = await reconciliar()
+  const { cancelados, conferidas } = await escoarPendentes(agora)
   const avisados = await avisarVencimentos()
 
-  const resumo = { expirados, recuperados, avisados, ms: Date.now() - inicio }
+  const resumo = {
+    expirados,
+    recuperados,
+    cancelados,
+    conferidas,
+    avisados,
+    ms: Date.now() - inicio,
+  }
   console.log("[cron] varredura concluída", resumo)
   return NextResponse.json(resumo)
 }

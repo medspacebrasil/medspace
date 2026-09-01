@@ -10,6 +10,7 @@ import { z } from "zod/v4"
 import { rateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 import { whatsappSchema, optionalPhoneSchema } from "@/lib/validators/phone"
 import { echoFormValues } from "@/lib/form-values"
+import { cancelarPedidosPendentes } from "@/lib/billing/orders"
 
 function storagePathFromPublicUrl(url: string): string | null {
   const marker = "/storage/v1/object/public/listings/"
@@ -218,6 +219,11 @@ export async function deleteAccount(
     where: { clinicId: session.user.clinicId },
     select: { slug: true, type: true },
   })
+
+  // Cobranças abertas são canceladas no Asaas antes de a clínica sumir. O
+  // histórico financeiro (pedidos pagos) fica, com nome em snapshot, pelo
+  // prazo legal; só o vínculo com a conta é desfeito (SetNull).
+  await cancelarPedidosPendentes({ clinicId: session.user.clinicId })
 
   // Cascade: User -> Clinic -> Listing -> (images, specialties, equipment)
   await prisma.user.delete({ where: { id: session.user.id } })

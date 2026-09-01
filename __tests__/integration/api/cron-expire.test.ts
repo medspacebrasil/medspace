@@ -4,6 +4,7 @@ import { createMockPrisma, type MockPrisma } from "../../helpers/db"
 let mockPrisma: MockPrisma
 const expirePublications = vi.fn()
 const activatePublication = vi.fn()
+const markOrderOverdue = vi.fn()
 const getPayment = vi.fn()
 const sendEmail = vi.fn()
 
@@ -13,6 +14,7 @@ vi.mock("@/lib/db", () => ({
 vi.mock("@/lib/billing/orders", () => ({
   expirePublications: (...a: unknown[]) => expirePublications(...a),
   activatePublication: (...a: unknown[]) => activatePublication(...a),
+  markOrderOverdue: (...a: unknown[]) => markOrderOverdue(...a),
 }))
 vi.mock("@/lib/asaas/client", () => ({ getPayment: (...a: unknown[]) => getPayment(...a) }))
 vi.mock("@/lib/email", () => ({ sendEmail: (...a: unknown[]) => sendEmail(...a) }))
@@ -34,6 +36,8 @@ describe("GET /api/cron/expire-listings", () => {
     expirePublications.mockResolvedValue({ expirados: 0 })
     mockPrisma.asaasWebhookEvent.findMany.mockResolvedValue([])
     mockPrisma.publicationOrder.findMany.mockResolvedValue([])
+    mockPrisma.publicationOrder.updateMany.mockResolvedValue({ count: 0 })
+    mockPrisma.asaasCharge.findMany.mockResolvedValue([])
   })
 
   it("recusa sem token", async () => {
@@ -115,6 +119,35 @@ describe("GET /api/cron/expire-listings", () => {
     expect(sendEmail).toHaveBeenCalledTimes(1)
     expect(sendEmail.mock.calls[0][0].to).toBe("a@x.com")
     expect((await res.json()).avisados).toBe(1)
+  })
+
+  it("cancela pedido antigo que ficou sem cobranca e devolve a contagem", async () => {
+    mockPrisma.publicationOrder.updateMany.mockResolvedValue({ count: 2 })
+
+    const res = await GET(req(SECRET))
+    const call = mockPrisma.publicationOrder.updateMany.mock.calls[0][0]
+    expect(call.where.status).toBe("PENDING_PAYMENT")
+    expect(call.where.charges).toEqual({ none: {} })
+    expect(call.where.createdAt.lt).toBeInstanceOf(Date)
+    expect(call.data.status).toBe("CANCELED")
+    expect((await res.json()).cancelados).toBe(2)
+  })
+
+  it("confere cobranca vencida sem webhook: paga ativa, vencida marca atraso", async () => {
+    mockPrisma.asaasCharge.findMany.mockResolvedValue([
+      { id: "c1", asaasPaymentId: "pay_paga", orderId: "o1" },
+      { id: "c2", asaasPaymentId: "pay_vencida", orderId: "o2" },
+    ])
+    mockPrisma.asaasCharge.update.mockResolvedValue({})
+    getPayment.mockImplementation(async (id: string) => ({
+      id,
+      status: id === "pay_paga" ? "RECEIVED" : "OVERDUE",
+    }))
+
+    const res = await GET(req(SECRET))
+    expect(activatePublication).toHaveBeenCalledWith("o1", { settled: true })
+    expect(markOrderOverdue).toHaveBeenCalledWith("o2")
+    expect((await res.json()).conferidas).toBe(2)
   })
 
   it("nao deixa falha de e-mail derrubar a varredura", async () => {

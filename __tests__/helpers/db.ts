@@ -3,6 +3,12 @@ import { vi } from "vitest"
 // Mock Prisma client for integration tests
 export function createMockPrisma() {
   return {
+    /**
+     * Sem implementação por padrão. Teste que exercita transação define:
+     *   mock.$transaction.mockImplementation((arg) =>
+     *     typeof arg === "function" ? arg(mock) : Promise.all(arg))
+     */
+    $transaction: vi.fn(),
     user: {
       findUnique: vi.fn(),
       findMany: vi.fn(),
@@ -36,15 +42,20 @@ export function createMockPrisma() {
     },
     asaasCharge: {
       findUnique: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
     },
     publicationOrder: {
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
       updateMany: vi.fn(),
       findMany: vi.fn(),
+      count: vi.fn(),
+      aggregate: vi.fn(),
     },
     listingImage: {
       create: vi.fn(),

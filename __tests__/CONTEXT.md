@@ -53,8 +53,11 @@ npm run test:all      # Roda tudo
 - Fixtures: dados constantes, sem side effects
 - Helpers: funcoes utilitarias com logica (setup DB, auth mock, etc)
 - Cada teste deve ser independente (sem depender de ordem de execucao)
-- Testes de integracao usam banco de teste isolado (rollback entre testes)
+- Testes de integracao nao tocam banco: o Prisma e substituido por um Proxy sobre
+  `createMockPrisma()` (helpers/db.ts) com `vi.mock("@/lib/db")`. Transacao precisa de
+  implementacao no teste (`$transaction.mockImplementation`), ver `unit/lib/orders.test.ts`.
 
 ---
 ## Changelog
 - [2026-03-30] - Context criado
+- [2026-09-01] - Corrigida a nota sobre integracao (mock, nao banco); mocks de cobranca no helper

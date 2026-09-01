@@ -5,6 +5,8 @@ let mockPrisma: MockPrisma
 const getPayment = vi.fn()
 const activatePublication = vi.fn()
 const markOrderOverdue = vi.fn()
+const openChargeback = vi.fn()
+const refundOrder = vi.fn()
 
 vi.mock("@/lib/db", () => ({
   prisma: new Proxy({}, { get: (_, p) => mockPrisma[p as keyof MockPrisma] }),
@@ -15,8 +17,8 @@ vi.mock("@/lib/asaas/client", () => ({
 vi.mock("@/lib/billing/orders", () => ({
   activatePublication: (...a: unknown[]) => activatePublication(...a),
   markOrderOverdue: (...a: unknown[]) => markOrderOverdue(...a),
-  openChargeback: vi.fn(),
-  refundOrder: vi.fn(),
+  openChargeback: (...a: unknown[]) => openChargeback(...a),
+  refundOrder: (...a: unknown[]) => refundOrder(...a),
 }))
 
 const { POST } = await import("@/app/api/webhooks/asaas/route")
@@ -48,6 +50,43 @@ describe("POST /api/webhooks/asaas", () => {
     mockPrisma.asaasWebhookEvent.create.mockResolvedValue({})
     mockPrisma.asaasWebhookEvent.update.mockResolvedValue({})
     mockPrisma.asaasCharge.update.mockResolvedValue({})
+    mockPrisma.asaasCharge.count.mockResolvedValue(0)
+  })
+
+  it("estorno da cobranca que pagou o pedido despublica", async () => {
+    mockPrisma.asaasCharge.findUnique.mockResolvedValue({ id: "c1", orderId: "o1" })
+    const res = await POST(req(evento({ event: "PAYMENT_REFUNDED", payment: { id: "pay_1" } })))
+    expect(res.status).toBe(200)
+    expect(refundOrder).toHaveBeenCalledWith("o1")
+    // A cobranca espelha o estorno antes de qualquer decisao.
+    expect(mockPrisma.asaasCharge.update).toHaveBeenCalledWith({
+      where: { id: "c1" },
+      data: { status: "REFUNDED" },
+    })
+  })
+
+  it("estorno de cobranca duplicada nao derruba o pedido", async () => {
+    // Anunciante pagou Pix e cartao do mesmo pedido; o Asaas devolve um deles.
+    mockPrisma.asaasCharge.findUnique.mockResolvedValue({ id: "c2", orderId: "o1" })
+    mockPrisma.asaasCharge.count.mockResolvedValue(1)
+    await POST(req(evento({ event: "PAYMENT_REFUNDED", payment: { id: "pay_2" } })))
+    expect(refundOrder).not.toHaveBeenCalled()
+    const consulta = mockPrisma.asaasCharge.count.mock.calls[0][0].where
+    expect(consulta.orderId).toBe("o1")
+    expect(consulta.id).toEqual({ not: "c2" })
+  })
+
+  it("chargeback de duplicata so espelha o status da cobranca", async () => {
+    mockPrisma.asaasCharge.findUnique.mockResolvedValue({ id: "c2", orderId: "o1" })
+    mockPrisma.asaasCharge.count.mockResolvedValue(1)
+    await POST(
+      req(evento({ event: "PAYMENT_CHARGEBACK_REQUESTED", payment: { id: "pay_2" } }))
+    )
+    expect(openChargeback).not.toHaveBeenCalled()
+    expect(mockPrisma.asaasCharge.update).toHaveBeenCalledWith({
+      where: { id: "c2" },
+      data: { status: "CHARGEBACK_REQUESTED" },
+    })
   })
 
   it("recusa token errado", async () => {
