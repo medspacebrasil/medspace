@@ -43,8 +43,8 @@ export function RejectListingButton({ id, title }: RejectListingButtonProps) {
           >
             <h2 className="text-lg font-bold">Rejeitar anúncio</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              &ldquo;{title}&rdquo; &mdash; o motivo será mostrado ao anunciante
-              no painel, para que ele saiba o que corrigir antes de reenviar.
+              &ldquo;{title}&rdquo;: o motivo será mostrado ao anunciante no
+              painel, para que ele saiba o que corrigir antes de reenviar.
             </p>
             <form
               action={async (formData) => {

@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { LegalPage } from "@/components/layout/LegalPage"
 
 export const metadata: Metadata = {
-  title: "Termos de Uso — MedSpace",
+  title: "Termos de Uso",
   description:
     "Regras, responsabilidades e condições para uso da plataforma MedSpace.",
 }

@@ -46,7 +46,7 @@ export function BlockClinicButton({
               O anunciante <strong>não conseguirá mais fazer login</strong> e{" "}
               <strong>todos os anúncios serão arquivados</strong>
               {publishedCount > 0 && (
-                <> — incluindo {publishedCount} que está(ão) no ar agora</>
+                <>, incluindo {publishedCount} que está(ão) no ar agora</>
               )}
               .
             </p>

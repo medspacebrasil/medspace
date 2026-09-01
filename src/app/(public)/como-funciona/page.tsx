@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Como funciona — MedSpace",
+  title: "Como funciona",
   description:
     "A MedSpace é uma plataforma digital de anúncios e contato entre usuários da área da saúde. Veja como funciona em 3 passos.",
 }

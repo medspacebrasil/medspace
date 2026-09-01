@@ -11,7 +11,7 @@ export default function Error({
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
       <h2 className="text-2xl font-bold">Algo deu errado</h2>
       <p className="max-w-md text-muted-foreground">
-        Ocorreu um erro inesperado. Tente novamente — se o problema continuar,
+        Ocorreu um erro inesperado. Tente novamente. Se o problema continuar,
         fale com a gente: contato@medspacebrasil.com.br
       </p>
       {error.digest && (

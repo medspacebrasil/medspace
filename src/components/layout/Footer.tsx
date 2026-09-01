@@ -185,11 +185,11 @@ export function Footer() {
 
         <div className="mt-10 border-t border-white/10 pt-6">
           <p className="text-center text-xs text-white/50">
-            MedSpace — Plataforma digital de anúncios e divulgação de
+            MedSpace: plataforma digital de anúncios e divulgação de
             oportunidades voltadas à área da saúde.
           </p>
           <p className="mt-2 text-center text-xs text-white/40">
-            &copy; {new Date().getFullYear()} MEDSPACE PUBLICIDADE LTDA — CNPJ
+            &copy; {new Date().getFullYear()} MEDSPACE PUBLICIDADE LTDA, CNPJ
             66.632.755/0001-17. Todos os direitos reservados.
           </p>
         </div>

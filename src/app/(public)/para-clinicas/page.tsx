@@ -24,7 +24,7 @@ import {
 } from "lucide-react"
 
 export const metadata = {
-  title: "Para Clínicas | MedSpace",
+  title: "Para Clínicas",
   description:
     "Anuncie seus espaços e equipamentos no MedSpace. Alcance médicos que buscam salas prontas para atender, sem comissão sobre suas negociações.",
 }
@@ -53,8 +53,8 @@ export default function ParaClinicasPage() {
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-white/70">
             Anuncie no MedSpace e conecte-se com médicos que precisam de espaços
-            prontos para atender. Receba contatos direto no seu WhatsApp — sem
-            comissão, sem burocracia.
+            prontos para atender. Receba contatos direto no seu WhatsApp, sem
+            comissão e sem burocracia.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link href="/cadastro">
@@ -420,7 +420,7 @@ export default function ParaClinicasPage() {
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   Consultórios, salas de procedimento, salas cirúrgicas,
-                  laboratórios, salas de exame — qualquer espaço ou equipamento
+                  laboratórios, salas de exame: qualquer espaço ou equipamento
                   médico que possa ser sublocado para outros profissionais.
                 </AccordionContent>
               </AccordionItem>

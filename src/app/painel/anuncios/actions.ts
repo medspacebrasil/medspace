@@ -263,7 +263,7 @@ export async function publishListing(
       errors: {
         _form: [
           listing.status === "PENDING"
-            ? "Este anúncio já está em análise — não é preciso enviá-lo de novo."
+            ? "Este anúncio já está em análise. Não é preciso enviá-lo de novo."
             : "Este anúncio já está publicado.",
         ],
       },
@@ -273,7 +273,7 @@ export async function publishListing(
   if (listing.images.length === 0) {
     return {
       success: false,
-      errors: { _form: ["Adicione pelo menos 1 foto antes de enviar para revisão — anúncios sem foto não são aprovados."] },
+      errors: { _form: ["Adicione pelo menos 1 foto antes de enviar para revisão: anúncios sem foto não são aprovados."] },
     }
   }
 

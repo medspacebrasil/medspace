@@ -35,7 +35,7 @@ import {
 export const metadata: Metadata = {
   title: "Educação Médica",
   description:
-    "Mentorias, cursos, pós-graduações e eventos para profissionais de saúde. Anúncios publicados diretamente pelos organizadores — contato direto via WhatsApp.",
+    "Mentorias, cursos, pós-graduações e eventos para profissionais de saúde. Anúncios publicados diretamente pelos organizadores, com contato direto via WhatsApp.",
 }
 
 const LEGAL_NOTICE =

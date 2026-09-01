@@ -29,7 +29,7 @@ export default function GlobalError({
         >
           <h2 style={{ fontSize: "24px", fontWeight: 700 }}>Algo deu errado</h2>
           <p style={{ color: "#666", maxWidth: "420px" }}>
-            Ocorreu um erro inesperado. Tente novamente — se o problema
+            Ocorreu um erro inesperado. Tente novamente. Se o problema
             continuar, fale com a gente: contato@medspacebrasil.com.br
           </p>
           {error.digest && (

@@ -128,7 +128,7 @@ export async function registerClinic(
     // então vai em `info` (verde, com link para o login) e não em errors._form.
     return {
       success: false,
-      info: "Sua conta foi criada com sucesso! Só não conseguimos entrar automaticamente — faça login para continuar.",
+      info: "Sua conta foi criada com sucesso! Só não conseguimos entrar automaticamente. Faça login para continuar.",
       values,
     }
   }

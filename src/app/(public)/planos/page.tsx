@@ -12,7 +12,7 @@ import { PlansSelector } from "./PlansSelector"
 export const metadata: Metadata = {
   title: "Planos de anúncio",
   description:
-    "Escolha o plano ideal para o seu anúncio na MedSpace. Espaços, equipamentos ou educação médica — durante o período de lançamento, todos os anúncios são gratuitos.",
+    "Escolha o plano ideal para o seu anúncio na MedSpace. Espaços, equipamentos ou educação médica: durante o período de lançamento, todos os anúncios são gratuitos.",
 }
 
 export default function PlanosPage() {
@@ -31,7 +31,7 @@ export default function PlanosPage() {
             priority
           />
           <span className="inline-block rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-sm font-medium text-gold">
-            Período de lançamento — acesso gratuito
+            Período de lançamento: acesso gratuito
           </span>
           <h1 className="mt-6 text-3xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
             Escolha seu <span className="text-gold">plano</span>
@@ -138,8 +138,8 @@ export default function PlanosPage() {
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   A estrutura é a mesma (Gratuito, Essencial e Profissional),
-                  mas os benefícios e detalhes variam conforme a categoria —
-                  espaços, equipamentos ou educação médica. Use o seletor de
+                  mas os benefícios e detalhes variam conforme a categoria
+                  (espaços, equipamentos ou educação médica). Use o seletor de
                   categoria no topo para ver os benefícios de cada uma.
                 </AccordionContent>
               </AccordionItem>

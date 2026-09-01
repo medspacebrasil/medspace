@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: {
     default:
-      "MedSpace — Plataforma digital de anúncios e divulgação para a área da saúde",
+      "MedSpace | Plataforma digital de anúncios e divulgação para a área da saúde",
     template: "%s | MedSpace",
   },
   description:

@@ -96,7 +96,7 @@ export const updateEducationSchema = z
     investment: z.string().max(120, "Texto muito longo").optional(),
     whatsapp: whatsappSchema.optional(),
     externalLink: z
-      .url("Link inválido — use o endereço completo, começando com https://")
+      .url("Link inválido. Use o endereço completo, começando com https://")
       .max(300, "Link muito longo")
       .optional(),
   })

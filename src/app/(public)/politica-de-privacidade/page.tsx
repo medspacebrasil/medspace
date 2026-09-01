@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { LegalPage } from "@/components/layout/LegalPage"
 
 export const metadata: Metadata = {
-  title: "Política de Privacidade — MedSpace",
+  title: "Política de Privacidade",
   description:
     "Como a MedSpace coleta, utiliza, armazena, compartilha e protege seus dados pessoais (LGPD).",
 }
@@ -11,7 +11,7 @@ export default function PoliticaDePrivacidadePage() {
   return (
     <LegalPage
       title="Política de Privacidade"
-      subtitle="Em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD)."
+      subtitle="Em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018, LGPD)."
       lastUpdated="09/05/2026"
     >
       <h2>1. Apresentação</h2>
@@ -23,7 +23,7 @@ export default function PoliticaDePrivacidadePage() {
         Esta Política de Privacidade descreve como a MedSpace coleta, utiliza,
         armazena, compartilha e protege os dados pessoais fornecidos pelos
         usuários da plataforma, em conformidade com a Lei Geral de Proteção
-        de Dados Pessoais (Lei nº 13.709/2018 — LGPD).
+        de Dados Pessoais (Lei nº 13.709/2018, LGPD).
       </p>
       <p>
         Ao acessar ou utilizar a plataforma MedSpace, o usuário declara estar

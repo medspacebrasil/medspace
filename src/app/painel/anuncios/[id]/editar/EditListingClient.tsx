@@ -164,7 +164,7 @@ export function EditListingClient({
             <p className="mt-1 text-blue-800">
               Ele está <strong>em análise pela nossa equipe</strong> e será
               publicado após a aprovação. Você receberá o status aqui no painel.
-              {!hasPhotos && " Aproveite para adicionar fotos abaixo — anúncios sem foto não são aprovados."}
+              {!hasPhotos && " Aproveite para adicionar fotos abaixo: anúncios sem foto não são aprovados."}
             </p>
           </div>
         </div>
@@ -211,7 +211,7 @@ export function EditListingClient({
           <ImageIcon className="h-5 w-5 shrink-0" />
           <p>
             <strong>Seu anúncio ainda não tem fotos.</strong> Adicione pelo
-            menos 1 foto — anúncios sem foto não são aprovados e não aparecem
+            menos 1 foto: anúncios sem foto não são aprovados e não aparecem
             para os médicos.
           </p>
         </div>

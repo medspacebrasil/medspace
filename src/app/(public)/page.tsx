@@ -43,7 +43,7 @@ export default function HomePage() {
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-white/70">
             Encontre ou anuncie salas, equipamentos e oportunidades de educação
-            médica — direto pelo WhatsApp, sem burocracia.
+            médica, direto pelo WhatsApp e sem burocracia.
           </p>
         </div>
       </section>

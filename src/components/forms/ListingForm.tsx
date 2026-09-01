@@ -247,7 +247,7 @@ export function ListingForm({
                 Atende todas as especialidades
                 <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
                   O anúncio exibirá a etiqueta “Todas as especialidades” em vez
-                  da lista — fica mais limpo e cobre especialidades que não
+                  da lista: fica mais limpo e cobre especialidades que não
                   estão abaixo.
                 </span>
               </span>

@@ -69,11 +69,11 @@ export async function sendPasswordResetEmail(
   to: string,
   resetUrl: string
 ): Promise<SendResult> {
-  const subject = "Redefinição de senha — MedSpace"
+  const subject = "Redefinição de senha na MedSpace"
   const text =
     `Recebemos um pedido para redefinir a senha da sua conta MedSpace.\n\n` +
     `Acesse o link abaixo para criar uma nova senha (válido por 1 hora):\n${resetUrl}\n\n` +
-    `Se você não solicitou, ignore este e-mail — sua senha continua a mesma.`
+    `Se você não solicitou, ignore este e-mail. Sua senha continua a mesma.`
   const html = `
     <div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;color:#1a1a18">
       <div style="background:#0e1c36;padding:24px;border-radius:8px 8px 0 0;text-align:center">
@@ -95,7 +95,7 @@ export async function sendPasswordResetEmail(
           <a href="${resetUrl}" style="color:#0c447c;word-break:break-all">${resetUrl}</a>
         </p>
         <p style="font-size:12px;line-height:1.6;color:#888;border-top:1px solid #e5e1d3;padding-top:12px;margin-top:16px">
-          Se você não solicitou esta redefinição, ignore este e-mail — sua senha
+          Se você não solicitou esta redefinição, ignore este e-mail. Sua senha
           continua a mesma.
         </p>
       </div>

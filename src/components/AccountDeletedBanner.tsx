@@ -29,7 +29,7 @@ export function AccountDeletedBanner() {
         <p className="flex-1">
           <strong>Sua conta foi excluída definitivamente.</strong> Seus dados,
           anúncios e imagens foram apagados, conforme a nossa Política de
-          Privacidade. Sentiremos sua falta — você pode criar uma nova conta
+          Privacidade. Sentiremos sua falta. Você pode criar uma nova conta
           quando quiser.
         </p>
         <button

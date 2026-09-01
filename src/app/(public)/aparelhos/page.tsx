@@ -10,9 +10,9 @@ import { MapPin, Wrench } from "lucide-react"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Aparelhos disponíveis | MedSpace",
+  title: "Aparelhos disponíveis",
   description:
-    "Encontre aparelhos médicos disponíveis para locação — direto com o anunciante, sem burocracia.",
+    "Encontre aparelhos médicos disponíveis para locação, direto com o anunciante e sem burocracia.",
 }
 
 interface PageProps {

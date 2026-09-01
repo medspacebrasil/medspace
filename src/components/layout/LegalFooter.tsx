@@ -11,7 +11,7 @@ export function LegalFooter() {
     <footer className="border-t border-border/50 bg-background px-4 py-4 text-xs text-muted-foreground">
       <div className="container mx-auto flex flex-col items-center gap-2 text-center sm:flex-row sm:justify-between sm:text-left">
         <p>
-          &copy; {new Date().getFullYear()} MedSpace — Plataforma digital de
+          &copy; {new Date().getFullYear()} MedSpace. Plataforma digital de
           anúncios para a área da saúde.
         </p>
         <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">

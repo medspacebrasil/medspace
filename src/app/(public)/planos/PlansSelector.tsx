@@ -101,7 +101,7 @@ const PLANS: PlanCard[] = [
     name: "Essencial",
     badge: "Em breve",
     badgeVariant: "soon",
-    price: "R$ —",
+    price: "R$ a definir",
     priceIsFree: false,
     period: "/ mês · cancele quando quiser",
     hasAnnual: false,
@@ -116,7 +116,7 @@ const PLANS: PlanCard[] = [
     name: "Profissional",
     badge: "Em breve",
     badgeVariant: "soon",
-    price: "R$ —",
+    price: "R$ a definir",
     priceIsFree: false,
     period: "/ mês",
     hasAnnual: true,
@@ -310,7 +310,7 @@ export function PlansSelector() {
                   <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
                     <span className="text-muted-foreground">ou</span>
                     <span className="font-semibold text-foreground">
-                      R$ — / ano
+                      R$ a definir / ano
                     </span>
                     <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[11px] font-medium text-emerald-700">
                       economize ~2 meses

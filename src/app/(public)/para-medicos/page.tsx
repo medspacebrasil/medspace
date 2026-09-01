@@ -30,9 +30,9 @@ import {
 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Para Médicos | MedSpace",
+  title: "Para Médicos",
   description:
-    "Encontre salas, aparelhos e estruturas prontas para atender — direto com o anunciante, sem burocracia.",
+    "Encontre salas, aparelhos e estruturas prontas para atender, direto com o anunciante e sem burocracia.",
 }
 
 export default async function ParaMedicosPage() {

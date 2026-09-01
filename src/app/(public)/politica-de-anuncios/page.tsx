@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { LegalPage } from "@/components/layout/LegalPage"
 
 export const metadata: Metadata = {
-  title: "Política de Anúncios — MedSpace",
+  title: "Política de Anúncios",
   description:
     "Regras e condições aplicáveis à publicação de anúncios na MedSpace.",
 }
