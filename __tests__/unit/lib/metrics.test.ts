@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { brasiliaDay, visitorHash } from "@/lib/metrics"
+import { csvCell, csvFile } from "@/lib/csv"
 
 describe("brasiliaDay", () => {
   it("usa o fuso de Brasília, não o UTC do servidor", () => {
@@ -50,14 +51,8 @@ describe("visitorHash", () => {
 })
 
 describe("csvCell (exportacao do relatorio)", () => {
-  // Reimplementa a regra do route handler para travar o comportamento: titulo
-  // de anuncio e texto livre e a planilha e aberta pela cliente no Excel.
-  function csvCell(value: string | number): string {
-    let s = String(value)
-    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`
-    return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
-  }
-
+  // Titulo de anuncio e texto livre e a planilha e aberta pela cliente no
+  // Excel, entao a regra fica travada por teste.
   it("neutraliza titulo que viraria formula no Excel", () => {
     // Titulo com aspas tambem e envolvido em aspas, entao o apostrofo fica
     // dentro do campo. E o comportamento correto do CSV.
@@ -77,5 +72,11 @@ describe("csvCell (exportacao do relatorio)", () => {
   it("continua escapando aspas e quebras de linha", () => {
     expect(csvCell('Sala "premium"')).toBe('"Sala ""premium"""')
     expect(csvCell("linha1\nlinha2")).toBe('"linha1\nlinha2"')
+  })
+
+  it("monta o arquivo com BOM, ponto e virgula e CRLF", () => {
+    const csv = csvFile(["A", "B"], [["x", 1]])
+    expect(csv.charCodeAt(0)).toBe(0xfeff)
+    expect(csv.slice(1)).toBe("A;B\r\nx;1")
   })
 })

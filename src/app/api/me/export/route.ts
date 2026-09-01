@@ -70,6 +70,31 @@ export async function GET() {
               equipment: { select: { equipment: { select: { name: true } } } },
             },
           },
+          // Pagamentos também são dado pessoal do titular (art. 18, II e V).
+          orders: {
+            select: {
+              id: true,
+              listingTitle: true,
+              origin: true,
+              status: true,
+              amountCents: true,
+              durationDays: true,
+              createdAt: true,
+              paidAt: true,
+              startsAt: true,
+              expiresAt: true,
+              refundedAt: true,
+              charges: {
+                select: {
+                  asaasPaymentId: true,
+                  billingType: true,
+                  status: true,
+                  dueDate: true,
+                  createdAt: true,
+                },
+              },
+            },
+          },
         },
       },
     },

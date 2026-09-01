@@ -58,7 +58,9 @@ export function DataRights() {
           <p className="text-sm text-muted-foreground">
             Esta ação é <strong>permanente e irreversível</strong>. Sua conta, o
             perfil da clínica, todos os anúncios e as imagens enviadas serão
-            apagados definitivamente.
+            apagados definitivamente. Registros de pagamento, quando existirem,
+            são mantidos pelo prazo exigido pela legislação fiscal, sem uso
+            comercial.
           </p>
 
           {state.errors?._form && (

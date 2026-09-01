@@ -8,19 +8,26 @@ Ver documentacao completa em [docs/API.md](../../../docs/API.md).
 ## Estrutura
 ```
 api/
-├── auth/
-│   └── [...nextauth]/route.ts    # Auth.js catch-all (login, logout, session, csrf)
+├── auth/[...nextauth]/route.ts   # Auth.js catch-all (login, logout, session, csrf)
 ├── anuncios/
 │   ├── route.ts                  # GET (listar com filtros) + POST (criar)
 │   └── [id]/route.ts             # GET (detalhe) + PUT (editar) + DELETE (remover)
-├── upload/
-│   └── route.ts                  # POST (upload de imagem para Supabase Storage)
+├── images/
+│   ├── [id]/route.ts             # DELETE imagem
+│   └── cover/route.ts            # Definir capa
+├── taxonomies/route.ts           # GET especialidades/equipamentos/tipos de sala
+├── upload/route.ts               # POST (upload de imagem para Supabase Storage)
+├── metrics/route.ts              # POST visualizacao/contato por anuncio (same-origin, anti-bot, rate limit)
+├── me/export/route.ts            # GET exportacao LGPD (inclui pedidos e cobrancas)
+├── webhooks/asaas/route.ts       # POST eventos do Asaas (header asaas-access-token)
+├── cron/expire-listings/route.ts # GET varredura diaria (Bearer CRON_SECRET)
 └── admin/
     ├── clinicas/route.ts         # GET (listar clinicas)
-    └── anuncios/
-        ├── route.ts              # GET (listar para moderacao)
-        └── [id]/
-            └── status/route.ts   # PATCH (aprovar/rejeitar/arquivar)
+    ├── anuncios/
+    │   ├── route.ts              # GET (listar para moderacao)
+    │   └── [id]/status/route.ts  # PATCH (aprovar/rejeitar/arquivar)
+    ├── interesse.csv/route.ts    # GET ranking de interesse em CSV
+    └── cobrancas.csv/route.ts    # GET cobrancas em CSV (filtro na URL)
 ```
 
 ## Padrao de Implementacao
@@ -63,3 +70,4 @@ export async function POST(request: Request) {
 ---
 ## Changelog
 - [2026-03-30] - Context criado
+- [2026-09-01] - Arvore atualizada: metrics, me/export, webhooks/asaas, cron, CSVs do admin

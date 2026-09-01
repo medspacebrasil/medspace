@@ -9,6 +9,8 @@ Area protegida para clinicas gerenciarem seus anuncios. Requer autenticacao (rol
 | `/painel` | `page.tsx` | Dashboard com visao geral dos anuncios |
 | `/painel/anuncios/novo` | `anuncios/novo/page.tsx` | Formulario de criacao de anuncio |
 | `/painel/anuncios/[id]/editar` | `anuncios/[id]/editar/page.tsx` | Formulario de edicao |
+| `/painel/anuncios/[id]/pagamento` | `anuncios/[id]/pagamento/page.tsx` | Checkout da taxa de publicacao (Pix com QR na pagina, cartao na fatura do Asaas) |
+| `/painel/pagamentos` | `pagamentos/page.tsx` | Historico de pagamentos do anunciante: situacao, vigencia, comprovante do Asaas, botao pagar/renovar |
 | `/painel/perfil` | `perfil/page.tsx` | Editar dados da clinica |
 
 ## Layout
@@ -90,3 +92,4 @@ Arquivo: `anuncios/actions.ts`
 ---
 ## Changelog
 - [2026-03-30] - Context criado
+- [2026-09-01] - Rota `/painel/pagamentos` (historico) e registro da rota de checkout

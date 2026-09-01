@@ -15,7 +15,9 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
       <AdminSidebar pendingCount={pendingCount} />
-      <div className="flex flex-1 flex-col">
+      {/* min-w-0: sem isso uma tabela larga alarga a coluna em vez de rolar
+          dentro dela, e esmaga a sidebar entre 1024 e 1280px. */}
+      <div className="flex min-w-0 flex-1 flex-col">
         <main className="flex-1 p-6 lg:p-8">{children}</main>
         <LegalFooter />
       </div>

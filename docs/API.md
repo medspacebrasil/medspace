@@ -178,6 +178,25 @@ Altera status de um anuncio (aprovar, rejeitar, arquivar).
 }
 ```
 
+#### `GET /api/admin/interesse.csv?dias=7|30|90` (autenticado - ADMIN)
+Ranking de interesse por anuncio em CSV (BOM, separador `;`, celulas protegidas contra formula).
+
+#### `GET /api/admin/cobrancas.csv?filtro=todos|aguardando|pagos|vencidos|estornos|cortesias` (autenticado - ADMIN)
+Exportacao das cobrancas por publicacao. Colunas: data, anunciante, anuncio, origem, forma,
+valor, situacao, pago em, inicio e fim da vigencia, id da cobranca no Asaas, id do pedido.
+Limitada a 5000 linhas; o corte e avisado na ultima linha do arquivo.
+
+### Cobranca
+
+#### `POST /api/webhooks/asaas`
+Webhook do Asaas. Autenticado pelo header `asaas-access-token` (comparacao em tempo constante
+com `ASAAS_WEBHOOK_TOKEN`). Sempre responde 200 depois de gravar o evento; reconsulta a
+cobranca na API antes de publicar.
+
+#### `GET /api/cron/expire-listings`
+Varredura diaria (Vercel Cron, `Authorization: Bearer CRON_SECRET`): expira vigencias,
+reconcilia eventos de webhook nao processados e envia avisos de vencimento (D-7 e D-3).
+
 ---
 
 ## Server Actions
@@ -235,3 +254,4 @@ Server Actions sao usadas para operacoes de formulario que nao precisam de endpo
 
 ## Changelog
 - [2026-03-30] - Documentacao da API criada para o MVP
+- [2026-09-01] - Endpoints de cobranca (webhook Asaas, cron de expiracao) e exportacoes CSV do admin

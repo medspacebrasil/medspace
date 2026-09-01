@@ -11,6 +11,7 @@ import {
   FileText,
   Settings,
   BarChart3,
+  Wallet,
   LogOut,
   ExternalLink,
   Menu,
@@ -26,6 +27,7 @@ export function AdminSidebar({ pendingCount = 0 }: { pendingCount?: number }) {
     { href: "/admin/clinicas", label: "Cadastros", icon: Building2, badge: 0 },
     { href: "/admin/anuncios", label: "Anúncios", icon: FileText, badge: pendingCount },
     { href: "/admin/interesse", label: "Interesse", icon: BarChart3, badge: 0 },
+    { href: "/admin/cobrancas", label: "Cobranças", icon: Wallet, badge: 0 },
     { href: "/admin/config", label: "Configurações", icon: Settings, badge: 0 },
   ]
 
@@ -125,7 +127,7 @@ export function AdminSidebar({ pendingCount = 0 }: { pendingCount?: number }) {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="relative hidden w-64 border-r bg-muted/30 lg:block">
+      <aside className="relative hidden w-64 shrink-0 border-r bg-muted/30 lg:block">
         <div className="flex h-16 items-center border-b px-6">
           <Link href="/admin" className="text-xl font-bold text-primary">
             Med<span className="text-secondary">Space</span>

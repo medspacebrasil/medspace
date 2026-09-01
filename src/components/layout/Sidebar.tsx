@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   PlusCircle,
   UserCircle,
+  Receipt,
   LogOut,
   ExternalLink,
   Menu,
@@ -18,6 +19,7 @@ import {
 const links = [
   { href: "/painel", label: "Painel", icon: LayoutDashboard },
   { href: "/painel/anuncios/novo", label: "Novo Anúncio", icon: PlusCircle },
+  { href: "/painel/pagamentos", label: "Pagamentos", icon: Receipt },
   { href: "/painel/perfil", label: "Meu Perfil", icon: UserCircle },
 ]
 
@@ -112,7 +114,7 @@ export function Sidebar() {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="relative hidden w-64 border-r bg-muted/30 lg:block">
+      <aside className="relative hidden w-64 shrink-0 border-r bg-muted/30 lg:block">
         <div className="flex h-16 items-center border-b px-6">
           <Link href="/" className="text-xl font-bold text-primary">
             Med<span className="text-secondary">Space</span>

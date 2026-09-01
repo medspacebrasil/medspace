@@ -212,6 +212,10 @@ export default function PoliticaDePrivacidadePage() {
       <ul>
         <li>enquanto a conta permanecer ativa;</li>
         <li>pelo período necessário para cumprimento de obrigações legais;</li>
+        <li>
+          no caso de registros de pagamento e de emissão de cobrança, pelo
+          prazo exigido pela legislação fiscal, mesmo após a exclusão da conta;
+        </li>
         <li>para exercício regular de direitos;</li>
         <li>para prevenção de fraudes;</li>
         <li>para proteção da plataforma.</li>
