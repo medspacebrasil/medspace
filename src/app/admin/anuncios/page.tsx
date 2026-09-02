@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { PendingButton } from "@/components/ui/pending-button"
 import { Card, CardContent } from "@/components/ui/card"
-import { approveListing, archiveListing, toggleFeatured, markReviewed } from "../actions"
+import { approveListing, archiveListing, setListingStatus, toggleFeatured, markReviewed } from "../actions"
 import { DeleteListingButton } from "@/components/anuncios/DeleteListingButton"
 import { RejectListingButton } from "@/components/anuncios/RejectListingButton"
 import { AdminListingsSearch } from "@/components/anuncios/AdminListingsSearch"
@@ -330,6 +330,39 @@ export default async function AdminAnunciosPage({
                         Arquivar
                       </PendingButton>
                     </form>
+                  )}
+                  {(listing.status === "AWAITING_PAYMENT" || listing.status === "EXPIRED") && (
+                    <>
+                      {/* Saída para anúncio esperando pagamento: arquivar, ou
+                          publicar como cortesia (sem taxa). Sem estes botões o
+                          admin não teria nenhuma ação nesses estados. */}
+                      <form action={setListingStatus}>
+                        <input type="hidden" name="id" value={listing.id} />
+                        <input type="hidden" name="status" value="PUBLISHED" />
+                        <PendingButton
+                          size="sm"
+                          variant="default"
+                          className="gap-1"
+                          pendingText="Publicando..."
+                          title="Publica sem cobrar a taxa (cortesia)"
+                        >
+                          <CheckCircle className="h-3.5 w-3.5" />
+                          Publicar sem cobrança
+                        </PendingButton>
+                      </form>
+                      <form action={archiveListing}>
+                        <input type="hidden" name="id" value={listing.id} />
+                        <PendingButton
+                          size="sm"
+                          variant="outline"
+                          className="gap-1"
+                          pendingText="Arquivando..."
+                        >
+                          <Archive className="h-3.5 w-3.5" />
+                          Arquivar
+                        </PendingButton>
+                      </form>
+                    </>
                   )}
                   {(listing.status === "ARCHIVED" || listing.status === "REJECTED" || listing.status === "DRAFT") && (
                     <form action={approveListing}>

@@ -164,13 +164,14 @@ export async function updateListing(
         : undefined
     const eqIds = equipmentIds ? await validEquipmentIds(equipmentIds) : undefined
 
-    // Anti bait-and-switch: editar um anúncio já PUBLICADO o devolve para a
-    // fila de revisão (PENDING) — o conteúdo aprovado não pode ser trocado
-    // sem nova moderação. Demais estados não mudam por uma edição do dono.
-    const reReview =
-      listing.status === "PUBLISHED"
-        ? { status: "PENDING" as const, reviewedAt: null }
-        : {}
+    // Anti bait-and-switch: editar um anúncio aprovado o devolve para a fila
+    // de revisão (PENDING): o conteúdo aprovado não pode ser trocado sem nova
+    // moderação. Vale também para AWAITING_PAYMENT e EXPIRED, senão a dona
+    // editaria depois da aprovação e o pagamento publicaria um texto que o
+    // admin nunca viu (o webhook publica qualquer anúncio nesses estados).
+    const reReview = ["PUBLISHED", "AWAITING_PAYMENT", "EXPIRED"].includes(listing.status)
+      ? { status: "PENDING" as const, reviewedAt: null }
+      : {}
 
     await prisma.listing.update({
       where: { id },

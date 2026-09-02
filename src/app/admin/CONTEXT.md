@@ -95,6 +95,15 @@ Arquivo: `actions.ts`
 - Logs de acoes administrativas (futuro)
 
 ---
+## Moderacao com cobranca ligada (BILLING_ENABLED=true)
+`approveListing` e `unarchiveListing` decidem o destino por `statusAposAprovacao`
+(src/lib/billing/flags.ts): vigencia paga em curso ou legado do lancamento
+(`firstPublishedAt` preenchido, nunca pagou) publicam direto; anuncio novo ou vigencia
+vencida vao para AWAITING_PAYMENT, com e-mail avisando o anunciante. `setListingStatus`
+-> PUBLISHED e o caminho de cortesia (publica sem cobrar e registra `firstPublishedAt`).
+Com a chave desligada (padrao), tudo publica direto como sempre.
+
 ## Changelog
 - [2026-03-30] - Context criado
 - [2026-09-01] - Painel de cobrancas (`/admin/cobrancas` + CSV) e resumo de recebimentos no dashboard
+- [2026-09-02] - Fio aprovacao->pagamento atras de BILLING_ENABLED; firstPublishedAt separa legado de anuncio novo

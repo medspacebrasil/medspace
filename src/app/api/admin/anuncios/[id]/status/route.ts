@@ -35,9 +35,17 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
+    // Publicação por esta rota também registra a primeira ida ao ar, para o
+    // anúncio não ser cobrado numa re-aprovação futura. Uma escrita só: o
+    // carimbo sai no mesmo commit e a resposta reflete o que foi gravado.
     const updated = await prisma.listing.update({
       where: { id },
-      data: { status: parsed.data.status },
+      data: {
+        status: parsed.data.status,
+        ...(parsed.data.status === "PUBLISHED" && !listing.firstPublishedAt
+          ? { firstPublishedAt: new Date() }
+          : {}),
+      },
     })
 
     return NextResponse.json(updated)

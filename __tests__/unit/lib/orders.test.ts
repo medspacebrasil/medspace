@@ -120,6 +120,10 @@ describe("activatePublication", () => {
     expect(pub.where.id).toBe("an_2")
     expect(pub.where.status.in).toEqual(["AWAITING_PAYMENT", "EXPIRED", "PUBLISHED"])
     expect(pub.data).toEqual({ status: "PUBLISHED" })
+    // Publicacao paga tambem conta como primeira publicacao.
+    const stamp = mockPrisma.listing.updateMany.mock.calls[1][0]
+    expect(stamp.where).toEqual({ id: "an_2", firstPublishedAt: null })
+    expect(stamp.data.firstPublishedAt).toEqual(now)
   })
 
   it("pagamento nao passa por cima de anuncio arquivado ou em analise", async () => {
@@ -140,6 +144,9 @@ describe("activatePublication", () => {
     expect(r.published).toBe(false)
     // O pedido virou pago mesmo assim: o dinheiro entrou e a vigencia corre.
     expect(mockPrisma.publicationOrder.updateMany.mock.calls[0][0].data.status).toBe("PAID")
+    // A unica escrita no anuncio foi a tentativa de publicar; o carimbo de
+    // primeira publicacao NAO roda quando o anuncio nao foi publicado.
+    expect(mockPrisma.listing.updateMany).toHaveBeenCalledTimes(1)
   })
 
   it("perde a corrida com outra entrega e nao publica duas vezes", async () => {

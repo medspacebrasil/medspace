@@ -32,9 +32,11 @@ describe("PATCH /api/admin/anuncios/[id]/status", () => {
       "@/app/api/admin/anuncios/[id]/status/route"
     )
 
+    // firstPublishedAt preenchido: legado, a rota nao estampa de novo.
     mockPrisma.listing.findUnique.mockResolvedValue({
       id: "listing-1",
       status: "PENDING",
+      firstPublishedAt: new Date("2026-06-01T12:00:00.000Z"),
     })
     mockPrisma.listing.update.mockResolvedValue({
       id: "listing-1",
@@ -61,6 +63,36 @@ describe("PATCH /api/admin/anuncios/[id]/status", () => {
       where: { id: "listing-1" },
       data: { status: "PUBLISHED" },
     })
+  })
+
+  it("publicar anuncio que nunca foi ao ar estampa firstPublishedAt na mesma escrita", async () => {
+    const { PATCH } = await import(
+      "@/app/api/admin/anuncios/[id]/status/route"
+    )
+
+    mockPrisma.listing.findUnique.mockResolvedValue({
+      id: "listing-2",
+      status: "PENDING",
+      firstPublishedAt: null,
+    })
+    mockPrisma.listing.update.mockResolvedValue({
+      id: "listing-2",
+      status: "PUBLISHED",
+    })
+
+    const request = new Request(
+      "http://localhost:3000/api/admin/anuncios/listing-2/status",
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "PUBLISHED" }),
+      }
+    )
+    await PATCH(request, { params: Promise.resolve({ id: "listing-2" }) })
+
+    const upd = mockPrisma.listing.update.mock.calls[0][0]
+    expect(upd.data.status).toBe("PUBLISHED")
+    expect(upd.data.firstPublishedAt).toBeInstanceOf(Date)
   })
 
   it("rejects invalid status", async () => {

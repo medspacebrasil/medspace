@@ -191,6 +191,10 @@ model Listing {
   // expiracao e o painel serem uma consulta so; o pedido continua sendo a
   // fonte de verdade.
   paidUntil       DateTime?          @map("paid_until")
+  // Primeira vez que o anuncio foi ao ar. E o que separa o legado do
+  // lancamento (publicou gratis; re-aprovacao continua gratis) de anuncio
+  // novo, que com a cobranca ligada paga antes da primeira publicacao.
+  firstPublishedAt DateTime?         @map("first_published_at")
 
   images          ListingImage[]
   specialties     ListingSpecialty[]

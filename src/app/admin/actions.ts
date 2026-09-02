@@ -17,6 +17,8 @@ import { generateSlug } from "@/lib/utils"
 import { echoFormValues } from "@/lib/form-values"
 import { validSpecialtyIds, validEquipmentIds } from "@/lib/listing-taxonomy"
 import { cancelarPedidosPendentes } from "@/lib/billing/orders"
+import { statusAposAprovacao } from "@/lib/billing/flags"
+import { sendEmail } from "@/lib/email"
 
 export type AdminCreateListingState = {
   success: boolean
@@ -66,11 +68,60 @@ export async function approveListing(formData: FormData) {
 
   await assertCanPublish(id)
 
-  const listing = await prisma.listing.update({
+  const listing = await prisma.listing.findUnique({
     where: { id },
-    data: { status: "PUBLISHED", rejectionReason: null },
-    select: { slug: true },
+    select: {
+      slug: true,
+      title: true,
+      paidUntil: true,
+      firstPublishedAt: true,
+      clinic: { select: { user: { select: { email: true } } } },
+    },
   })
+  if (!listing) throw new Error("Anúncio não encontrado")
+
+  // Com a cobrança ligada, anúncio novo aprovado espera o pagamento; legado
+  // do lançamento e vigência paga em curso continuam publicando direto.
+  const destino = statusAposAprovacao(listing)
+  // Escrita condicional ao estado que fundamentou a decisão. Este botão serve
+  // PENDING (Aprovar) e ARCHIVED/REJECTED/DRAFT (Publicar); a guarda de
+  // paidUntil nulo impede a corrida com o webhook: se o pagamento chegou entre
+  // a leitura e a escrita, count fica 0 e o estado do webhook prevalece.
+  const { count } = await prisma.listing.updateMany({
+    where: {
+      id,
+      status: { in: ["PENDING", "ARCHIVED", "REJECTED", "DRAFT"] },
+      ...(destino === "AWAITING_PAYMENT" ? { paidUntil: null } : {}),
+    },
+    data:
+      destino === "PUBLISHED"
+        ? {
+            status: "PUBLISHED",
+            rejectionReason: null,
+            firstPublishedAt: listing.firstPublishedAt ?? new Date(),
+          }
+        : { status: "AWAITING_PAYMENT", rejectionReason: null },
+  })
+
+  // Sem este aviso o anunciante não tem como saber que a bola está com ele.
+  // Falha de e-mail não desfaz a aprovação: o painel também mostra o botão.
+  if (count === 1 && destino === "AWAITING_PAYMENT" && listing.clinic?.user?.email) {
+    const texto =
+      `Olá! O anúncio "${listing.title}" foi aprovado na análise.\n\n` +
+      `Falta só o pagamento da taxa de publicação para ele ir ao ar:\n` +
+      `https://medspacebrasil.com.br/painel/anuncios/${id}/pagamento\n\n` +
+      `Assim que o pagamento for confirmado, a publicação é automática.\n\nMedSpace`
+    try {
+      await sendEmail({
+        to: listing.clinic.user.email,
+        subject: "Anúncio aprovado: falta o pagamento para publicar",
+        text: texto,
+        html: texto.replace(/\n/g, "<br>"),
+      })
+    } catch (error) {
+      console.error("[moderacao] falha ao avisar aprovacao", id, error)
+    }
+  }
 
   revalidatePath("/admin/anuncios")
   revalidatePath("/anuncios")
@@ -121,9 +172,29 @@ export async function unarchiveListing(formData: FormData) {
 
   await assertCanPublish(id)
 
-  await prisma.listing.update({
+  const listing = await prisma.listing.findUnique({
     where: { id },
-    data: { status: "PUBLISHED", rejectionReason: null },
+    select: { paidUntil: true, firstPublishedAt: true },
+  })
+  if (!listing) throw new Error("Anúncio não encontrado")
+
+  // Mesma régua da aprovação: desarquivar legado é grátis; desarquivar
+  // anúncio que nunca publicou, com a cobrança ligada, passa pelo pagamento.
+  const destino = statusAposAprovacao(listing)
+  await prisma.listing.updateMany({
+    where: {
+      id,
+      status: { in: ["PENDING", "ARCHIVED", "REJECTED", "DRAFT"] },
+      ...(destino === "AWAITING_PAYMENT" ? { paidUntil: null } : {}),
+    },
+    data:
+      destino === "PUBLISHED"
+        ? {
+            status: "PUBLISHED",
+            rejectionReason: null,
+            firstPublishedAt: listing.firstPublishedAt ?? new Date(),
+          }
+        : { status: "AWAITING_PAYMENT", rejectionReason: null },
   })
 
   revalidatePath("/admin/anuncios")
@@ -147,9 +218,21 @@ export async function setListingStatus(formData: FormData) {
     await assertCanPublish(id)
   }
 
+  // Publicação manual é o caminho de cortesia do admin e também conta como
+  // primeira publicação, senão o anúncio seria cobrado numa re-aprovação.
+  // Uma escrita só, para o carimbo não ficar fora do commit do status.
+  const atual = await prisma.listing.findUnique({
+    where: { id },
+    select: { firstPublishedAt: true },
+  })
   await prisma.listing.update({
     where: { id },
-    data: { status: status as ListingStatusValue },
+    data: {
+      status: status as ListingStatusValue,
+      ...(status === "PUBLISHED" && !atual?.firstPublishedAt
+        ? { firstPublishedAt: new Date() }
+        : {}),
+    },
   })
 
   revalidatePath("/admin/anuncios")
@@ -185,6 +268,11 @@ export async function blockClinic(formData: FormData) {
   await requireAdmin()
   const clinicId = formData.get("clinicId") as string
   if (!clinicId) throw new Error("ID da clínica não fornecido")
+
+  // Bloqueio também cancela cobrança aberta no Asaas: sem isso um Pix já
+  // gerado continuaria pagável sem login, e entraria dinheiro de conta
+  // bloqueada com o anúncio arquivado.
+  await cancelarPedidosPendentes({ clinicId })
 
   // Archive all listings from this clinic
   await prisma.listing.updateMany({

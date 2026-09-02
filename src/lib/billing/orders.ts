@@ -143,7 +143,13 @@ export async function activatePublication(
         data: { status: "PUBLISHED" },
       })
       published = count === 1
-      if (!published) {
+      if (published) {
+        // Publicação paga também é primeira publicação, quando for a primeira.
+        await tx.listing.updateMany({
+          where: { id: order.listingId, firstPublishedAt: null },
+          data: { firstPublishedAt: now },
+        })
+      } else {
         console.warn("[billing] pedido pago sem publicar: anuncio fora do estado esperado", orderId)
       }
     }

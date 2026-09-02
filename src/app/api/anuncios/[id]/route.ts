@@ -66,10 +66,12 @@ export async function PUT(request: Request, context: RouteContext) {
 
     const { specialtyIds, equipmentIds, ...data } = parsed.data
 
-    // Anti bait-and-switch: edição do DONO em um anúncio publicado volta à
-    // revisão. Admin é confiável e mantém o status.
+    // Anti bait-and-switch: edição do DONO em anúncio aprovado volta à
+    // revisão. Inclui AWAITING_PAYMENT e EXPIRED: sem isso, editar depois da
+    // aprovação e pagar publicaria conteúdo nunca moderado. Admin é confiável
+    // e mantém o status.
     const reReview =
-      !isAdmin && listing.status === "PUBLISHED"
+      !isAdmin && ["PUBLISHED", "AWAITING_PAYMENT", "EXPIRED"].includes(listing.status)
         ? { status: "PENDING" as const, reviewedAt: null }
         : {}
 
