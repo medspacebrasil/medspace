@@ -146,6 +146,94 @@ export async function listingMetricsSince(
   return result
 }
 
+export interface MonthlyMetrics {
+  /** "2026-08" no calendário de Brasília. */
+  month: string
+  views: number
+  contacts: number
+}
+
+/**
+ * Agrega linhas diárias por mês. Pura, para ser testável: o `day` já vem
+ * normalizado como meia-noite UTC do dia de Brasília, então o mês é o prefixo
+ * da própria data, sem conversão de fuso aqui.
+ */
+export function aggregateMonthly(
+  rows: { listingId: string; day: Date; views: number; contacts: number }[]
+): Map<string, MonthlyMetrics[]> {
+  const porAnuncio = new Map<string, Map<string, MonthlyMetrics>>()
+  for (const r of rows) {
+    const month = r.day.toISOString().slice(0, 7)
+    let meses = porAnuncio.get(r.listingId)
+    if (!meses) porAnuncio.set(r.listingId, (meses = new Map()))
+    const m = meses.get(month) ?? { month, views: 0, contacts: 0 }
+    m.views += r.views
+    m.contacts += r.contacts
+    meses.set(month, m)
+  }
+  const out = new Map<string, MonthlyMetrics[]>()
+  for (const [id, meses] of porAnuncio) {
+    out.set(
+      id,
+      [...meses.values()].sort((a, b) => b.month.localeCompare(a.month))
+    )
+  }
+  return out
+}
+
+/**
+ * Preenche os buracos da série com zero, do mês mais antigo com dado até
+ * `ateMonth` (inclusive). Mês sem linha não pode simplesmente sumir: "zero
+ * interesse em outubro" é informação, e escondê-lo faria a tabela pular de
+ * novembro para setembro sem explicação.
+ */
+export function fillMonthlySeries(
+  mesesDesc: MonthlyMetrics[],
+  ateMonth: string
+): MonthlyMetrics[] {
+  if (mesesDesc.length === 0) return mesesDesc
+  const porMes = new Map(mesesDesc.map((m) => [m.month, m]))
+  const inicio = mesesDesc[mesesDesc.length - 1].month
+  const out: MonthlyMetrics[] = []
+  let [ano, mes] = inicio.split("-").map(Number)
+  let atual = inicio
+  while (atual <= ateMonth) {
+    out.push(porMes.get(atual) ?? { month: atual, views: 0, contacts: 0 })
+    mes++
+    if (mes > 12) {
+      mes = 1
+      ano++
+    }
+    atual = `${ano}-${String(mes).padStart(2, "0")}`
+  }
+  return out.reverse()
+}
+
+/**
+ * Histórico mês a mês de cada anúncio, do mais recente para o mais antigo,
+ * sem buracos. O mês corrente entra parcial; quem exibe avisa isso.
+ */
+export async function listingMonthlyHistory(
+  listingIds: string[],
+  months = 12
+): Promise<Map<string, MonthlyMetrics[]>> {
+  if (listingIds.length === 0) return new Map()
+
+  const inicio = brasiliaDay().date
+  inicio.setUTCDate(1)
+  inicio.setUTCMonth(inicio.getUTCMonth() - (months - 1))
+
+  const rows = await prisma.listingDailyStat.findMany({
+    where: { listingId: { in: listingIds }, day: { gte: inicio } },
+    select: { listingId: true, day: true, views: true, contacts: true },
+  })
+  const agregado = aggregateMonthly(rows)
+  const mesAtual = brasiliaDay().key.slice(0, 7)
+  const out = new Map<string, MonthlyMetrics[]>()
+  for (const [id, meses] of agregado) out.set(id, fillMonthlySeries(meses, mesAtual))
+  return out
+}
+
 export interface ListingInterestRow {
   listingId: string
   title: string

@@ -10,6 +10,7 @@ import {
   PlusCircle,
   UserCircle,
   Receipt,
+  BarChart3,
   LogOut,
   ExternalLink,
   Menu,
@@ -19,6 +20,7 @@ import {
 const links = [
   { href: "/painel", label: "Painel", icon: LayoutDashboard },
   { href: "/painel/anuncios/novo", label: "Novo Anúncio", icon: PlusCircle },
+  { href: "/painel/desempenho", label: "Desempenho", icon: BarChart3 },
   { href: "/painel/pagamentos", label: "Pagamentos", icon: Receipt },
   { href: "/painel/perfil", label: "Meu Perfil", icon: UserCircle },
 ]
