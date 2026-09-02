@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/layout/Sidebar"
 import { LegalFooter } from "@/components/layout/LegalFooter"
+import { advertiserMetricsEnabled } from "@/lib/metrics/flags"
 
 export default function PainelLayout({
   children,
@@ -8,7 +9,7 @@ export default function PainelLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
-      <Sidebar />
+      <Sidebar mostrarDesempenho={advertiserMetricsEnabled()} />
       <div className="flex min-w-0 flex-1 flex-col">
         <main className="flex-1 p-6 lg:p-8">{children}</main>
         <LegalFooter />

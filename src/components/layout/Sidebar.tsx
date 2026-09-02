@@ -17,7 +17,7 @@ import {
   X,
 } from "lucide-react"
 
-const links = [
+const todosLinks = [
   { href: "/painel", label: "Painel", icon: LayoutDashboard },
   { href: "/painel/anuncios/novo", label: "Novo Anúncio", icon: PlusCircle },
   { href: "/painel/desempenho", label: "Desempenho", icon: BarChart3 },
@@ -25,7 +25,11 @@ const links = [
   { href: "/painel/perfil", label: "Meu Perfil", icon: UserCircle },
 ]
 
-export function Sidebar() {
+/** mostrarDesempenho vem do servidor (interruptor de métricas do anunciante). */
+export function Sidebar({ mostrarDesempenho = true }: { mostrarDesempenho?: boolean }) {
+  const links = mostrarDesempenho
+    ? todosLinks
+    : todosLinks.filter((l) => l.href !== "/painel/desempenho")
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
 

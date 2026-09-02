@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic"
 
-import { redirect } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
+import { advertiserMetricsEnabled } from "@/lib/metrics/flags"
 import { prisma } from "@/lib/db"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -26,6 +27,9 @@ function nomeDoMes(month: string): string {
 }
 
 export default async function DesempenhoPage() {
+  // Fase inicial: metricas visiveis so no admin, a pedido da cliente.
+  if (!advertiserMetricsEnabled()) notFound()
+
   const session = await auth()
   if (!session?.user?.clinicId) redirect("/login")
 
