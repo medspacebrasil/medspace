@@ -83,6 +83,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/consultorios"
+                  className="transition-colors hover:text-white"
+                >
+                  Consultórios por cidade
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/aparelhos"
                   className="transition-colors hover:text-white"
                 >

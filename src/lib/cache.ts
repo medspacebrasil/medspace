@@ -59,7 +59,10 @@ export const getCachedEquipmentCategories = unstable_cache(
 export const getCachedPublishedClinicCities = unstable_cache(
   async () => {
     return prisma.listing.findMany({
-      where: { status: "PUBLISHED", type: "CLINIC" },
+      // images some: cidade cujo único anúncio não tem foto ficaria no filtro
+      // e na página da cidade apontando para uma lista vazia (as listagens
+      // públicas escondem anúncio sem foto).
+      where: { status: "PUBLISHED", type: "CLINIC", images: { some: {} } },
       select: { city: true, state: true },
       distinct: ["city", "state"],
       orderBy: { city: "asc" },

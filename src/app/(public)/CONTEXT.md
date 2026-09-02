@@ -9,6 +9,8 @@ Grupo de rotas publicas (acessiveis sem autenticacao). Compartilham um layout co
 | `/` | `page.tsx` | Home page |
 | `/anuncios` | `anuncios/page.tsx` | Marketplace (listagem + filtros) |
 | `/anuncios/[slug]` | `anuncios/[slug]/page.tsx` | Detalhe de um anuncio |
+| `/consultorios` | `consultorios/page.tsx` | Indice de cidades com oferta + capitais "em breve" |
+| `/consultorios/[cidade]` | `consultorios/[cidade]/page.tsx` | Pagina de destino por cidade: oferta local ou convite de cadastro quando vazia (src/lib/cidades.ts resolve o slug) |
 
 ## Home (`/`)
 Pagina principal com:
@@ -73,3 +75,4 @@ Pagina individual do anuncio:
 ---
 ## Changelog
 - [2026-03-30] - Context criado
+- [2026-09-02] - Paginas por cidade (`/consultorios` e `/consultorios/[cidade]`)
