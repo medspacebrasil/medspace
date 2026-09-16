@@ -365,18 +365,32 @@ export default async function AdminAnunciosPage({
                     </>
                   )}
                   {(listing.status === "ARCHIVED" || listing.status === "REJECTED" || listing.status === "DRAFT") && (
-                    <form action={approveListing}>
-                      <input type="hidden" name="id" value={listing.id} />
-                      <PendingButton
+                    missingPhoto ? (
+                      <Button
+                        type="button"
                         size="sm"
                         variant="default"
-                        className="gap-1"
-                        pendingText="Publicando..."
+                        className="gap-1 opacity-50"
+                        disabled
+                        title="Adicione ao menos 1 foto antes de publicar"
                       >
                         <RotateCcw className="h-3.5 w-3.5" />
                         Publicar
-                      </PendingButton>
-                    </form>
+                      </Button>
+                    ) : (
+                      <form action={approveListing}>
+                        <input type="hidden" name="id" value={listing.id} />
+                        <PendingButton
+                          size="sm"
+                          variant="default"
+                          className="gap-1"
+                          pendingText="Publicando..."
+                        >
+                          <RotateCcw className="h-3.5 w-3.5" />
+                          Publicar
+                        </PendingButton>
+                      </form>
+                    )
                   )}
                   <DeleteListingButton id={listing.id} title={listing.title} />
                 </div>

@@ -111,7 +111,9 @@ export function AdminEditListingClient({
         status={modalStatus}
         message={
           modalStatus === "success"
-            ? "Suas alterações foram salvas e já estão no ar."
+            ? listing.status === "PUBLISHED"
+              ? "Suas alterações foram salvas e já estão no ar."
+              : "Alterações salvas. Este anúncio ainda não está publicado: adicione ao menos 1 foto e use o botão Publicar na lista de anúncios."
             : state.errors?._form?.[0] ??
               "Verifique os campos destacados no formulário."
         }

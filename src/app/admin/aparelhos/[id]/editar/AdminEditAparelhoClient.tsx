@@ -69,7 +69,9 @@ export function AdminEditAparelhoClient({
         status={updateState.success ? "success" : "error"}
         message={
           updateState.success
-            ? "Suas alterações foram salvas e já estão no ar."
+            ? listing.status === "PUBLISHED"
+              ? "Suas alterações foram salvas e já estão no ar."
+              : "Alterações salvas. Este aparelho ainda não está publicado: adicione ao menos 1 foto e use o botão Publicar na lista de anúncios."
             : updateState.errors?._form?.[0] ??
               "Verifique os campos destacados no formulário."
         }

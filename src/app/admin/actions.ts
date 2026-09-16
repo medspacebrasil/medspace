@@ -431,7 +431,12 @@ export async function adminCreateListing(
         ...data,
         slug,
         type: "CLINIC",
-        status: "PUBLISHED",
+        // Nasce como rascunho: as fotos só são enviadas na tela de edição, para
+        // onde esta action redireciona. Publicar aqui deixaria o anúncio no ar
+        // com zero foto, e anúncio sem foto não aparece nas listagens públicas
+        // (some da vitrine sem explicação). A admin publica pelo botão depois de
+        // subir a foto, e aí a validação de foto (assertCanPublish) roda.
+        status: "DRAFT",
         // Admin-created listings are reviewed by definition
         reviewedAt: new Date(),
         clinicId,
@@ -737,7 +742,10 @@ export async function adminCreateEquipment(
         ...data,
         slug,
         type: "EQUIPMENT",
-        status: "PUBLISHED",
+        // Rascunho: fotos entram na edição, para onde redirecionamos. Publicar
+        // sem foto deixaria o aparelho invisível na vitrine. Ver comentário em
+        // adminCreateListing.
+        status: "DRAFT",
         reviewedAt: new Date(),
         clinicId,
       },
@@ -821,7 +829,11 @@ export async function adminCreateEducation(
         customSpecialties: d.area || null,
         slug,
         type: "EDUCATION",
+        // Educação não exige foto (assertCanPublish a isenta), então pode ir ao
+        // ar direto. Carimba a primeira publicação para não ser tratada como
+        // anúncio novo quando a cobrança for ligada.
         status: "PUBLISHED",
+        firstPublishedAt: new Date(),
         reviewedAt: new Date(),
         clinicId,
       },
