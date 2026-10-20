@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic"
 
 import { notFound } from "next/navigation"
-import Image from "next/image"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/db"
 import { getCachedClinicListingBySlug } from "@/lib/cache"
@@ -9,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { WhatsAppButton } from "@/components/anuncios/WhatsAppButton"
 import { StickyWhatsAppBar } from "@/components/anuncios/StickyWhatsAppBar"
 import { ListingViewTracker } from "@/components/anuncios/ListingViewTracker"
+import { ListingGallery } from "@/components/anuncios/ListingGallery"
 import { MapPin, Building2, Phone } from "lucide-react"
 import { formatPhone, listingWhatsAppMessage } from "@/lib/utils"
 
@@ -67,35 +67,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
         <div className="lg:col-span-2">
           {/* Image gallery */}
           {listing.images.length > 0 ? (
-            <div className="grid gap-2">
-              <div className="relative aspect-video overflow-hidden rounded-lg">
-                <Image
-                  src={listing.images[0].url}
-                  alt={listing.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-              {listing.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
-                  {listing.images.slice(1, 5).map((img) => (
-                    <div
-                      key={img.id}
-                      className="relative aspect-square overflow-hidden rounded-md"
-                    >
-                      <Image
-                        src={img.url}
-                        alt={listing.title}
-                        fill
-                        className="object-cover"
-                        sizes="25vw"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ListingGallery images={listing.images} title={listing.title} />
           ) : (
             <div className="flex aspect-video items-center justify-center rounded-lg bg-muted">
               <Building2 className="h-16 w-16 text-muted-foreground/50" />
