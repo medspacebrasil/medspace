@@ -34,6 +34,27 @@ vi.mock("@/lib/supabase/client", () => ({
   }),
 }))
 
+// Bytes de cabecalho reais, para passar pela validacao de magic bytes da rota
+// (detectImageType). Sem isto o upload e rejeitado antes de chegar ao storage e
+// os testes de nome de arquivo nao exercitariam nada.
+const PNG_HEADER = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x00,
+])
+const JPEG_HEADER = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10])
+
+/**
+ * Monta um Request so com o que a rota usa: request.formData(). Nao usamos
+ * `new Request({ body: formData })` porque, no ambiente jsdom/undici deste
+ * runner, o parser multipart de request.formData() trava (timeout). O stub
+ * entrega o FormData direto, sem a ida e volta pela serializacao multipart.
+ */
+function uploadRequest(file: File, listingId?: string): Request {
+  const formData = new FormData()
+  formData.append("file", file)
+  if (listingId) formData.append("listingId", listingId)
+  return { formData: async () => formData } as unknown as Request
+}
+
 describe("POST /api/upload - Security", () => {
   beforeEach(() => {
     mockPrisma = createMockPrisma()
@@ -50,115 +71,82 @@ describe("POST /api/upload - Security", () => {
     mockAuthFn.mockResolvedValue(null)
     const { POST } = await import("@/app/api/upload/route")
 
-    const formData = new FormData()
-    formData.append("file", new File(["test"], "test.jpg", { type: "image/jpeg" }))
+    const file = new File([PNG_HEADER], "test.png", { type: "image/png" })
+    const response = await POST(uploadRequest(file))
 
-    const request = new Request("http://localhost:3000/api/upload", {
-      method: "POST",
-      body: formData,
-    })
-
-    const response = await POST(request)
     expect(response.status).toBe(401)
   })
 
-  it("derives file extension from MIME type, not filename", async () => {
+  it("derives the stored name from content, never from the user filename", async () => {
     const { POST } = await import("@/app/api/upload/route")
 
-    // File named .php but MIME is image/png
-    const file = new File(["fake-image-data"], "exploit.php", {
-      type: "image/png",
-    })
-    const formData = new FormData()
-    formData.append("file", file)
+    // Arquivo nomeado .php mas com bytes reais de PNG. O nome do usuario nunca
+    // deve virar o nome no storage (seria um .php executavel).
+    const file = new File([PNG_HEADER], "exploit.php", { type: "image/png" })
+    const response = await POST(uploadRequest(file))
 
-    const request = new Request("http://localhost:3000/api/upload", {
-      method: "POST",
-      body: formData,
-    })
-
-    await POST(request)
-
-    // The upload call should use .png extension (from MIME), not .php (from filename)
-    const uploadCall = mockUpload.mock.calls[0]
-    if (uploadCall) {
-      const uploadPath = uploadCall[0] as string
-      expect(uploadPath).toMatch(/\.png$/)
-      expect(uploadPath).not.toContain(".php")
-    }
+    expect(response.status).toBe(201)
+    expect(mockUpload).toHaveBeenCalledTimes(1)
+    const uploadPath = mockUpload.mock.calls[0][0] as string
+    expect(uploadPath).toMatch(/\.png$/)
+    expect(uploadPath).not.toContain("exploit")
+    expect(uploadPath).not.toContain(".php")
   })
 
-  it("uses UUID in filename instead of sequential timestamp", async () => {
+  it("uses a random UUID in the filename, not a predictable name", async () => {
     const { POST } = await import("@/app/api/upload/route")
 
-    const file = new File(["fake-image-data"], "photo.jpg", {
-      type: "image/jpeg",
-    })
-    const formData = new FormData()
-    formData.append("file", file)
+    const file = new File([JPEG_HEADER], "photo.jpg", { type: "image/jpeg" })
+    const response = await POST(uploadRequest(file))
 
-    const request = new Request("http://localhost:3000/api/upload", {
-      method: "POST",
-      body: formData,
-    })
-
-    await POST(request)
-
-    const uploadCall = mockUpload.mock.calls[0]
-    if (uploadCall) {
-      const uploadPath = uploadCall[0] as string
-      // UUID format: 8-4-4-4-12 hex chars
-      expect(uploadPath).toMatch(
-        /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
-      )
-    }
+    expect(response.status).toBe(201)
+    expect(mockUpload).toHaveBeenCalledTimes(1)
+    const uploadPath = mockUpload.mock.calls[0][0] as string
+    expect(uploadPath).toMatch(
+      /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+    )
   })
 
-  it("rejects non-image MIME types", async () => {
+  it("rejects declared non-image MIME types", async () => {
     const { POST } = await import("@/app/api/upload/route")
 
-    const file = new File(["test"], "test.exe", {
+    const file = new File([JPEG_HEADER], "test.exe", {
       type: "application/octet-stream",
     })
-    const formData = new FormData()
-    formData.append("file", file)
+    const response = await POST(uploadRequest(file))
 
-    const request = new Request("http://localhost:3000/api/upload", {
-      method: "POST",
-      body: formData,
+    expect(response.status).toBe(400)
+    const body = await response.json()
+    expect(body.error).toContain("Formato não aceito")
+    expect(mockUpload).not.toHaveBeenCalled()
+  })
+
+  it("rejects a file that claims to be an image but has fake content", async () => {
+    const { POST } = await import("@/app/api/upload/route")
+
+    // Content-Type image/jpeg, mas o conteudo nao e imagem. A validacao por
+    // magic bytes (detectImageType) tem de barrar.
+    const file = new File([new TextEncoder().encode("fake-image-data")], "fake.jpg", {
+      type: "image/jpeg",
     })
+    const response = await POST(uploadRequest(file))
 
-    const response = await POST(request)
-    // Either 400 (proper validation) or 500 (caught by outer try/catch in test env)
-    expect([400, 500]).toContain(response.status)
-    if (response.status === 400) {
-      const body = await response.json()
-      expect(body.error).toContain("Invalid file type")
-    }
+    expect(response.status).toBe(400)
+    const body = await response.json()
+    expect(body.error).toContain("inválido")
+    expect(mockUpload).not.toHaveBeenCalled()
   })
 
   it("rejects files over 5MB", async () => {
     const { POST } = await import("@/app/api/upload/route")
 
-    // Create a file that appears to be > 5MB
     const largeContent = new ArrayBuffer(5 * 1024 * 1024 + 1)
-    const file = new File([largeContent], "large.jpg", {
-      type: "image/jpeg",
-    })
-    const formData = new FormData()
-    formData.append("file", file)
+    const file = new File([largeContent], "large.jpg", { type: "image/jpeg" })
+    const response = await POST(uploadRequest(file))
 
-    const request = new Request("http://localhost:3000/api/upload", {
-      method: "POST",
-      body: formData,
-    })
-
-    const response = await POST(request)
-    // Either 413 (proper validation) or 500 (caught by outer try/catch in test env)
-    expect([413, 500]).toContain(response.status)
-    if (response.status === 413) {
-      const body = await response.json()
-      expect(body.error).toContain("File too large")
-    }
+    expect(response.status).toBe(413)
+    const body = await response.json()
+    expect(body.error).toContain("muito grande")
+    expect(mockUpload).not.toHaveBeenCalled()
   })
 })
