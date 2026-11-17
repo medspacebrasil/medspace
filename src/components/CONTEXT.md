@@ -31,7 +31,7 @@ components/
 │   ├── ListingCard.tsx      # Card do anuncio (usado na listagem)
 │   ├── ListingGrid.tsx      # Grid de cards
 │   ├── ListingFilters.tsx   # Barra/sidebar de filtros
-│   ├── ListingGallery.tsx   # Galeria de fotos (detalhe do anuncio)
+│   ├── ListingGallery.tsx   # Galeria de fotos com modal e lupa (anuncios e aparelhos); matematica em src/lib/gallery/zoom.ts
 │   ├── ListingDetail.tsx    # Bloco de informacoes do anuncio
 │   ├── WhatsAppButton.tsx   # Botao CTA "Tenho interesse"
 │   ├── ListingStatusBadge.tsx # Badge de status (DRAFT, PENDING, etc)
@@ -97,3 +97,4 @@ components/
 ---
 ## Changelog
 - [2026-03-30] - Context criado
+- [2026-11-17] - ListingGallery ganhou lupa no modal (clique, roda, pinca, teclado) e camada em alta resolucao

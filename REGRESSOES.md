@@ -18,6 +18,9 @@ Registro dos bugs corrigidos e do teste que impede cada um de voltar. Ver skill 
   geram N miniaturas (com o bug do slice seriam 5) e que o clique abre a visualização
   ampliada. Provado que falha com o código antigo reintroduzido numa cópia.
 - **Commit:** fix(anuncios): galeria mostra todas as fotos e abre em tamanho maior.
+- **17/11/2026:** a galeria ganhou lupa (pedido da Cejana). Os testes acima continuam
+  valendo; o mesmo arquivo de teste cobre agora mouse, teclado, botões, toque, alta
+  resolução e foco, e a matemática do zoom está em `__tests__/unit/lib/gallery-zoom.test.ts`.
 
 ### upload-security.test.ts travava no request.formData() (02/11/2026)
 - **Sintoma:** 4 casos de `__tests__/integration/api/upload-security.test.ts` davam

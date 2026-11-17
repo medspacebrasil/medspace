@@ -35,6 +35,8 @@ lib/
 │   ├── prisma.ts        # Singleton do Prisma 7 com adapter pg
 │   └── index.ts
 │
+├── gallery/zoom.ts      # Lupa da galeria: escala, limites, seguir o mouse, pinca, deslize
+│
 ├── metrics/
 │   ├── index.ts         # brasiliaDay, visitorHash, recordListingEvent, rankings
 │   └── client.ts        # reportListingView / reportListingContact (beacon)
@@ -70,3 +72,4 @@ import { createListingSchema } from "@/lib/validators"
 ## Changelog
 - [2026-03-30] - Context criado
 - [2026-09-01] - Arvore atualizada para o estado real; regras da cobranca por publicacao
+- [2026-11-17] - gallery/zoom.ts: funcoes puras da lupa da galeria (escala, limites, seguir o mouse, pinca, deslize)
